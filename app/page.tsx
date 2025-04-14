@@ -1,10 +1,9 @@
-
-import { Button } from "@/components/ui/button"
+import ConnectionList from "@/components/ConnectionList";
 
 export default function Home() {
   return (
     <div>
-      <h1 className="text-2xl">Welcome</h1>
+      <ConnectionList></ConnectionList>
     </div>
   );
 }
