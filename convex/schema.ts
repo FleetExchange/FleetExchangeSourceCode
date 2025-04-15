@@ -20,7 +20,7 @@ export default defineSchema({
   freight: defineTable({
     source: v.string(),
     destination: v.string(),
-    frieghtDescription: v.string(),
+    freightDescription: v.string(),
     pickupDate: v.number(),
     deliveryDate: v.number(),
     price: v.number(),
@@ -45,7 +45,7 @@ export default defineSchema({
   })
     .index("by_trip", ["tripId"])
     .index("by_user", ["userId"])
-    .index("by_user_event", ["userId", "tripId"])
+    .index("by_user_trip", ["userId", "tripId"])
     .index("by_payment_intent", ["paymentIntentId"]),
 
   purchaseFreight: defineTable({
@@ -63,7 +63,7 @@ export default defineSchema({
   })
     .index("by_freight", ["freightId"])
     .index("by_user", ["userId"])
-    .index("by_user_event", ["userId", "freightId"])
+    .index("by_user_freight", ["userId", "freightId"])
     .index("by_payment_intent", ["paymentIntentId"]),
 
   /*waitingList: defineTable({

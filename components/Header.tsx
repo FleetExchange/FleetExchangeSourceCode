@@ -7,7 +7,7 @@ import SearchBar from "./SearchBar";
 function Header() {
   return (
     <div className="border-b-2">
-      <div className="flex flex-col lg:flex-row items-center gap-4 p-10">
+      <div className="flex flex-col lg:flex-row items-center gap-5 p-30">
         <div className="flex items-center justify-between w-full lg:w-auto">
           <Link href="/" className="font-bold shrink-0">
             <Image
@@ -19,13 +19,13 @@ function Header() {
             />
           </Link>
 
-          <div className="lg:hidden">
+          <div className="lg:hidden ml:auto">
             <SignedIn>
               <UserButton />
             </SignedIn>
             <SignedOut>
               <SignInButton mode="modal">
-                <button className="bg-gray-100 text-gray-800 px-3 py-1.5 text-sm rounded-lg hover:bg-gray-200 transition border border-gray-300">
+                <button className="bg-gray-100 text-gray-800 px-3 py-4 text-sm rounded-lg hover:bg-gray-200 transition border border-gray-300">
                   Sign In
                 </button>
               </SignInButton>
@@ -38,16 +38,17 @@ function Header() {
           <SearchBar />
         </div>
 
+        {/* Desktop version */}
         <div className="hidden lg:block ml-auto">
           <SignedIn>
             <div className="flex items-center gap-3">
-              <Link href="/seller">
-                <button className="bg-blue-600 text-white px-3 py-1.5 text-sm rounded-lg hover:bg-blue-700 transition">
+              <Link href="/create">
+                <button className="bg-blue-600 text-white px-3 py-3 text-sm rounded-lg hover:bg-blue-700 transition">
                   Create Frieght/Trip
                 </button>
               </Link>
 
-              <Link href="/tickets">
+              <Link href="/connection">
                 <button className="bg-gray-100 text-gray-800 px-3 py-1.5 text-sm rounded-lg hover:bg-gray-200 transition border border-gray-300">
                   My Freights/Trip
                 </button>

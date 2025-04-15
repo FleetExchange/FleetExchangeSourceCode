@@ -1,9 +1,11 @@
-import ConnectionList from "@/components/ConnectionList";
+import FreightList from "@/components/FreightList";
+import TripList from "@/components/TripList";
 
 export default function Home() {
   return (
     <div>
-      <ConnectionList></ConnectionList>
+      <TripList />
+      <FreightList />
     </div>
   );
 }
