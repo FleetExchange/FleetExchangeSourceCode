@@ -2,91 +2,78 @@ import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
 // How the database looks
+// All entries have automatic _id fields
 
 export default defineSchema({
   trip: defineTable({
-    source: v.string(),
-    destination: v.string(),
-    truckDescription: v.string(),
-    pickupDate: v.number(),
-    deliveryDate: v.number(),
-    price: v.number(),
-    loadCapacity: v.number(),
-    userId: v.string(),
-    imageStorageId: v.optional(v.id("_storage")),
-    is_cancelled: v.optional(v.boolean()),
-  }),
-
-  freight: defineTable({
-    source: v.string(),
-    destination: v.string(),
-    freightDescription: v.string(),
-    pickupDate: v.number(),
-    deliveryDate: v.number(),
-    price: v.number(),
-    loadWeight: v.number(),
-    userId: v.string(),
-    imageStorageId: v.optional(v.id("_storage")),
-    is_cancelled: v.optional(v.boolean()),
+    originCity: v.string(), // Origin city of departure
+    originAddress: v.string(), // Will be completed when the client books trip
+    destinationCity: v.string(), // Destination of arrival
+    destinationAddress: v.string(), // Will be completed when the client books trip
+    departureDate: v.number(), // Departure Date
+    arrivalDate: v.number(), // Arrival Date
+    truckId: v.id("truck"), // Identification of the truck assigned to the trip
+    basePrice: v.number(), // Base price for the trip
+    variablePrice: v.number(), // Variable amount for each kg/km **need to do research on this
+    userId: v.id("users"), // Company that created trip
+    isBooked: v.boolean(), // Has the trip been booked
   }),
 
   purchaseTrip: defineTable({
-    tripId: v.id("trip"),
-    userId: v.string(),
-    purchasedAt: v.number(),
+    tripId: v.id("trip"), // id of the trick of the purchase item
+    userId: v.id("users"), // id of the user that booked the trip
+    purchasedAt: v.number(), // Date & time of purchase
     status: v.union(
-      v.literal("valid"),
-      v.literal("used"),
-      v.literal("refunded"),
-      v.literal("cancelled")
+      // Status of the trip
+      v.literal("AwaitingApproval"),
+      v.literal("Booked"),
+      v.literal("Delivered"),
+      v.literal("Dispatched"),
+      v.literal("Refunded"),
+      v.literal("Cancelled")
     ),
     paymentIntentId: v.optional(v.string()),
-    amount: v.optional(v.number()),
-  })
-    .index("by_trip", ["tripId"])
-    .index("by_user", ["userId"])
-    .index("by_user_trip", ["userId", "tripId"])
-    .index("by_payment_intent", ["paymentIntentId"]),
+    amount: v.optional(v.number()), // Final amount of the sale
+    logisticNotes: v.string(), // Any notes for the transporting company relating to the pickup and delivery of the freight
+    freightNotes: v.string(), // Description of the freight
+  }),
 
-  purchaseFreight: defineTable({
-    freightId: v.id("freight"),
-    userId: v.string(),
-    purchasedAt: v.number(),
-    status: v.union(
-      v.literal("valid"),
-      v.literal("used"),
-      v.literal("refunded"),
-      v.literal("cancelled")
-    ),
-    paymentIntentId: v.optional(v.string()),
-    amount: v.optional(v.number()),
-  })
-    .index("by_freight", ["freightId"])
-    .index("by_user", ["userId"])
-    .index("by_user_freight", ["userId", "freightId"])
-    .index("by_payment_intent", ["paymentIntentId"]),
-
-  /*waitingList: defineTable({
-    eventId: v.id("events"),
-    userId: v.string(),
-    status: v.union(
-      v.literal("waiting"),
-      v.literal("offered"),
-      v.literal("purchased"),
-      v.literal("expired")
-    ),
-    offerExpiresAt: v.optional(v.number()),
-  })
-    .index("by_event_status", ["eventId", "status"])
-    .index("by_user_event", ["userId", "eventId"])
-    .index("by_user", ["userId"]),*/
+  freightRequest: defineTable({
+    originCity: v.string(), // Origin city of departure
+    destinationCity: v.string(), // Destination of arrival
+    freightDescription: v.string(), // Description of what needs to be shipped
+    departureDate: v.number(), // Departure Date
+    arrivalDate: v.number(), // Arrival Date
+    loadWeight: v.number(), // Total weight of the items to be shipped
+    userId: v.id("users"), // Creator of freight request
+  }),
 
   users: defineTable({
-    name: v.string(),
-    email: v.string(),
-    userId: v.string(),
+    companyName: v.string(), // Name of the company
+    email: v.string(), // Companies Email address registered with account
     stripeConnectId: v.optional(v.string()),
-  })
-    .index("by_user_id", ["userId"])
-    .index("by_email", ["email"]),
+    userType: v.union(
+      // Type of account the company has, admin is placeholder for business accounts
+      v.literal("transporter"),
+      v.literal("client"),
+      v.literal("admin")
+    ),
+  }).index("by_email", ["email"]),
+
+  fleet: defineTable({
+    fleetName: v.string(), // Name of the fleet
+    userId: v.id("users"), // The user that owns the fleet 1 to 1 relationship
+    trucks: v.array(v.id("truck")), // Array of all trucks in the fleet indexed by thier _id
+  }),
+
+  truck: defineTable({
+    numberPlate: v.string(), // Identifier for the truck
+    make: v.string(), // Name of the truck brand
+    model: v.string(), // Model of the truck
+    truckType: v.union(v.literal("Flatbed"), v.literal("Flatbed + crane")), // Type of truck
+    maxLoadCapacity: v.number(), // Max weight truck can bear
+    width: v.number(), // Width of the cargo area
+    length: v.number(), // Length of the cargo area
+    height: v.number(), // Height of cargo area
+  }),
 });
