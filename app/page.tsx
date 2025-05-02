@@ -4,8 +4,8 @@ import TripList from "@/components/TripList";
 export default function Home() {
   return (
     <div>
-      <TripList />
-      <FreightList />
+      {/*<TripList />
+      <FreightList />*/}
     </div>
   );
 }
