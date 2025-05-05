@@ -1,6 +1,7 @@
 import React from "react";
 import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import { CiMenuBurger } from "react-icons/ci";
+import Link from "next/link";
 
 const Sidebar = () => {
   return (
@@ -22,10 +23,14 @@ const Sidebar = () => {
           {/* Sidebar content here */}
           <h1>Menu</h1>
           <li>
-            <a className="text-primary">Dashboard</a>
+            <Link href="/" className="text-primary">
+              Dashboard
+            </Link>
           </li>
           <li>
-            <a className="text-primary">Discover</a>
+            <Link href="/discover" className="text-primary">
+              Discover
+            </Link>
           </li>
           <li>
             <a className="text-primary">My Fleet</a>

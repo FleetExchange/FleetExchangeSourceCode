@@ -34,7 +34,6 @@ export default function RootLayout({
           <ClerkProvider>
             <Header />
             <Sidebar></Sidebar>
-
             <SyncUserWithConvex></SyncUserWithConvex>
             {children}
           </ClerkProvider>
