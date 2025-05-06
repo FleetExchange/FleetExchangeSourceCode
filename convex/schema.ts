@@ -70,6 +70,7 @@ export default defineSchema({
     numberPlate: v.string(), // Identifier for the truck
     make: v.string(), // Name of the truck brand
     model: v.string(), // Model of the truck
+    year: v.string(), // Year trick was manufactured
     truckType: v.union(v.literal("Flatbed"), v.literal("Flatbed + crane")), // Type of truck
     maxLoadCapacity: v.number(), // Max weight truck can bear
     width: v.number(), // Width of the cargo area
