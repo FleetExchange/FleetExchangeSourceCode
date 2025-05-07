@@ -58,6 +58,7 @@ export default defineSchema({
       v.literal("client"),
       v.literal("admin")
     ),
+    logo: v.string(),
   }).index("by_email", ["email"]),
 
   fleet: defineTable({

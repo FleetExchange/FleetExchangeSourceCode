@@ -17,7 +17,7 @@ export default function SearchBar() {
 
   return (
     <form className="flex flex-row space-x-2" onSubmit={handleSubmit}>
-      <div className="relative mx-auto flex h-18 w-[625px] rounded-2xl border-1 border-gray-300 bg-base-100 shadow">
+      <div className="relative mx-auto flex h-18 w-[625px] rounded-2xl border-1 border-base-300 bg-base-100 shadow">
         <div className="flex h-18 w-[175px] rounded-2xl hover:bg-base-200 items-center focus-within:bg-base-200">
           <fieldset className="fieldset ml-4">
             <legend className="fieldset-legend ml-3 mb-0 pb-0">Origin</legend>

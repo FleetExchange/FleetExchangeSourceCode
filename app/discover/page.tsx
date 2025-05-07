@@ -1,5 +1,6 @@
 import FilterBtn from "@/components/FilterBtn";
 import SearchBar from "@/components/SearchBar";
+import TripList from "@/components/TripList";
 
 // app/discover/page.tsx
 export default function DiscoverPage() {
@@ -20,6 +21,8 @@ export default function DiscoverPage() {
       </div>
 
       <hr className="border-t border-base-200 my-0" />
+
+      <TripList></TripList>
     </>
   );
 }
