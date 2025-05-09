@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { TRUCK_TYPES } from "../shared/truckTypes";
 
 // Get all trucks
 export const getTruck = query({

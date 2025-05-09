@@ -3,17 +3,6 @@
 import { api } from "@/convex/_generated/api";
 import { useQuery } from "convex/react";
 import { Id } from "@/convex/_generated/dataModel";
-import {
-  CalendarDays,
-  MapPin,
-  Ticket,
-  Check,
-  CircleArrowRight,
-  LoaderCircle,
-  XCircle,
-  PencilIcon,
-  StarIcon,
-} from "lucide-react";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { LuMapPinHouse } from "react-icons/lu";
@@ -23,7 +12,6 @@ import { BsTruck } from "react-icons/bs";
 import { BsBoxSeam } from "react-icons/bs";
 
 export default function TripCard({ tripId }: { tripId: Id<"trip"> }) {
-  const { user } = useUser();
   const router = useRouter();
   const trip = useQuery(api.trip.getById, { tripId });
 
@@ -56,16 +44,18 @@ export default function TripCard({ tripId }: { tripId: Id<"trip"> }) {
         <div>
           <LuMapPinHouse />
           <h3>{trip?.originCity}</h3>
-          {trip?.departureDate
-            ? new Intl.DateTimeFormat("en-GB", {
-                day: "2-digit",
-                month: "2-digit",
-                year: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-                hour12: true,
-              }).format(new Date(trip?.departureDate))
-            : "No Date"}
+          <h3 className="text-sm">
+            {trip?.departureDate
+              ? new Intl.DateTimeFormat("en-GB", {
+                  day: "2-digit",
+                  month: "2-digit",
+                  year: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: true,
+                }).format(new Date(trip?.departureDate))
+              : "No Date"}
+          </h3>
         </div>
         <div>
           <FaLongArrowAltRight />
@@ -73,16 +63,18 @@ export default function TripCard({ tripId }: { tripId: Id<"trip"> }) {
         <div className="flex flex-col items-end">
           <LuMapPin />
           <h3 className="text-right">{trip?.destinationCity}</h3>
-          {trip?.arrivalDate
-            ? new Intl.DateTimeFormat("en-GB", {
-                day: "2-digit",
-                month: "2-digit",
-                year: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-                hour12: true,
-              }).format(new Date(trip?.arrivalDate))
-            : "No Date"}
+          <h3 className="text-sm">
+            {trip?.arrivalDate
+              ? new Intl.DateTimeFormat("en-GB", {
+                  day: "2-digit",
+                  month: "2-digit",
+                  year: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: true,
+                }).format(new Date(trip?.arrivalDate))
+              : "No Date"}
+          </h3>
         </div>
       </div>
 

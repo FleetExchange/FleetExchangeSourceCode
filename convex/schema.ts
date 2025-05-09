@@ -1,5 +1,6 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
+import { TRUCK_TYPES } from "../shared/truckTypes";
 
 // How the database looks
 // All entries have automatic _id fields
@@ -72,7 +73,7 @@ export default defineSchema({
     make: v.string(), // Name of the truck brand
     model: v.string(), // Model of the truck
     year: v.string(), // Year trick was manufactured
-    truckType: v.union(v.literal("Flatbed"), v.literal("Flatbed + crane")), // Type of truck
+    truckType: v.union(...TRUCK_TYPES.map(v.literal)), // Type of truck
     maxLoadCapacity: v.number(), // Max weight truck can bear
     width: v.number(), // Width of the cargo area
     length: v.number(), // Length of the cargo area

@@ -3,16 +3,18 @@
 import { useState } from "react";
 import { IoIosSearch } from "react-icons/io";
 
-export default function SearchBar() {
+export default function SearchBar({
+  onSearch,
+}: {
+  onSearch: (filters: { from: string; to: string; arrival: string }) => void;
+}) {
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [arrival, setArrival] = useState("");
-  const [truck, setTruck] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log({ from, to, arrival, truck });
-    // You can now send this data to an API, etc.
+    onSearch({ from, to, arrival });
   };
 
   return (

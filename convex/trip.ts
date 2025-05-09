@@ -1,11 +1,174 @@
+// ** DISCLAIMER **
+// TIME FILTERS ONLY WORK WITH GMT+2
+//
+
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { Id } from "./_generated/dataModel";
 
-// Get all freights and trips
 export const getTrip = query({
-  args: {},
-  handler: async (ctx) => {
-    const trips = await ctx.db.query("trip").collect();
+  args: {
+    searchTerm: v.object({
+      from: v.string(),
+      to: v.string(),
+      arrival: v.string(),
+    }),
+    filterTerm: v.object({
+      depDate: v.string(),
+      depTime: v.string(),
+      arrDate: v.string(),
+      arrTime: v.string(),
+      truckType: v.string(),
+      width: v.string(),
+      length: v.string(),
+      height: v.string(),
+      payload: v.string(),
+    }),
+  },
+  handler: async (ctx, { searchTerm, filterTerm }) => {
+    let trips = await ctx.db.query("trip").collect();
+
+    if (searchTerm.from) {
+      trips = trips.filter((trip) =>
+        trip.originCity?.toLowerCase().includes(searchTerm.from.toLowerCase())
+      );
+    }
+
+    if (searchTerm.to) {
+      trips = trips.filter((trip) =>
+        trip.destinationCity
+          ?.toLowerCase()
+          .includes(searchTerm.to.toLowerCase())
+      );
+    }
+
+    // Apply latest arrival, overrride if specific date exists
+    if (searchTerm.arrival) {
+      const latestArrival = new Date(searchTerm.arrival);
+      latestArrival.setHours(23, 59, 59, 999); // Set to end of day
+
+      trips = trips.filter(
+        (trip) =>
+          trip.arrivalDate && new Date(trip.arrivalDate) <= latestArrival
+      );
+    }
+
+    // Create a arrival Date object set to a default and update time part based on the filters
+    // If specific time is give, 1 hour window is applied both sides
+    if (filterTerm.arrDate) {
+      if (filterTerm.arrTime) {
+        const [hours, minutes] = filterTerm.arrTime.split(":").map(Number);
+        const arrivalDate = new Date(filterTerm.arrDate);
+        arrivalDate.setHours(hours, minutes, 0, 0);
+
+        const windowStart = new Date(arrivalDate);
+        windowStart.setHours(hours - 3, minutes, 0, 0);
+
+        const windowEnd = new Date(arrivalDate);
+        windowEnd.setHours(hours - 1, minutes, 59, 999);
+
+        trips = trips.filter((trip) => {
+          const arr = new Date(trip.arrivalDate);
+          return arr >= windowStart && arr <= windowEnd;
+        });
+      } else {
+        const startOfDay = new Date(filterTerm.arrDate);
+        startOfDay.setHours(0, 0, 0, 0);
+
+        const endOfDay = new Date(filterTerm.arrDate);
+        endOfDay.setHours(23, 59, 59, 999);
+
+        trips = trips.filter((trip) => {
+          const arr = new Date(trip.arrivalDate);
+          return arr >= startOfDay && arr <= endOfDay;
+        });
+      }
+    }
+
+    // Create a departure Date object set to a default and update time part based on the filters
+    // If specific time is give, 1 hour window is applied both sides
+    if (filterTerm.depDate) {
+      if (filterTerm.depTime) {
+        const [hours, minutes] = filterTerm.depTime.split(":").map(Number);
+        const depDate = new Date(filterTerm.depDate);
+        depDate.setHours(hours, minutes, 0, 0);
+
+        const windowStart = new Date(depDate);
+        windowStart.setHours(hours - 3, minutes, 0, 0);
+
+        const windowEnd = new Date(depDate);
+        windowEnd.setHours(hours - 1, minutes, 59, 999);
+
+        trips = trips.filter((trip) => {
+          const arr = new Date(trip.departureDate);
+          return arr >= windowStart && arr <= windowEnd;
+        });
+      } else {
+        const startOfDay = new Date(filterTerm.depDate);
+        startOfDay.setHours(0, 0, 0, 0);
+
+        const endOfDay = new Date(filterTerm.depDate);
+        endOfDay.setHours(23, 59, 59, 999);
+
+        trips = trips.filter((trip) => {
+          const arr = new Date(trip.departureDate);
+          return arr >= startOfDay && arr <= endOfDay;
+        });
+      }
+    }
+
+    // Filter for type of truck
+    if (filterTerm.truckType && filterTerm.truckType !== "Any") {
+      const trucks = await ctx.db.query("truck").collect();
+      const truckMap = new Map(trucks.map((truck) => [truck._id, truck]));
+
+      trips = trips.filter((trip) => {
+        const truck = trip.truckId ? truckMap.get(trip.truckId) : null;
+        return truck && truck.truckType === filterTerm.truckType;
+      });
+    }
+
+    // Filter for Width
+    if (filterTerm.width) {
+      const trucks = await ctx.db.query("truck").collect();
+      const truckMap = new Map(trucks.map((truck) => [truck._id, truck]));
+
+      trips = trips.filter((trip) => {
+        const truck = trip.truckId ? truckMap.get(trip.truckId) : null;
+        return truck && truck.width === Number(filterTerm.width);
+      });
+    }
+    // Filter for Length
+    if (filterTerm.length) {
+      const trucks = await ctx.db.query("truck").collect();
+      const truckMap = new Map(trucks.map((truck) => [truck._id, truck]));
+
+      trips = trips.filter((trip) => {
+        const truck = trip.truckId ? truckMap.get(trip.truckId) : null;
+        return truck && truck.length === Number(filterTerm.length);
+      });
+    }
+    // Filter for height
+    if (filterTerm.height) {
+      const trucks = await ctx.db.query("truck").collect();
+      const truckMap = new Map(trucks.map((truck) => [truck._id, truck]));
+
+      trips = trips.filter((trip) => {
+        const truck = trip.truckId ? truckMap.get(trip.truckId) : null;
+        return truck && truck.height === Number(filterTerm.height);
+      });
+    }
+
+    // Filter for Payload Capacity
+    if (filterTerm.payload) {
+      const trucks = await ctx.db.query("truck").collect();
+      const truckMap = new Map(trucks.map((truck) => [truck._id, truck]));
+
+      trips = trips.filter((trip) => {
+        const truck = trip.truckId ? truckMap.get(trip.truckId) : null;
+        return truck && truck.maxLoadCapacity === Number(filterTerm.payload);
+      });
+    }
 
     return trips;
   },

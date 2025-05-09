@@ -6,9 +6,33 @@ import Spinner from "./spinner";
 import { CalendarDays, Ticket } from "lucide-react";
 import TripCard from "./TripCard";
 
-const TripList = () => {
+type SearchTerm = {
+  from: string;
+  to: string;
+  arrival: string;
+};
+
+type FilterTerm = {
+  depDate: string;
+  depTime: string;
+  arrDate: string;
+  arrTime: string;
+  truckType: string;
+  width: string;
+  length: string;
+  height: string;
+  payload: string;
+};
+
+const TripList = ({
+  searchTerm,
+  filterTerm,
+}: {
+  searchTerm: SearchTerm;
+  filterTerm: FilterTerm;
+}) => {
   //Get all events
-  const trip = useQuery(api.trip.getTrip);
+  const trip = useQuery(api.trip.getTrip, { searchTerm, filterTerm });
 
   if (!trip) {
     return (

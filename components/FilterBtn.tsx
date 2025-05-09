@@ -1,9 +1,24 @@
 "use client";
 
+import { TRUCK_TYPES } from "@/shared/truckTypes";
 import React, { useState } from "react";
 import { IoFilter } from "react-icons/io5";
 
-const FilterBtn = () => {
+const FilterBtn = ({
+  onFilter,
+}: {
+  onFilter: (filters: {
+    depDate: string;
+    depTime: string;
+    arrDate: string;
+    arrTime: string;
+    truckType: string;
+    width: string;
+    length: string;
+    height: string;
+    payload: string;
+  }) => void;
+}) => {
   const [depDate, setDepDate] = useState("");
   const [depTime, setDepTime] = useState("");
   const [arrDate, setArrDate] = useState("");
@@ -16,7 +31,7 @@ const FilterBtn = () => {
 
   const applyFilters = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log({
+    onFilter({
       depDate,
       depTime,
       arrDate,
@@ -30,7 +45,8 @@ const FilterBtn = () => {
     // You can now send this data to an API, etc.
   };
 
-  const resetFilters = () => {
+  const resetFilters = (e: React.FormEvent) => {
+    e.preventDefault();
     setDepDate("");
     setDepTime("");
     setArrDate("");
@@ -40,6 +56,17 @@ const FilterBtn = () => {
     setHeight("");
     setPayload("");
     setType("");
+    onFilter({
+      depDate,
+      depTime,
+      arrDate,
+      arrTime,
+      truckType,
+      width,
+      length,
+      height,
+      payload,
+    });
   };
   const openModal = () => {
     const modal = document.getElementById(
@@ -120,17 +147,19 @@ const FilterBtn = () => {
             <h1 className="font-bold">Select Vehicle Type</h1>
             <div className="flex flex-row gap-2">
               <fieldset className="fieldset">
-                <legend className="fieldset-legend">Type Select </legend>
+                <legend className="fieldset-legend">Type Select</legend>
                 <select
-                  defaultValue="Any"
+                  id="truckTypeSelect"
                   className="select focus:outline-none focus:ring-0"
                   value={truckType}
                   onChange={(e) => setType(e.target.value)}
                 >
-                  <option>Any</option>
-                  <option>Flatbed</option>
-                  <option>Flatbed + Crane</option>
-                  <option>BoxVan</option>
+                  <option value="Any">Any</option>
+                  {TRUCK_TYPES.map((type) => (
+                    <option key={type} value={type}>
+                      {type}
+                    </option>
+                  ))}
                 </select>
               </fieldset>
             </div>
