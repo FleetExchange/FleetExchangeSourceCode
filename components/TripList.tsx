@@ -5,6 +5,7 @@ import { useQuery } from "convex/react";
 import Spinner from "./spinner";
 import { CalendarDays, Ticket } from "lucide-react";
 import TripCard from "./TripCard";
+import { TbClipboardOff } from "react-icons/tb";
 
 type SearchTerm = {
   from: string;
@@ -43,9 +44,9 @@ const TripList = ({
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 lg:px-8 py-12">
+    <div className=" px-8">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-5">
         <div>
           <h1 className="text-3xl font-bold text-neutral-800">
             Upcomming Trips
@@ -62,16 +63,18 @@ const TripList = ({
         </div>
       </div>
 
+      <hr className="border-t border-base-200 mb-5" />
+
       {/* Upcoming Trips Grid */}
       {trip.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+        <div className="grid grid-cols-1 mb-12">
           {trip.map((trip) => (
             <TripCard key={trip._id} tripId={trip._id} />
           ))}
         </div>
       ) : (
         <div className="bg-base-100 rounded-lg p-12 text-center mb-12">
-          <Ticket className="w-12 h-12 text-neutral-400 mx-auto mb-4" />
+          <TbClipboardOff className="w-12 h-12 text-neutral-400 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-neutral-900">
             No upcoming trips
           </h3>

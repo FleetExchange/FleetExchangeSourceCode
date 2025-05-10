@@ -3,10 +3,8 @@
 import { api } from "@/convex/_generated/api";
 import { useQuery } from "convex/react";
 import { Id } from "@/convex/_generated/dataModel";
-import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
-import { LuMapPinHouse } from "react-icons/lu";
-import { LuMapPin } from "react-icons/lu";
+import { CiRuler } from "react-icons/ci";
 import { FaLongArrowAltRight } from "react-icons/fa";
 import { BsTruck } from "react-icons/bs";
 import { BsBoxSeam } from "react-icons/bs";
@@ -26,25 +24,25 @@ export default function TripCard({ tripId }: { tripId: Id<"trip"> }) {
   );
 
   return (
-    <div
-      onClick={() => router.push(`/event/${tripId}`)}
-      className="flex w-[350px] flex-col rounded-xl border border-base-300 bg-base-100 px-5 py-3 shadow transition-all duration-300 hover:shadow-xl"
-    >
-      <div className="flex flex-row justify-between items-center gap-2">
-        <h3 className="text-sm">
-          {tripOwner?.logo}
-          {tripOwner?.companyName}
-        </h3>
+    <div className=" pointer-events-none flex flex-col rounded-xl border border-base-300 bg-base-100 px-5 py-3 shadow transition-all duration-300 hover:shadow-xl">
+      {/* Avatar & Name of company & Price */}
+      <div className="flex flex-row justify-between gap-2">
+        <div className="flex flex-row  items-center avatar avatar-placeholder gap-2">
+          <div className="bg-neutral text-neutral-content w-8 rounded-full">
+            <span className="text-xs">WT</span>
+          </div>
+          <h3 className="text-sm">{tripOwner?.companyName}</h3>
+        </div>
+
         <div className="flex justify-end badge badge-soft badge-success rounded-2xl">
           From R{trip?.basePrice}
         </div>
       </div>
 
-      <div className="w-[300px] mt-4 flex flex-row justify-between">
-        <div>
-          <LuMapPinHouse />
-          <h3>{trip?.originCity}</h3>
-          <h3 className="text-sm">
+      <div className="mt-4 flex flex-row justify-evenly">
+        <div className="flex flex-col items-center">
+          <p className="text-2xl">{trip?.originCity}</p>
+          <p className="text-sm">
             {trip?.departureDate
               ? new Intl.DateTimeFormat("en-GB", {
                   day: "2-digit",
@@ -52,18 +50,17 @@ export default function TripCard({ tripId }: { tripId: Id<"trip"> }) {
                   year: "numeric",
                   hour: "2-digit",
                   minute: "2-digit",
-                  hour12: true,
+                  hour12: false,
                 }).format(new Date(trip?.departureDate))
               : "No Date"}
-          </h3>
+          </p>
         </div>
-        <div>
+        <div className="flex justify-center items-center">
           <FaLongArrowAltRight />
         </div>
-        <div className="flex flex-col items-end">
-          <LuMapPin />
-          <h3 className="text-right">{trip?.destinationCity}</h3>
-          <h3 className="text-sm">
+        <div className="flex flex-col items-center">
+          <p className="text-2xl">{trip?.destinationCity}</p>
+          <p className="text-sm">
             {trip?.arrivalDate
               ? new Intl.DateTimeFormat("en-GB", {
                   day: "2-digit",
@@ -71,21 +68,52 @@ export default function TripCard({ tripId }: { tripId: Id<"trip"> }) {
                   year: "numeric",
                   hour: "2-digit",
                   minute: "2-digit",
-                  hour12: true,
-                }).format(new Date(trip?.arrivalDate))
+                  hour12: false,
+                }).format(new Date(trip?.departureDate))
               : "No Date"}
-          </h3>
+          </p>
         </div>
       </div>
 
       <hr className="border-t border-base-200 mt-4 mb-4"></hr>
-      <div className="flex flex-row items-center gap-2">
-        <BsTruck />
-        <p className="text-sm">Truck Type: {truck?.truckType}</p>
-      </div>
-      <div className="flex flex-row items-center gap-2">
-        <BsBoxSeam />
-        <p className="text-sm">Payload Capacity: {truck?.maxLoadCapacity} KG</p>
+
+      <div className="flex flex-row justify-between">
+        <div className="flex flex-row gap-6">
+          <div className=" flex flex-col">
+            <div className="flex flex-row items-center gap-2">
+              <BsTruck />
+              <p className="text-sm">Truck Type: {truck?.truckType}</p>
+            </div>
+            <div className="flex flex-row items-center gap-2">
+              <BsBoxSeam />
+              <p className="text-sm">
+                Payload Capacity: {truck?.maxLoadCapacity} KG
+              </p>
+            </div>
+          </div>
+
+          <div className=" flex flex-col">
+            <div className="flex flex-row items-center gap-2">
+              <CiRuler />
+              <p className="text-sm">Width: {truck?.width} m</p>
+            </div>
+            <div className="flex flex-row items-center gap-2">
+              <CiRuler />
+              <p className="text-sm">Length: {truck?.length} m</p>
+            </div>
+            <div className="flex flex-row items-center gap-2">
+              <CiRuler />
+              <p className="text-sm">Height: {truck?.height} m</p>
+            </div>
+          </div>
+        </div>
+
+        <button
+          onClick={() => router.push(`/event/${tripId}`)}
+          className="pointer-events-auto btn btn-primary"
+        >
+          View Trip
+        </button>
       </div>
     </div>
   );

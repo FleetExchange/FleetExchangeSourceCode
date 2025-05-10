@@ -41,31 +41,43 @@ export default function DiscoverPage() {
 
   return (
     <>
-      <div className="relative top-20 flex justify-center w-full px-4">
-        {/* Search Bar - Centered */}
-        <div className="w-full max-w-4xl">
-          <SearchBar
-            onSearch={(searchTerm) => {
-              setSearchTerm(searchTerm);
-            }}
-          />
+      <div className="flex flex-col space-y-8 mt-20">
+        <div className="relative flex justify-center w-full px-4">
+          {/* Search Bar - Centered */}
+          <div className="w-full max-w-4xl">
+            <SearchBar
+              onSearch={(searchTerm) => {
+                setSearchTerm(searchTerm);
+              }}
+            />
+          </div>
+        </div>
+
+        <hr className="border-t border-base-200" />
+
+        <div className="mx-start flex flex-row gap-4 p-8 ">
+          <div className="flex w-1/6 flex-col p-4 border-1 border-base-300 h-[300px]">
+            <fieldset className="fieldset">
+              <select defaultValue="Pick a browser" className="select">
+                <option>Default Sort</option>
+                <option>Sort By Date</option>
+                <option>Sort By Price</option>
+              </select>
+            </fieldset>
+            <FilterBtn
+              onFilter={(filterTerm) => {
+                setFilterTerm(filterTerm);
+              }}
+            />
+          </div>
+          <div className="flex w-3/4 flex-col p-4">
+            <TripList
+              searchTerm={searchTerm}
+              filterTerm={filterTerm}
+            ></TripList>
+          </div>
         </div>
       </div>
-
-      {/* Filter Button - Positioned below with some space */}
-      <div className="flex justify-center mt-19">
-        <div className="ml-4">
-          <FilterBtn
-            onFilter={(filterTerm) => {
-              setFilterTerm(filterTerm);
-            }}
-          />
-        </div>
-      </div>
-
-      <hr className="border-t border-base-200 my-0" />
-
-      <TripList searchTerm={searchTerm} filterTerm={filterTerm}></TripList>
     </>
   );
 }

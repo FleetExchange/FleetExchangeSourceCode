@@ -171,7 +171,7 @@ const FilterBtn = ({
               <fieldset className="fieldset">
                 <legend className="fieldset-legend">Width</legend>
                 <input
-                  type="text"
+                  type="number"
                   className="input focus:outline-none focus:ring-0"
                   placeholder="Type here"
                   value={width}
@@ -182,7 +182,7 @@ const FilterBtn = ({
               <fieldset className="fieldset">
                 <legend className="fieldset-legend">Length</legend>
                 <input
-                  type="text"
+                  type="number"
                   className="input focus:outline-none focus:ring-0"
                   placeholder="Type here"
                   value={length}
@@ -193,7 +193,7 @@ const FilterBtn = ({
               <fieldset className="fieldset">
                 <legend className="fieldset-legend">Height</legend>
                 <input
-                  type="text"
+                  type="number"
                   className="input focus:outline-none focus:ring-0"
                   placeholder="Type here"
                   value={height}
@@ -204,7 +204,7 @@ const FilterBtn = ({
               <fieldset className="fieldset">
                 <legend className="fieldset-legend">Payload Capacity</legend>
                 <input
-                  type="text"
+                  type="number"
                   className="input focus:outline-none focus:ring-0"
                   placeholder="Type here"
                   value={payload}
