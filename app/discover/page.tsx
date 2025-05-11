@@ -39,6 +39,10 @@ export default function DiscoverPage() {
     payload: "",
   });
 
+  const [sortBy, setSortBy] = useState<"price" | "departureDate">(
+    "departureDate"
+  );
+
   return (
     <>
       <div className="flex flex-col space-y-8 mt-20">
@@ -56,12 +60,17 @@ export default function DiscoverPage() {
         <hr className="border-t border-base-200" />
 
         <div className="mx-start flex flex-row gap-4 p-8 ">
-          <div className="flex w-1/6 flex-col p-4 border-1 border-base-300 h-[300px]">
+          <div className="flex w-1/6 flex-col p-4 border-1 border-base-300">
             <fieldset className="fieldset">
-              <select defaultValue="Pick a browser" className="select">
-                <option>Default Sort</option>
-                <option>Sort By Date</option>
-                <option>Sort By Price</option>
+              <select
+                className="select focus:outline-none focus:ring-0"
+                value={sortBy}
+                onChange={(e) =>
+                  setSortBy(e.target.value as "price" | "departureDate")
+                }
+              >
+                <option value="departureDare">Sort By Date</option>
+                <option value="price">Sort By Price</option>
               </select>
             </fieldset>
             <FilterBtn
@@ -70,10 +79,12 @@ export default function DiscoverPage() {
               }}
             />
           </div>
+
           <div className="flex w-3/4 flex-col p-4">
             <TripList
               searchTerm={searchTerm}
               filterTerm={filterTerm}
+              sortBy={sortBy}
             ></TripList>
           </div>
         </div>

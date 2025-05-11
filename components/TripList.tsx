@@ -7,6 +7,8 @@ import { CalendarDays, Ticket } from "lucide-react";
 import TripCard from "./TripCard";
 import { TbClipboardOff } from "react-icons/tb";
 
+type SortOption = "departureDate" | "price";
+
 type SearchTerm = {
   from: string;
   to: string;
@@ -28,12 +30,28 @@ type FilterTerm = {
 const TripList = ({
   searchTerm,
   filterTerm,
+  sortBy,
 }: {
   searchTerm: SearchTerm;
   filterTerm: FilterTerm;
+  sortBy: SortOption;
 }) => {
   //Get all events
-  const trip = useQuery(api.trip.getTrip, { searchTerm, filterTerm });
+  const fetchedTrip = useQuery(api.trip.getTrip, { searchTerm, filterTerm });
+
+  let trip = [...(fetchedTrip ?? [])]; // Safe copy, never undefined
+
+  // Sorted events
+  if (sortBy === "departureDate") {
+    trip.sort(
+      (a, b) =>
+        new Date(a.departureDate).getTime() -
+        new Date(b.departureDate).getTime()
+    );
+  }
+  if (sortBy === "price") {
+    trip.sort((a, b) => a.basePrice - b.basePrice);
+  }
 
   if (!trip) {
     return (
