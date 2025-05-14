@@ -33,7 +33,9 @@ const Sidebar = () => {
             </Link>
           </li>
           <li>
-            <a className="text-primary">My Fleet</a>
+            <Link href="/fleetManager" className="text-primary">
+              Fleet Manager
+            </Link>
           </li>
           <li>
             <a className="text-primary">Trip Manager</a>

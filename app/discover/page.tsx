@@ -60,7 +60,7 @@ export default function DiscoverPage() {
         <hr className="border-t border-base-200" />
 
         <div className="mx-start flex flex-row gap-4 p-8 ">
-          <div className="flex w-1/6 flex-col p-4 border-1 border-base-300">
+          <div className="flex w-1/6 flex-col p-4 border-1 border-base-300 h-[200px]">
             <fieldset className="fieldset">
               <select
                 className="select focus:outline-none focus:ring-0"
@@ -69,7 +69,7 @@ export default function DiscoverPage() {
                   setSortBy(e.target.value as "price" | "departureDate")
                 }
               >
-                <option value="departureDare">Sort By Date</option>
+                <option value="departureDate">Sort By Departure Date</option>
                 <option value="price">Sort By Price</option>
               </select>
             </fieldset>

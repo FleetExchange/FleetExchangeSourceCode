@@ -30,14 +30,14 @@ export default function RootLayout({
   return (
     <html lang="en" data-theme="corporate">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <ConvexClientProvider>
-          <ClerkProvider>
+        <ClerkProvider>
+          <ConvexClientProvider>
             <Header />
-            <Sidebar></Sidebar>
-            <SyncUserWithConvex></SyncUserWithConvex>
+            <Sidebar />
+            <SyncUserWithConvex />
             {children}
-          </ClerkProvider>
-        </ConvexClientProvider>
+          </ConvexClientProvider>
+        </ClerkProvider>
       </body>
     </html>
   );

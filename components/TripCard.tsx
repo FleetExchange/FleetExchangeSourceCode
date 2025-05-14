@@ -24,7 +24,7 @@ export default function TripCard({ tripId }: { tripId: Id<"trip"> }) {
   );
 
   return (
-    <div className=" pointer-events-none flex flex-col rounded-xl border border-base-300 bg-base-100 px-5 py-3 shadow transition-all duration-300 hover:shadow-xl">
+    <div className=" pointer-events-none flex flex-col rounded-xl border border-base-300 bg-base-100 px-5 py-3 shadow transition-all duration-300 hover:shadow-xl mb-8">
       {/* Avatar & Name of company & Price */}
       <div className="flex flex-row justify-between gap-2">
         <div className="flex flex-row  items-center avatar avatar-placeholder gap-2">

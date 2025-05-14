@@ -50,17 +50,22 @@ export default defineSchema({
   }),
 
   users: defineTable({
-    companyName: v.string(), // Name of the company
+    clerkId: v.string(), // Store Clerk ID here
+    name: v.string(), // Name of the company
     email: v.string(), // Companies Email address registered with account
-    stripeConnectId: v.optional(v.string()),
-    userType: v.union(
-      // Type of account the company has, admin is placeholder for business accounts
-      v.literal("transporter"),
-      v.literal("client"),
-      v.literal("admin")
+    /*stripeConnectId: v.optional(v.string()),
+    userType: v.optional(
+      v.union(
+        // Type of account the company has, admin is placeholder for business accounts
+        v.literal("transporter"),
+        v.literal("client"),
+        v.literal("admin")
+      )
     ),
-    logo: v.string(),
-  }).index("by_email", ["email"]),
+    logo: v.optional(v.string()),*/
+  })
+    .index("by_email", ["email"])
+    .index("by_clerk_id", ["clerkId"]),
 
   fleet: defineTable({
     fleetName: v.string(), // Name of the fleet
@@ -69,7 +74,7 @@ export default defineSchema({
   }),
 
   truck: defineTable({
-    numberPlate: v.string(), // Identifier for the truck
+    registration: v.string(), // Identifier for the truck
     make: v.string(), // Name of the truck brand
     model: v.string(), // Model of the truck
     year: v.string(), // Year trick was manufactured

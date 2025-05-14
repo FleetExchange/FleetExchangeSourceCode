@@ -19,3 +19,13 @@ export const getTruckById = query({
     return await ctx.db.get(truckId);
   },
 });
+
+export const getTruckByIdArray = query({
+  args: {
+    truckIds: v.array(v.id("truck")),
+  },
+  handler: async (ctx, { truckIds }) => {
+    const trucks = await Promise.all(truckIds.map((id) => ctx.db.get(id)));
+    return trucks.filter((truck) => truck !== null); // Remove any nulls if trucks were deleted
+  },
+});
