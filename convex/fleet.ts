@@ -42,3 +42,20 @@ export const getTrucksForFleet = query({
     return fleet.trucks; // ✅ this is an array of truck IDs
   },
 });
+
+// Create New fleet
+export const newFleet = mutation({
+  args: {
+    fleetName: v.string(),
+    userId: v.id("users"),
+  },
+  handler: async (ctx, { fleetName, userId }) => {
+    const newFleetId = await ctx.db.insert("fleet", {
+      fleetName,
+      userId,
+      trucks: [],
+    });
+
+    return newFleetId;
+  },
+});

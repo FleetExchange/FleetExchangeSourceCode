@@ -6,6 +6,9 @@ import { useQuery } from "convex/react";
 import { useEffect, useState } from "react";
 import { CiMenuKebab } from "react-icons/ci";
 import FleetManagerTableFilter from "./FleetManagerTableFilter";
+import { CiSearch } from "react-icons/ci";
+import NewFleetCard from "./NewFleetCard";
+import NewFleetModal from "./NewFleetModal";
 
 type SortOption = "registration" | "payload" | "length" | "width" | "height";
 
@@ -36,6 +39,9 @@ const FleetManagerTable = () => {
   const [sortBy, setSortBy] = useState<
     "registration" | "payload" | "length" | "width" | "height"
   >("registration");
+
+  // Search Term
+  const [searchTerm, setSearchTerm] = useState("");
 
   // Stores the terms to filter by
   const [filterTerm, setFilterTerm] = useState<{
@@ -72,6 +78,10 @@ const FleetManagerTable = () => {
   // Filtering the trucks
   const filteredTrucks = trucks.filter((truck) => {
     return (
+      (!searchTerm ||
+        truck.registration
+          .toLowerCase()
+          .startsWith(searchTerm.toLowerCase())) &&
       (!filterTerm.make || truck.make === filterTerm.make) &&
       (!filterTerm.year || truck.year === filterTerm.year) &&
       (!filterTerm.truckType || truck.truckType === filterTerm.truckType) &&
@@ -116,7 +126,19 @@ const FleetManagerTable = () => {
         <div className="felx-row flex justify-between gap-2 bg-base-100 border-1 border-base-300 rounded-t-xl items-center px-5 py-2">
           <div className="flex flex-row justify-start gap-4">
             {/* Search Bar */}
-            <input type="search" className="grow" placeholder="Search" />
+            <div>
+              <label className="input">
+                <CiSearch />
+                <input
+                  className="input focus:outline-none focus:ring-0"
+                  type="search"
+                  placeholder="Search"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </label>
+            </div>
+
             {/* Fleet selector */}
             <select
               defaultValue={userFleet}
@@ -171,7 +193,8 @@ const FleetManagerTable = () => {
                 <a>Create Truck</a>
               </li>
               <li>
-                <a>New Fleet</a>
+                <NewFleetCard />
+                {userFleets && <NewFleetModal fleets={userFleets} />}
                 <a>Edit Fleet</a>
               </li>
             </ul>

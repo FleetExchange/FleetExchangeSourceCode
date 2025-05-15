@@ -12,6 +12,18 @@ export const getUserById = query({
   },
 });
 
+export const getUserByClerkId = query({
+  args: { clerkId: v.string() },
+  handler: async (ctx, { clerkId }) => {
+    const existingUser = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", clerkId))
+      .first();
+
+    return existingUser;
+  },
+});
+
 export const updateUser = mutation({
   args: {
     userId: v.string(), // Clerk ID
