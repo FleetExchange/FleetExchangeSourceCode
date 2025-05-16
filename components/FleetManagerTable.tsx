@@ -11,6 +11,7 @@ import NewFleetCard from "./NewFleetCard";
 import NewFleetModal from "./NewFleetModal";
 import EditFleetCard from "./EditFleetCard";
 import EditFleetModal from "./EditFleetModal";
+import Link from "next/link";
 
 type SortOption = "registration" | "payload" | "length" | "width" | "height";
 
@@ -192,7 +193,11 @@ const FleetManagerTable = () => {
               className="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm"
             >
               <li>
-                <a>Create Truck</a>
+                <Link href="/truckManager">
+                  <button className="btn btn-soft bg-base-100 outline-none">
+                    Create Truck
+                  </button>
+                </Link>
               </li>
               <li>
                 <NewFleetCard />
