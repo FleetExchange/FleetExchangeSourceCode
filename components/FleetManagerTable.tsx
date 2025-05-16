@@ -9,6 +9,8 @@ import FleetManagerTableFilter from "./FleetManagerTableFilter";
 import { CiSearch } from "react-icons/ci";
 import NewFleetCard from "./NewFleetCard";
 import NewFleetModal from "./NewFleetModal";
+import EditFleetCard from "./EditFleetCard";
+import EditFleetModal from "./EditFleetModal";
 
 type SortOption = "registration" | "payload" | "length" | "width" | "height";
 
@@ -195,7 +197,8 @@ const FleetManagerTable = () => {
               <li>
                 <NewFleetCard />
                 {userFleets && <NewFleetModal fleets={userFleets} />}
-                <a>Edit Fleet</a>
+                <EditFleetCard />
+                {userFleets && <EditFleetModal UserFleets={userFleets} />}
               </li>
             </ul>
           </div>

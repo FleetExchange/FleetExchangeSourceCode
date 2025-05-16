@@ -59,3 +59,42 @@ export const newFleet = mutation({
     return newFleetId;
   },
 });
+
+// Mutation to edit the name of a fleet
+export const editFleet = mutation({
+  args: {
+    fleetId: v.id("fleet"),
+    fleetName: v.string(),
+  },
+  handler: async (ctx, { fleetName, fleetId }) => {
+    const existingFleet = await ctx.db
+      .query("fleet")
+      .filter((q) => q.eq(q.field("_id"), fleetId))
+      .first();
+
+    if (existingFleet) {
+      await ctx.db.patch(existingFleet._id, {
+        fleetName,
+      });
+      return existingFleet._id;
+    }
+  },
+});
+
+// Mutation to delete a fleet
+export const deleteFleet = mutation({
+  args: {
+    fleetId: v.id("fleet"),
+  },
+  handler: async (ctx, { fleetId }) => {
+    const existingFleet = await ctx.db
+      .query("fleet")
+      .filter((q) => q.eq(q.field("_id"), fleetId))
+      .first();
+
+    if (existingFleet) {
+      await ctx.db.delete(existingFleet._id);
+      return existingFleet._id;
+    }
+  },
+});

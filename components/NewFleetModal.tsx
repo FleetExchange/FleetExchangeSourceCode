@@ -12,7 +12,7 @@ interface Fleet {
 
 const NewFleetModal = ({ fleets }: { fleets: Fleet[] }) => {
   const [name, setName] = useState("");
-  const [error, setError] = useState("");
+  const [returnMessage, setReturnMessage] = useState("");
 
   // Get the logged in user identity
   const { user } = useUser();
@@ -30,18 +30,20 @@ const NewFleetModal = ({ fleets }: { fleets: Fleet[] }) => {
     );
 
     if (nameExists) {
-      setError("You already have a fleet with that name.");
+      setReturnMessage("You already have a fleet with that name.");
       return;
     }
 
-    setError("");
+    setReturnMessage("");
 
     try {
-      await createFleet({ fleetName: name.trim(), userId }); // ✅ Call mutation
-      // Optionally reset state or close modal
+      if (userId) {
+        await createFleet({ fleetName: name.trim(), userId });
+        setReturnMessage("Fleet Created.");
+      } // ✅ Call mutation}
     } catch (err) {
       console.error("Failed to create fleet:", err);
-      setError("Something went wrong. Please try again.");
+      setReturnMessage("Something went wrong. Please try again.");
     }
   };
 
@@ -58,11 +60,16 @@ const NewFleetModal = ({ fleets }: { fleets: Fleet[] }) => {
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
-            {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+            {returnMessage && (
+              <p className="text-neutral text-sm mt-1">{returnMessage}</p>
+            )}
           </fieldset>
           <div className="modal-action">
             <div className="flex flex-row gap-2 justify-between">
-              <button className="btn btn-primary" onClick={handleCreate}>
+              <button
+                className="btn btn-primary border-1"
+                onClick={handleCreate}
+              >
                 Create
               </button>
               <form method="dialog">
