@@ -119,3 +119,69 @@ export const addTruckToFleet = mutation({
     }
   },
 });
+
+// Mutation to remove a truck from a fleet
+export const removeTruckFromFleet = mutation({
+  args: {
+    fleetId: v.id("fleet"),
+    truckId: v.id("truck"),
+  },
+  handler: async (ctx, { fleetId, truckId }) => {
+    const existingFleet = await ctx.db
+      .query("fleet")
+      .filter((q) => q.eq(q.field("_id"), fleetId))
+      .first();
+
+    if (existingFleet) {
+      await ctx.db.patch(existingFleet._id, {
+        trucks: existingFleet.trucks.filter((id) => id !== truckId), // Remove the truckId
+      });
+      return existingFleet._id;
+    }
+  },
+});
+
+// Mutation change the fleet a truck belongs to
+export const changeTruckFleet = mutation({
+  args: {
+    fleetId: v.id("fleet"),
+    truckId: v.id("truck"),
+    userFleet: v.array(v.id("fleet")),
+  },
+  handler: async (ctx, { fleetId, truckId, userFleet }) => {
+    // Check if truck is in the "new" fleet
+    const newFleet = await ctx.db
+      .query("fleet")
+      .filter((q) => q.eq(q.field("_id"), fleetId))
+      .first();
+
+    // If no fleet is found, throw an error or handle it appropriately
+    if (!newFleet) {
+      throw new Error(`Fleet with ID ${fleetId} not found.`);
+    }
+
+    // If truck is in the fleet already, make no changes
+    if (newFleet.trucks.includes(truckId)) {
+      return;
+    }
+
+    // Add the truck to the new fleet
+    await ctx.db.patch(newFleet._id, {
+      trucks: [...newFleet.trucks, truckId],
+    });
+
+    // Remove the truck from the old fleet
+    for (const fleet of userFleet) {
+      const existingFleet = await ctx.db
+        .query("fleet")
+        .filter((q) => q.eq(q.field("_id"), fleet))
+        .first();
+      if (existingFleet) {
+        await ctx.db.patch(existingFleet._id, {
+          trucks: existingFleet.trucks.filter((id) => id !== truckId),
+        });
+      }
+    }
+    return newFleet._id;
+  },
+});

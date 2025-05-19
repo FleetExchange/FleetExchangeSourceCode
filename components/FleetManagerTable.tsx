@@ -12,6 +12,7 @@ import NewFleetModal from "./NewFleetModal";
 import EditFleetCard from "./EditFleetCard";
 import EditFleetModal from "./EditFleetModal";
 import Link from "next/link";
+import { action } from "@/convex/_generated/server";
 
 type SortOption = "registration" | "payload" | "length" | "width" | "height";
 
@@ -193,7 +194,12 @@ const FleetManagerTable = () => {
               className="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm"
             >
               <li>
-                <Link href="/truckManager">
+                <Link
+                  href={{
+                    pathname: "/truckManager",
+                    query: { action: "create", truckId: "" },
+                  }}
+                >
                   <button className="btn btn-soft bg-base-100 outline-none">
                     Create Truck
                   </button>
@@ -244,9 +250,19 @@ const FleetManagerTable = () => {
                     <td>{truck.width}</td>
                     <td>{truck.height}</td>
                     <th>
-                      <button className="btn btn-square bg-base-100 border-none">
-                        <CiMenuKebab />
-                      </button>
+                      <Link
+                        href={{
+                          pathname: "/truckManager",
+                          query: {
+                            action: "edit",
+                            truckId: truck._id as string,
+                          },
+                        }}
+                      >
+                        <button className="btn btn-square bg-base-100 border-none">
+                          <CiMenuKebab />
+                        </button>
+                      </Link>
                     </th>
                   </tr>
                 ))}

@@ -1,13 +1,22 @@
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
-import { newTruck } from "@/convex/truck";
+import { editTruck, newTruck } from "@/convex/truck";
 import { TRUCK_TYPES, TruckType } from "@/shared/truckTypes";
 import { useUser } from "@clerk/nextjs";
 import { useMutation, useQuery } from "convex/react";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
-const NewTruckCard = () => {
+interface EditTruckCardProps {
+  truckId: string;
+}
+
+const EditTruckCard: React.FC<EditTruckCardProps> = ({ truckId }) => {
+  // Get the truck to edit
+  const truckForEdit = useQuery(api.truck.getTruckById, {
+    truckId: truckId as Id<"truck">,
+  });
+
   // Get the logged in user identity
   const { user } = useUser();
   // This is the Clerk user ID
@@ -28,15 +37,55 @@ const NewTruckCard = () => {
   const [height, setHeight] = useState<number>(0);
   const [fleet, setFleet] = useState("");
 
+  // Populate state when truckForEdit is loaded
+  useEffect(() => {
+    if (truckForEdit) {
+      setRegistration(truckForEdit.registration || "");
+      setMake(truckForEdit.make || "");
+      setModel(truckForEdit.model || "");
+      setYear(truckForEdit.year || "");
+      setTruckType(truckForEdit.truckType || "");
+      setMaxLoadCapacity(truckForEdit.maxLoadCapacity || 0);
+      setWidth(truckForEdit.width || 0);
+      setLength(truckForEdit.length || 0);
+      setHeight(truckForEdit.height || 0);
+    }
+  }, [truckForEdit]); // Runs whenever truckForEdit changes
+
   // Combine all truck IDs from all fleets
   const allTruckIds = userFleets?.flatMap((fleet) => fleet.trucks) || [];
   // Fetch all trucks in a single query
   const allTrucks = useQuery(api.truck.getTruckByIdArray, {
     truckIds: allTruckIds,
   });
-  const createTruck = useMutation(api.truck.newTruck); // ✅ Hook at top level
-  const addTruckToFleet = useMutation(api.fleet.addTruckToFleet);
-  const handleCreate = async () => {
+
+  const deleteTruck = useMutation(api.truck.deleteTruck);
+  const deleeteTruckFromFleet = useMutation(api.fleet.removeTruckFromFleet);
+  const handleDelete = async () => {
+    const deletedTruckId = await deleteTruck({
+      truckId: truckId as Id<"truck">,
+    });
+
+    // Remove from Fleet
+    const fleetId = userFleets?.find((fleet) =>
+      fleet.trucks.includes(truckId as Id<"truck">)
+    )?._id;
+    if (fleetId) {
+      await deleeteTruckFromFleet({
+        fleetId: fleetId as Id<"fleet">,
+        truckId: truckId as Id<"truck">,
+      });
+    }
+    if (deletedTruckId) {
+      alert("Truck Deleted.");
+    }
+    // Redirect to fleet manager page
+    window.location.href = "/fleetManager";
+  };
+
+  const editTruck = useMutation(api.truck.editTruck); // ✅ Hook at top level
+  const changeTruckFleet = useMutation(api.fleet.changeTruckFleet);
+  const handleEdit = async () => {
     // Ensure all values are set to a valid state
     if (
       !registration ||
@@ -55,21 +104,22 @@ const NewTruckCard = () => {
     }
 
     // Check Registration Number
-
     // Check if the registration already exists
-    const registrationExists = allTrucks?.some(
-      (truck) =>
-        truck.registration.toLowerCase() === registration.trim().toLowerCase()
-    );
+    const registrationExists = allTrucks?.some((truck) => {
+      if (truck._id != truckId) {
+        truck.registration.toLowerCase() === registration.trim().toLowerCase();
+      }
+    });
 
     if (registrationExists) {
       alert("A truck with this registration already exists in your fleets.");
       return;
     }
 
-    // Create Truck
+    // Edit Truck
     try {
-      const newTruckId = await createTruck({
+      const editedTruckId = await editTruck({
+        truckId: truckId as Id<"truck">,
         registration: registration.trim(),
         make: make.trim(),
         model: model.trim(),
@@ -82,14 +132,15 @@ const NewTruckCard = () => {
       });
 
       // Add to Fleet
-      await addTruckToFleet({
+      await changeTruckFleet({
         fleetId: fleet as Id<"fleet">,
-        truckId: newTruckId,
+        truckId: editedTruckId as Id<"truck">,
+        userFleet: userFleets?.map((fleet) => fleet._id) || [],
       });
 
-      alert("Truck Created.");
+      alert("Truck Edited.");
     } catch (err) {
-      console.error("Failed to create truck:", err);
+      console.error("Failed to edit truck:", err);
       alert("Something went wrong. Please try again.");
     }
   };
@@ -98,7 +149,7 @@ const NewTruckCard = () => {
     <>
       <div className="flex items w-full bg-base-100">
         <div className="flex flex-col gap-4 p-4 w-full">
-          <h1 className="text-2xl">Create Truck</h1>
+          <h1 className="text-2xl">Edit Truck</h1>
           <hr className="border-base-200 w-full"></hr>
           <div className="mt-2">
             {/** Truck Information */}
@@ -109,7 +160,6 @@ const NewTruckCard = () => {
                 <input
                   type="text"
                   className="input focus:outline-none focus:ring-0"
-                  placeholder="Type here"
                   value={registration}
                   onChange={(e) => setRegistration(e.target.value)}
                 />
@@ -121,7 +171,6 @@ const NewTruckCard = () => {
                 <input
                   type="text"
                   className="input focus:outline-none focus:ring-0"
-                  placeholder="Type here"
                   value={make}
                   onChange={(e) => setMake(e.target.value)}
                 />
@@ -131,7 +180,6 @@ const NewTruckCard = () => {
                 <input
                   type="text"
                   className="input focus:outline-none focus:ring-0"
-                  placeholder="Type here"
                   value={model}
                   onChange={(e) => setModel(e.target.value)}
                 />
@@ -141,7 +189,6 @@ const NewTruckCard = () => {
                 <input
                   type="number"
                   className="input focus:outline-none focus:ring-0"
-                  placeholder="Type here"
                   value={year}
                   onChange={(e) => setYear(e.target.value)}
                 />
@@ -177,7 +224,6 @@ const NewTruckCard = () => {
                     <input
                       type="number"
                       className="input focus:outline-none focus:ring-0"
-                      placeholder="Type here"
                       value={width}
                       onChange={(e) => setWidth(parseFloat(e.target.value))}
                     />
@@ -188,7 +234,6 @@ const NewTruckCard = () => {
                     <input
                       type="number"
                       className="input focus:outline-none focus:ring-0"
-                      placeholder="Type here"
                       value={length}
                       onChange={(e) => setLength(parseFloat(e.target.value))}
                     />
@@ -199,7 +244,6 @@ const NewTruckCard = () => {
                     <input
                       type="number"
                       className="input focus:outline-none focus:ring-0"
-                      placeholder="Type here"
                       value={height}
                       onChange={(e) => setHeight(parseFloat(e.target.value))}
                     />
@@ -212,7 +256,6 @@ const NewTruckCard = () => {
                     <input
                       type="number"
                       className="input focus:outline-none focus:ring-0"
-                      placeholder="Type here"
                       value={maxLoadCapacity}
                       onChange={(e) =>
                         setMaxLoadCapacity(parseFloat(e.target.value))
@@ -237,6 +280,8 @@ const NewTruckCard = () => {
                     defaultValue={fleet}
                     onChange={(e) => setFleet(e.target.value)}
                   >
+                    <option value="">Select a fleet</option>
+                    {/* Check if userFleets is defined and has length */}
                     {/* Use optional chaining or fallback */}
                     {(userFleets?.length ? userFleets : []).map(
                       (fleet: { _id: string; fleetName: string }) => (
@@ -251,12 +296,15 @@ const NewTruckCard = () => {
               </div>
 
               <div className="flex mt-4 gap-4 items-end">
-                <button className="btn btn-primary" onClick={handleCreate}>
-                  Create
+                <button className="btn btn-primary" onClick={handleEdit}>
+                  Edit
+                </button>
+                <button className="btn btn-primary" onClick={handleDelete}>
+                  Delete
                 </button>
                 <Link href="/fleetManager">
                   <button className="btn btn-soft bg-base-200 outline-none">
-                    Discard
+                    Close
                   </button>
                 </Link>
               </div>
@@ -268,4 +316,4 @@ const NewTruckCard = () => {
   );
 };
 
-export default NewTruckCard;
+export default EditTruckCard;
