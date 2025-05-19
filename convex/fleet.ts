@@ -98,3 +98,24 @@ export const deleteFleet = mutation({
     }
   },
 });
+
+// Mutation to add a truck to a fleet
+export const addTruckToFleet = mutation({
+  args: {
+    fleetId: v.id("fleet"),
+    truckId: v.id("truck"),
+  },
+  handler: async (ctx, { fleetId, truckId }) => {
+    const existingFleet = await ctx.db
+      .query("fleet")
+      .filter((q) => q.eq(q.field("_id"), fleetId))
+      .first();
+
+    if (existingFleet) {
+      await ctx.db.patch(existingFleet._id, {
+        trucks: [...existingFleet.trucks, truckId],
+      });
+      return existingFleet._id;
+    }
+  },
+});

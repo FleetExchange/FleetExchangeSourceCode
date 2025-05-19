@@ -29,3 +29,46 @@ export const getTruckByIdArray = query({
     return trucks.filter((truck) => truck !== null); // Remove any nulls if trucks were deleted
   },
 });
+
+// Create New fleet
+export const newTruck = mutation({
+  args: {
+    registration: v.string(), // Identifier for the truck
+    make: v.string(), // Name of the truck brand
+    model: v.string(), // Model of the truck
+    year: v.string(), // Year truck was manufactured
+    truckType: v.union(...TRUCK_TYPES.map(v.literal)), // Restrict to valid truck types
+    maxLoadCapacity: v.number(), // Max weight truck can bear
+    width: v.number(), // Width of the cargo area
+    length: v.number(), // Length of the cargo area
+    height: v.number(), // Height of cargo area
+  },
+  handler: async (
+    ctx,
+    {
+      registration,
+      make,
+      model,
+      year,
+      truckType,
+      maxLoadCapacity,
+      width,
+      length,
+      height,
+    }
+  ) => {
+    const newTruckId = await ctx.db.insert("truck", {
+      registration,
+      make,
+      model,
+      year,
+      truckType,
+      maxLoadCapacity,
+      width,
+      length,
+      height,
+    });
+
+    return newTruckId;
+  },
+});
