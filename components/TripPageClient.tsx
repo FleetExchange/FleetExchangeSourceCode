@@ -1,24 +1,82 @@
+import { api } from "@/convex/_generated/api";
+import { Id } from "@/convex/_generated/dataModel";
+import { useQuery } from "convex/react";
 import React, { useState } from "react";
 
-const TripPageClient = (tripId: string) => {
+interface TripPageClientProps {
+  tripId: string;
+}
+
+const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
+  // Object of the trip being used
+  const trip = useQuery(api.trip.getById, { tripId: tripId as Id<"trip"> });
+  const truck = useQuery(api.truck.getTruckById, {
+    truckId: trip?.truckId as Id<"truck">,
+  });
+  const tripIssuer = useQuery(api.users.getUserById, {
+    userId: trip?.userId as Id<"users">,
+  });
+
+  // Consts for new trip data from client
   const [booked, setBooked] = useState(false);
+  const [pickupAddress, setPickupAddress] = useState("");
+  const [pickupInstructions, setPickupInstructions] = useState("");
+  const [deliveryAddress, setDeliveryAddress] = useState("");
+  const [deliveryInstructions, setDeliveryInstructions] = useState("");
+  const [cargoWeight, setCargoWeight] = useState<number>(0);
+  const [cargoDescription, setCargoDescription] = useState("");
+  const tripPrice = (trip?.basePrice ?? 0) + (trip?.variablePrice ?? 0);
+
+  // Format date and time
+  const formatDateTime = (dateInput: string | number) => {
+    const date = new Date(dateInput);
+    return {
+      date: date.toLocaleDateString("en-US", {
+        weekday: "short",
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      }),
+      time: date.toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+    };
+  };
+
+  const departureDateTime = trip?.departureDate
+    ? formatDateTime(trip.departureDate)
+    : null;
+  const arrivalDateTime = trip?.arrivalDate
+    ? formatDateTime(trip.arrivalDate)
+    : null;
 
   return (
     <>
       <div className="grid grid-cols-3 grid-rows-3 gap-4 w-full h-full">
         <div className="row-span-2 col-span-2 bg-blue-400">
           <div className="flex flex-col gap-4 p-2">
-            <h1>Trip: tripID: Src to Destination</h1>
+            <h1>
+              Trip: {trip?.originCity} to {trip?.destinationCity}
+            </h1>
             <div className="flex flex-row gap-2 justify-evenly">
               <div>
-                <h2>Source City</h2>
-                <p>Departure Date</p>
+                <h2>{trip?.originCity}</h2>
+                <p>
+                  {departureDateTime && (
+                    <>
+                      {departureDateTime.date} at {departureDateTime.time}
+                    </>
+                  )}
+                </p>
                 <fieldset className="fieldset">
                   <legend className="fieldset-legend">Pickup Address?</legend>
                   <input
                     type="text"
                     className="input"
                     placeholder="Type here"
+                    value={pickupAddress}
+                    onChange={(e) => setPickupAddress(e.target.value)}
                   />
                 </fieldset>
                 <fieldset className="fieldset">
@@ -28,19 +86,29 @@ const TripPageClient = (tripId: string) => {
                   <textarea
                     className="textarea h-24"
                     placeholder="Type here"
+                    value={pickupInstructions}
+                    onChange={(e) => setPickupInstructions(e.target.value)}
                   ></textarea>
                 </fieldset>
               </div>
               <div className="border-1 border-base-300"></div>
               <div>
-                <h2>Destination City</h2>
-                <p>Arrival Date</p>
+                <h2>{trip?.destinationCity}</h2>
+                <p>
+                  {arrivalDateTime && (
+                    <>
+                      {arrivalDateTime.date} at {arrivalDateTime.time}
+                    </>
+                  )}
+                </p>
                 <fieldset className="fieldset">
                   <legend className="fieldset-legend">Delivery Address?</legend>
                   <input
                     type="text"
                     className="input"
                     placeholder="Type here"
+                    value={deliveryAddress}
+                    onChange={(e) => setDeliveryAddress(e.target.value)}
                   />
                 </fieldset>
                 <fieldset className="fieldset">
@@ -50,6 +118,8 @@ const TripPageClient = (tripId: string) => {
                   <textarea
                     className="textarea h-24"
                     placeholder="Type here"
+                    value={deliveryInstructions}
+                    onChange={(e) => setDeliveryInstructions(e.target.value)}
                   ></textarea>
                 </fieldset>
               </div>
@@ -59,41 +129,53 @@ const TripPageClient = (tripId: string) => {
         <div className="row-span-2 bg-green-300"></div>
         <div className="col-span-2 bg-yellow-300">
           <div className="flex flex-row justify-evenly gap-4">
-            <div className="grid grid-cols-2">
-              <p>Length: </p>
-              <p>Width: </p>
-              <p>Height: </p>
-              <p>Payload: </p>
+            <div className="flex flex-col gap-4">
+              <div>
+                <p>
+                  Truck Info: {truck?.year} {truck?.make} {truck?.model}
+                </p>
+                <p> Truck Type: {truck?.truckType}</p>
+              </div>
+              <div className="grid grid-cols-2">
+                <p>Length: {truck?.length}m </p>
+                <p>Width: {truck?.width}m </p>
+                <p>Height: {truck?.height}m </p>
+                <p>Payload Capacity:{truck?.maxLoadCapacity}kg </p>
+              </div>
             </div>
-            <div>
-              <p> Truck Info</p>
-              <p> Truck Type</p>
 
+            <div>
               <fieldset className="fieldset">
                 <legend className="fieldset-legend">Cargo Weight</legend>
                 <input
                   type="number"
                   className="input"
                   placeholder="Type here"
+                  value={cargoWeight}
+                  onChange={(e) => setCargoWeight(Number(e.target.value))}
                 />
               </fieldset>
-            </div>
-            <div>
               <fieldset className="fieldset">
                 <legend className="$$fieldset-legend">Cargo Description</legend>
                 <textarea
                   className="textarea h-24"
                   placeholder="Type here"
+                  value={cargoDescription}
+                  onChange={(e) => setCargoDescription(e.target.value)}
                 ></textarea>
               </fieldset>
+            </div>
+            <div>
+              <p>Issuer Detials:</p>
+              <p>{tripIssuer?.name}</p>
+              <p>{tripIssuer?.email}</p>
             </div>
           </div>
         </div>
         <div className="bg-pink-400 p-4">
-          <p>Base Price:</p>
-          <p>Variable Price per KM:</p>
-          <p>Variable Price per KG:</p>
-          <p>Total:</p>
+          <p>Base Price: R{trip?.basePrice}</p>
+          <p>Variable Price: R{trip?.variablePrice} / KM</p>
+          <p>Total: {tripPrice}</p>
           {booked ? (
             <button className="btn btn-error">Cancel Booking</button>
           ) : (

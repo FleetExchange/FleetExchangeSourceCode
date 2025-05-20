@@ -8,6 +8,7 @@ import { CiRuler } from "react-icons/ci";
 import { FaLongArrowAltRight } from "react-icons/fa";
 import { BsTruck } from "react-icons/bs";
 import { BsBoxSeam } from "react-icons/bs";
+import Link from "next/link";
 
 export default function TripCard({ tripId }: { tripId: Id<"trip"> }) {
   const router = useRouter();
@@ -31,7 +32,7 @@ export default function TripCard({ tripId }: { tripId: Id<"trip"> }) {
           <div className="bg-neutral text-neutral-content w-8 rounded-full">
             <span className="text-xs">WT</span>
           </div>
-          <h3 className="text-sm">{tripOwner?.companyName}</h3>
+          <h3 className="text-sm">{tripOwner?.name}</h3>
         </div>
 
         <div className="flex justify-end badge badge-soft badge-success rounded-2xl">
@@ -108,12 +109,18 @@ export default function TripCard({ tripId }: { tripId: Id<"trip"> }) {
           </div>
         </div>
 
-        <button
-          onClick={() => router.push(`/event/${tripId}`)}
-          className="pointer-events-auto btn btn-primary"
+        <Link
+          href={{
+            pathname: "/trip",
+            query: {
+              tripId: tripId as string,
+            },
+          }}
         >
-          View Trip
-        </button>
+          <button className="pointer-events-auto btn btn-primary">
+            View Trip
+          </button>
+        </Link>
       </div>
     </div>
   );
