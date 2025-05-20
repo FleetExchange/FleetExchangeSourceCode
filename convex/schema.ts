@@ -26,12 +26,12 @@ export default defineSchema({
     purchasedAt: v.number(), // Date & time of purchase
     status: v.union(
       // Status of the trip
-      v.literal("AwaitingApproval"),
+      v.literal("Awaiting Confirmation"),
       v.literal("Booked"),
-      v.literal("Delivered"),
       v.literal("Dispatched"),
-      v.literal("Refunded"),
-      v.literal("Cancelled")
+      v.literal("Delivered"),
+      v.literal("Cancelled"),
+      v.literal("Refunded")
     ),
     paymentIntentId: v.optional(v.string()),
     amount: v.optional(v.number()), // Final amount of the sale

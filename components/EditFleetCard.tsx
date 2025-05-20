@@ -14,12 +14,7 @@ const openModal = () => {
 const EditFleetCard = () => {
   return (
     <>
-      <button
-        className="btn btn-soft bg-base-100 outline-none "
-        onClick={openModal}
-      >
-        Edit Fleet
-      </button>
+      <p onClick={openModal}>Edit Fleet</p>
     </>
   );
 };

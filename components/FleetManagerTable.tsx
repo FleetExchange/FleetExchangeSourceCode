@@ -128,13 +128,13 @@ const FleetManagerTable = () => {
       <div className="fixed top-[50px] flex w-full max-w-8xl flex-col p-8">
         {/** Action bar */}
         <div className="felx-row flex justify-between gap-2 bg-base-100 border-1 border-base-300 rounded-t-xl items-center px-5 py-2">
-          <div className="flex flex-row justify-start gap-4">
+          <div className="flex flex-row justify-start gap-4 items-center">
             {/* Search Bar */}
             <div>
               <label className="input">
                 <CiSearch />
                 <input
-                  className="input focus:outline-none focus:ring-0"
+                  className="input focus:ring-0 focus:outline-none"
                   type="search"
                   placeholder="Search"
                   value={searchTerm}
@@ -147,7 +147,7 @@ const FleetManagerTable = () => {
             <select
               defaultValue={userFleet}
               onChange={handleFleetChange}
-              className="select"
+              className="select focus:ring-none focus:outline-none"
             >
               {userFleets.map((fleet: { _id: string; fleetName: string }) => (
                 <option key={fleet._id} value={fleet._id}>
@@ -157,7 +157,7 @@ const FleetManagerTable = () => {
             </select>
             {/* Sorting Selector */}
             <select
-              className="select"
+              className="select focus:ring-none focus:outline-none"
               value={sortBy}
               onChange={(e) =>
                 setSortBy(
@@ -185,7 +185,7 @@ const FleetManagerTable = () => {
           </div>
 
           {/* Action Button */}
-          <div className="dropdown">
+          <div className="dropdown dropdown-end">
             <div tabIndex={0} role="button" className="btn btn-primary m-1">
               Actions
             </div>
@@ -200,9 +200,7 @@ const FleetManagerTable = () => {
                     query: { action: "create", truckId: "" },
                   }}
                 >
-                  <button className="btn btn-soft bg-base-100 outline-none">
-                    Create Truck
-                  </button>
+                  Create Truck
                 </Link>
               </li>
               <li>

@@ -41,6 +41,12 @@ const Sidebar = () => {
             <a className="text-primary">Trip Manager</a>
           </li>
           <li>
+            <a className="text-primary">My Trips</a>
+          </li>
+          <li>
+            <a className="text-primary">Booked Trips</a>
+          </li>
+          <li>
             <a className="text-primary">Create</a>
           </li>
           <hr />
