@@ -60,7 +60,7 @@ const EditTruckCard: React.FC<EditTruckCardProps> = ({ truckId }) => {
   });
 
   const deleteTruck = useMutation(api.truck.deleteTruck);
-  const deleeteTruckFromFleet = useMutation(api.fleet.removeTruckFromFleet);
+  const deleteTruckFromFleet = useMutation(api.fleet.removeTruckFromFleet);
   const handleDelete = async () => {
     const deletedTruckId = await deleteTruck({
       truckId: truckId as Id<"truck">,
@@ -71,7 +71,7 @@ const EditTruckCard: React.FC<EditTruckCardProps> = ({ truckId }) => {
       fleet.trucks.includes(truckId as Id<"truck">)
     )?._id;
     if (fleetId) {
-      await deleeteTruckFromFleet({
+      await deleteTruckFromFleet({
         fleetId: fleetId as Id<"fleet">,
         truckId: truckId as Id<"truck">,
       });
@@ -105,11 +105,11 @@ const EditTruckCard: React.FC<EditTruckCardProps> = ({ truckId }) => {
 
     // Check Registration Number
     // Check if the registration already exists
-    const registrationExists = allTrucks?.some((truck) => {
-      if (truck._id != truckId) {
-        truck.registration.toLowerCase() === registration.trim().toLowerCase();
-      }
-    });
+    const registrationExists = allTrucks?.some(
+      (truck) =>
+        truck._id !== truckForEdit?._id &&
+        truck.registration.toLowerCase() === registration.trim().toLowerCase()
+    );
 
     if (registrationExists) {
       alert("A truck with this registration already exists in your fleets.");
@@ -119,7 +119,7 @@ const EditTruckCard: React.FC<EditTruckCardProps> = ({ truckId }) => {
     // Edit Truck
     try {
       const editedTruckId = await editTruck({
-        truckId: truckId as Id<"truck">,
+        truckId: truckForEdit?._id as Id<"truck">,
         registration: registration.trim(),
         make: make.trim(),
         model: model.trim(),

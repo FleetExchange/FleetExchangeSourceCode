@@ -149,39 +149,44 @@ export const changeTruckFleet = mutation({
     userFleet: v.array(v.id("fleet")),
   },
   handler: async (ctx, { fleetId, truckId, userFleet }) => {
-    // Check if truck is in the "new" fleet
-    const newFleet = await ctx.db
+    // Find the current fleet that contains the truck
+    const currentFleet = await ctx.db
+      .query("fleet")
+      .collect()
+      .then((fleets) => fleets.find((fleet) => fleet.trucks.includes(truckId)));
+
+    // Get the target fleet
+    const targetFleet = await ctx.db
       .query("fleet")
       .filter((q) => q.eq(q.field("_id"), fleetId))
       .first();
 
-    // If no fleet is found, throw an error or handle it appropriately
-    if (!newFleet) {
-      throw new Error(`Fleet with ID ${fleetId} not found.`);
+    if (!targetFleet) {
+      throw new Error(`Target fleet with ID ${fleetId} not found.`);
     }
 
-    // If truck is in the fleet already, make no changes
-    if (newFleet.trucks.includes(truckId)) {
-      return;
+    // If truck is already in the target fleet, return early
+    if (targetFleet.trucks.includes(truckId)) {
+      return targetFleet._id;
     }
 
-    // Add the truck to the new fleet
-    await ctx.db.patch(newFleet._id, {
-      trucks: [...newFleet.trucks, truckId],
-    });
-
-    // Remove the truck from the old fleet
-    for (const fleet of userFleet) {
-      const existingFleet = await ctx.db
-        .query("fleet")
-        .filter((q) => q.eq(q.field("_id"), fleet))
-        .first();
-      if (existingFleet) {
-        await ctx.db.patch(existingFleet._id, {
-          trucks: existingFleet.trucks.filter((id) => id !== truckId),
+    try {
+      // First, remove the truck from its current fleet if it exists
+      if (currentFleet) {
+        await ctx.db.patch(currentFleet._id, {
+          trucks: currentFleet.trucks.filter((id) => id !== truckId),
         });
       }
+
+      // Then, add the truck to the new fleet
+      await ctx.db.patch(targetFleet._id, {
+        trucks: [...targetFleet.trucks, truckId],
+      });
+
+      return targetFleet._id;
+    } catch (error) {
+      console.error("Error changing truck fleet:", error);
+      throw new Error("Failed to change truck fleet");
     }
-    return newFleet._id;
   },
 });

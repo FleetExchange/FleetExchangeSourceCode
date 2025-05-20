@@ -87,22 +87,22 @@ export const editTruck = mutation({
     length: v.number(), // Length of the cargo area
     height: v.number(), // Height of cargo area
   },
-  handler: async (ctx, { truckId }) => {
+  handler: async (ctx, args) => {
     const truck = await ctx.db
       .query("truck")
-      .filter((q) => q.eq(q.field("_id"), truckId))
+      .filter((q) => q.eq(q.field("_id"), args.truckId))
       .first();
     if (truck) {
       await ctx.db.patch(truck._id, {
-        registration: truck.registration,
-        make: truck.make,
-        model: truck.model,
-        year: truck.year,
-        truckType: truck.truckType,
-        maxLoadCapacity: truck.maxLoadCapacity,
-        width: truck.width,
-        length: truck.length,
-        height: truck.height,
+        registration: args.registration.trim(),
+        make: args.make.trim(),
+        model: args.model.trim(),
+        year: args.year.trim(),
+        truckType: args.truckType,
+        maxLoadCapacity: args.maxLoadCapacity,
+        width: args.width,
+        length: args.length,
+        height: args.height,
       });
       return truck._id;
     }
