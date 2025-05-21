@@ -1,6 +1,6 @@
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
-import { useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import React, { useEffect, useState } from "react";
 import {
   GoogleMap,
@@ -13,6 +13,8 @@ import usePlacesAutocomplete, {
 } from "use-places-autocomplete";
 import { usePlacesWithRestrictions } from "@/hooks/usePlacesWithRestrictions";
 import { AddressAutocomplete } from "./AddressAutocomplete";
+import { log } from "console";
+import { useUser } from "@clerk/nextjs";
 type DirectionsResult = google.maps.DirectionsResult;
 
 interface TripPageClientProps {
@@ -20,6 +22,15 @@ interface TripPageClientProps {
 }
 
 const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
+  // Get the logged in user identity
+  const { user } = useUser();
+  // This is the Clerk user ID
+  const clerkId = user!.id;
+  // User Id in Convex
+  const userId = useQuery(api.users.getUserByClerkId, {
+    clerkId: clerkId,
+  })?._id;
+
   // Object of the trip being used
   const trip = useQuery(api.trip.getById, { tripId: tripId as Id<"trip"> });
   const truck = useQuery(api.truck.getTruckById, {
@@ -30,7 +41,7 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
   });
 
   // Consts for new trip data from client
-  const [booked, setBooked] = useState(false);
+  const [booked, setBooked] = useState(trip?.isBooked ?? false);
   const [pickupAddress, setPickupAddress] = useState("");
   const [pickupInstructions, setPickupInstructions] = useState("");
   const [deliveryAddress, setDeliveryAddress] = useState("");
@@ -38,7 +49,9 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
   const [cargoWeight, setCargoWeight] = useState<number>(0);
   const [cargoDescription, setCargoDescription] = useState("");
   const [directions, setDirections] = useState<DirectionsResult | null>(null);
-  const tripPrice = (trip?.basePrice ?? 0) + (trip?.variablePrice ?? 0);
+  const [distance, setDistance] = useState<number>(0);
+  const tripPrice =
+    (trip?.basePrice ?? 0) + (trip?.variablePrice ?? 0) * distance;
 
   // Format date and time
   const formatDateTime = (dateInput: string | number) => {
@@ -111,6 +124,79 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
     width: "100%",
     height: "600px",
     position: "relative" as const,
+  };
+
+  // Book event handler
+  const bookTrip = useMutation(api.trip.setTripBooked);
+  const purchaseTrip = useMutation(api.purchasetrip.createPurchaseTrip);
+
+  const handleBookTrip = async () => {
+    // Check if truck data is loaded
+    if (!truck) {
+      alert("Truck information is not available. Please try again.");
+      return;
+    }
+
+    // Validate all required fields
+    if (
+      !pickupAddress ||
+      !pickupInstructions ||
+      !deliveryAddress ||
+      !deliveryInstructions ||
+      !cargoDescription ||
+      (!cargoWeight && cargoWeight >= 0)
+    ) {
+      alert("Please fill all fields");
+      return;
+    }
+
+    // Make sure cargo weight is below the max load capacity
+    // Now TypeScript knows truck is defined
+    if (cargoWeight > truck.maxLoadCapacity) {
+      alert("The cargo weight exceeds the truck's maximum load capacity.");
+      return;
+    }
+
+    try {
+      // Set trip to booked
+      await bookTrip({ tripId: trip?._id as Id<"trip"> });
+      setBooked(true);
+      // Create trip purchase object
+      await purchaseTrip({
+        tripId: trip?._id as Id<"trip">,
+        userId: userId as Id<"users">,
+        amount: tripPrice,
+        freightNotes: cargoDescription,
+        logisticNotes: "${pickupInstructions} ${deliveryInstructions}",
+      });
+
+      alert("Trip booked successfully!");
+      // Redirect to fleet manager page
+      window.location.href = "/discover";
+    } catch (error) {
+      alert("Failed to book trip. Please try again.");
+    }
+  };
+
+  // Cancel event handler
+  const cancelTrip = useMutation(api.trip.setTripCancelled);
+  const deletePurchaseTrip = useMutation(api.purchasetrip.deletePurchaseTrip);
+  const handleCancelTrip = async () => {
+    // Confrim cancellation
+
+    try {
+      // Set trip to cancelled
+      await cancelTrip({ tripId: trip?._id as Id<"trip"> });
+      setBooked(false);
+      await deletePurchaseTrip({
+        tripId: trip?._id as Id<"trip">,
+      });
+      alert("Trip cancelled successfully!");
+      // Redirect to fleet manager page
+      window.location.href = "/discover";
+    } catch (error) {
+      alert("Failed to cancel trip. Please try again.");
+    }
   };
 
   return (
@@ -232,6 +318,12 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
                   callback={(response, status) => {
                     if (response !== null && status === "OK") {
                       setDirections(response);
+                      // Get distance in kilometers (converts from meters)
+                      const distanceInKm =
+                        response.routes?.[0]?.legs?.[0]?.distance?.value != null
+                          ? response.routes[0].legs[0].distance.value / 1000
+                          : 0;
+                      setDistance(distanceInKm);
                     }
                   }}
                 />
@@ -295,12 +387,20 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
         </div>
         <div className="bg-pink-400 p-4">
           <p>Base Price: R{trip?.basePrice}</p>
-          <p>Variable Price: R{trip?.variablePrice} / KM</p>
-          <p>Total: {tripPrice}</p>
-          {booked ? (
-            <button className="btn btn-error">Cancel Booking</button>
+          <p>Distance: {distance.toFixed(2)} km</p>
+          <p>Variable Price: R{trip?.variablePrice} / km</p>
+          <p>Total: R{tripPrice.toFixed(2)}</p>
+          {/**If the owner of the trip */}
+          {userId === trip?.userId ? (
+            <p> You are the trip issuer</p>
+          ) : booked ? (
+            <button className="btn btn-error" onClick={handleCancelTrip}>
+              Cancel Booking
+            </button>
           ) : (
-            <button className="btn btn-primary">Book Trip</button>
+            <button className="btn btn-primary" onClick={handleBookTrip}>
+              Book Trip
+            </button>
           )}
         </div>
       </div>

@@ -34,7 +34,7 @@ export default defineSchema({
       v.literal("Refunded")
     ),
     paymentIntentId: v.optional(v.string()),
-    amount: v.optional(v.number()), // Final amount of the sale
+    amount: v.number(), // Final amount of the sale
     logisticNotes: v.string(), // Any notes for the transporting company relating to the pickup and delivery of the freight
     freightNotes: v.string(), // Description of the freight
   }),

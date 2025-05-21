@@ -27,7 +27,10 @@ export const getTrip = query({
     }),
   },
   handler: async (ctx, { searchTerm, filterTerm }) => {
-    let trips = await ctx.db.query("trip").collect();
+    let trips = await ctx.db
+      .query("trip")
+      .filter((q) => q.eq(q.field("isBooked"), false))
+      .collect();
 
     if (searchTerm.from) {
       trips = trips.filter((trip) =>
@@ -180,5 +183,39 @@ export const getById = query({
   args: { tripId: v.id("trip") },
   handler: async (ctx, { tripId }) => {
     return await ctx.db.get(tripId);
+  },
+});
+
+// Set trip booked
+export const setTripBooked = mutation({
+  args: { tripId: v.id("trip") },
+  handler: async (ctx, { tripId }) => {
+    const trip = await ctx.db.get(tripId);
+    if (!trip) {
+      throw new Error("Trip not found");
+    }
+
+    await ctx.db.patch(tripId, {
+      isBooked: true,
+    });
+
+    return trip._id;
+  },
+});
+
+// Set trip cancelled
+export const setTripCancelled = mutation({
+  args: { tripId: v.id("trip") },
+  handler: async (ctx, { tripId }) => {
+    const trip = await ctx.db.get(tripId);
+    if (!trip) {
+      throw new Error("Trip not found");
+    }
+
+    await ctx.db.patch(tripId, {
+      isBooked: false,
+    });
+
+    return trip._id;
   },
 });
