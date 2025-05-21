@@ -2,14 +2,18 @@ import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useQuery } from "convex/react";
 import React, { useEffect, useState } from "react";
-import { useLoadScript } from "@react-google-maps/api";
+import {
+  GoogleMap,
+  DirectionsService,
+  DirectionsRenderer,
+} from "@react-google-maps/api";
 import usePlacesAutocomplete, {
   getGeocode,
   getLatLng,
 } from "use-places-autocomplete";
-import { Combobox } from "@headlessui/react";
 import { usePlacesWithRestrictions } from "@/hooks/usePlacesWithRestrictions";
 import { AddressAutocomplete } from "./AddressAutocomplete";
+type DirectionsResult = google.maps.DirectionsResult;
 
 interface TripPageClientProps {
   tripId: string;
@@ -33,6 +37,7 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
   const [deliveryInstructions, setDeliveryInstructions] = useState("");
   const [cargoWeight, setCargoWeight] = useState<number>(0);
   const [cargoDescription, setCargoDescription] = useState("");
+  const [directions, setDirections] = useState<DirectionsResult | null>(null);
   const tripPrice = (trip?.basePrice ?? 0) + (trip?.variablePrice ?? 0);
 
   // Format date and time
@@ -63,12 +68,6 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
   //  Google Maps API Section
   //
   //
-  const libraries = ["places"];
-  const { isLoaded } = useLoadScript({
-    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY as string,
-    libraries: libraries as ["places"],
-  });
-
   // First, add these helper functions at the top of your component
   const getCityCoordinates = async (cityName: string) => {
     try {
@@ -106,6 +105,13 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
   const delivery = usePlacesWithRestrictions({
     cityName: trip?.destinationCity,
   });
+
+  // First, add this style to ensure the map container is properly sized
+  const mapContainerStyle = {
+    width: "100%",
+    height: "600px",
+    position: "relative" as const,
+  };
 
   return (
     <>
@@ -190,7 +196,58 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
             </div>
           </div>
         </div>
-        <div className="row-span-2 bg-green-300"></div>
+        <div className="row-span-2 bg-green-300">
+          <GoogleMap
+            mapContainerStyle={mapContainerStyle}
+            options={{
+              zoomControl: true,
+              streetViewControl: true,
+              mapTypeControl: true,
+              fullscreenControl: true,
+              gestureHandling: "greedy", // Changed from cooperative to greedy
+              clickableIcons: false,
+              mapTypeId: google.maps.MapTypeId.ROADMAP,
+            }}
+            zoom={7}
+            center={pickupCoords}
+            onClick={(e) => {
+              // Add click handler if needed
+            }}
+            onLoad={(map) => {
+              // Trigger a resize event after the map loads
+              window.google.maps.event.trigger(map, "resize");
+            }}
+          >
+            {(trip?.originCity || pickupAddress) &&
+              (trip?.destinationCity || deliveryAddress) && (
+                <DirectionsService
+                  options={{
+                    origin:
+                      pickupAddress || `${trip?.originCity}, South Africa`,
+                    destination:
+                      deliveryAddress ||
+                      `${trip?.destinationCity}, South Africa`,
+                    travelMode: google.maps.TravelMode.DRIVING,
+                  }}
+                  callback={(response, status) => {
+                    if (response !== null && status === "OK") {
+                      setDirections(response);
+                    }
+                  }}
+                />
+              )}
+            {directions && (
+              <DirectionsRenderer
+                options={{
+                  suppressMarkers: false,
+                  preserveViewport: false,
+                  draggable: true, // Allow route dragging
+                }}
+                directions={directions}
+              />
+            )}
+          </GoogleMap>
+        </div>
         <div className="col-span-2 bg-yellow-300">
           <div className="flex flex-row justify-evenly gap-4">
             <div className="flex flex-col gap-4">
