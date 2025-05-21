@@ -6,6 +6,7 @@ import { ConvexClientProvider } from "@/components/ConvexClientProvider";
 import SyncUserWithConvex from "@/components/SyncUserWithConvex";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
+import Maps from "@/components/Maps";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,6 +36,7 @@ export default function RootLayout({
             <Header />
             <Sidebar />
             <SyncUserWithConvex />
+            <Maps />
             {children}
           </ConvexClientProvider>
         </ClerkProvider>

@@ -1,7 +1,15 @@
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useQuery } from "convex/react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useLoadScript } from "@react-google-maps/api";
+import usePlacesAutocomplete, {
+  getGeocode,
+  getLatLng,
+} from "use-places-autocomplete";
+import { Combobox } from "@headlessui/react";
+import { usePlacesWithRestrictions } from "@/hooks/usePlacesWithRestrictions";
+import { AddressAutocomplete } from "./AddressAutocomplete";
 
 interface TripPageClientProps {
   tripId: string;
@@ -51,6 +59,54 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
     ? formatDateTime(trip.arrivalDate)
     : null;
 
+  //
+  //  Google Maps API Section
+  //
+  //
+  const libraries = ["places"];
+  const { isLoaded } = useLoadScript({
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY as string,
+    libraries: libraries as ["places"],
+  });
+
+  // First, add these helper functions at the top of your component
+  const getCityCoordinates = async (cityName: string) => {
+    try {
+      const results = await getGeocode({
+        address: `${cityName}, South Africa`,
+      });
+      return getLatLng(results[0]);
+    } catch (error) {
+      console.error("Error getting coordinates for city:", error);
+      return { lat: -26.2041, lng: 28.0473 }; // Fallback to Johannesburg
+    }
+  };
+
+  // Update the Places Autocomplete setup
+  const [pickupCoords, setPickupCoords] = useState({
+    lat: -26.2041,
+    lng: 28.0473,
+  });
+  const [deliveryCoords, setDeliveryCoords] = useState({
+    lat: -26.2041,
+    lng: 28.0473,
+  });
+
+  // Add this effect to update coordinates when trip data loads
+  useEffect(() => {
+    if (trip?.originCity) {
+      getCityCoordinates(trip.originCity).then(setPickupCoords);
+    }
+    if (trip?.destinationCity) {
+      getCityCoordinates(trip.destinationCity).then(setDeliveryCoords);
+    }
+  }, [trip?.originCity, trip?.destinationCity]);
+
+  const pickup = usePlacesWithRestrictions({ cityName: trip?.originCity });
+  const delivery = usePlacesWithRestrictions({
+    cityName: trip?.destinationCity,
+  });
+
   return (
     <>
       <div className="grid grid-cols-3 grid-rows-3 gap-4 w-full h-full">
@@ -70,13 +126,17 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
                   )}
                 </p>
                 <fieldset className="fieldset">
-                  <legend className="fieldset-legend">Pickup Address?</legend>
-                  <input
-                    type="text"
-                    className="input"
-                    placeholder="Type here"
+                  <legend className="fieldset-legend">Pickup Address</legend>
+                  <AddressAutocomplete
                     value={pickupAddress}
-                    onChange={(e) => setPickupAddress(e.target.value)}
+                    onChange={setPickupAddress}
+                    ready={pickup.ready}
+                    inputValue={pickup.value}
+                    onInputChange={pickup.setValue}
+                    suggestions={pickup.suggestions}
+                    status={pickup.status}
+                    clearSuggestions={pickup.clearSuggestions}
+                    label="Pickup Address"
                   />
                 </fieldset>
                 <fieldset className="fieldset">
@@ -102,13 +162,17 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
                   )}
                 </p>
                 <fieldset className="fieldset">
-                  <legend className="fieldset-legend">Delivery Address?</legend>
-                  <input
-                    type="text"
-                    className="input"
-                    placeholder="Type here"
+                  <legend className="fieldset-legend">Delivery Address</legend>
+                  <AddressAutocomplete
                     value={deliveryAddress}
-                    onChange={(e) => setDeliveryAddress(e.target.value)}
+                    onChange={setDeliveryAddress}
+                    ready={delivery.ready}
+                    inputValue={delivery.value}
+                    onInputChange={delivery.setValue}
+                    suggestions={delivery.suggestions}
+                    status={delivery.status}
+                    clearSuggestions={delivery.clearSuggestions}
+                    label="Delivery Address"
                   />
                 </fieldset>
                 <fieldset className="fieldset">
