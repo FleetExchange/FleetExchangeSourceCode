@@ -200,25 +200,35 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
   };
 
   return (
-    <>
-      <div className="grid grid-cols-3 grid-rows-3 gap-4 w-full h-full">
-        <div className="row-span-2 col-span-2 bg-blue-400">
-          <div className="flex flex-col gap-4 p-2">
-            <h1>
+    <div className="container mx-auto p-6">
+      <div className="grid grid-cols-3 grid-rows-3 gap-6">
+        {/* Main Trip Information Section */}
+        <div className="row-span-2 col-span-2 bg-base-200 rounded-lg shadow-lg">
+          <div className="p-6 space-y-6">
+            <h1 className="text-3xl font-semibold text-base-content">
               Trip: {trip?.originCity} to {trip?.destinationCity}
             </h1>
-            <div className="flex flex-row gap-2 justify-evenly">
-              <div>
-                <h2>{trip?.originCity}</h2>
-                <p>
-                  {departureDateTime && (
-                    <>
-                      {departureDateTime.date} at {departureDateTime.time}
-                    </>
-                  )}
-                </p>
-                <fieldset className="fieldset">
-                  <legend className="fieldset-legend">Pickup Address</legend>
+
+            <div className="flex justify-between gap-8">
+              {/* Pickup Section */}
+              <div className="flex-1 space-y-4">
+                <div className="bg-base-100 p-4 rounded-lg">
+                  <h2 className="text-xl font-semibold mb-2">
+                    {trip?.originCity}
+                  </h2>
+                  <p className="text-base-content/80">
+                    {departureDateTime && (
+                      <span>
+                        {departureDateTime.date} at {departureDateTime.time}
+                      </span>
+                    )}
+                  </p>
+                </div>
+
+                <fieldset className="space-y-2">
+                  <legend className="text-base font-medium">
+                    Pickup Address
+                  </legend>
                   <AddressAutocomplete
                     value={pickupAddress}
                     onChange={setPickupAddress}
@@ -231,30 +241,41 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
                     label="Pickup Address"
                   />
                 </fieldset>
-                <fieldset className="fieldset">
-                  <legend className="$$fieldset-legend">
+
+                <fieldset className="space-y-2">
+                  <legend className="text-base font-medium">
                     Pickup Instructions
                   </legend>
                   <textarea
-                    className="textarea h-24"
-                    placeholder="Type here"
+                    className="textarea textarea-bordered w-full h-24 focus:outline-none focus:ring-0"
+                    placeholder="Enter pickup instructions"
                     value={pickupInstructions}
                     onChange={(e) => setPickupInstructions(e.target.value)}
-                  ></textarea>
+                  />
                 </fieldset>
               </div>
-              <div className="border-1 border-base-300"></div>
-              <div>
-                <h2>{trip?.destinationCity}</h2>
-                <p>
-                  {arrivalDateTime && (
-                    <>
-                      {arrivalDateTime.date} at {arrivalDateTime.time}
-                    </>
-                  )}
-                </p>
-                <fieldset className="fieldset">
-                  <legend className="fieldset-legend">Delivery Address</legend>
+
+              <div className="w-px bg-base-300" />
+
+              {/* Delivery Section */}
+              <div className="flex-1 space-y-4">
+                <div className="bg-base-100 p-4 rounded-lg">
+                  <h2 className="text-xl font-semibold mb-2">
+                    {trip?.destinationCity}
+                  </h2>
+                  <p className="text-base-content/80">
+                    {arrivalDateTime && (
+                      <span>
+                        {arrivalDateTime.date} at {arrivalDateTime.time}
+                      </span>
+                    )}
+                  </p>
+                </div>
+
+                <fieldset className="space-y-2">
+                  <legend className="text-base font-medium">
+                    Delivery Address
+                  </legend>
                   <AddressAutocomplete
                     value={deliveryAddress}
                     onChange={setDeliveryAddress}
@@ -267,22 +288,25 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
                     label="Delivery Address"
                   />
                 </fieldset>
-                <fieldset className="fieldset">
-                  <legend className="$$fieldset-legend">
+
+                <fieldset className="space-y-2">
+                  <legend className="text-base font-medium">
                     Delivery Instructions
                   </legend>
                   <textarea
-                    className="textarea h-24"
-                    placeholder="Type here"
+                    className="textarea textarea-bordered w-full h-24 focus:outline-none focus:ring-0"
+                    placeholder="Enter delivery instructions"
                     value={deliveryInstructions}
                     onChange={(e) => setDeliveryInstructions(e.target.value)}
-                  ></textarea>
+                  />
                 </fieldset>
               </div>
             </div>
           </div>
         </div>
-        <div className="row-span-2 bg-green-300">
+
+        {/* Map Section */}
+        <div className="row-span-2 bg-base-200 rounded-lg shadow-lg overflow-hidden">
           <GoogleMap
             mapContainerStyle={mapContainerStyle}
             options={{
@@ -340,71 +364,108 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
             )}
           </GoogleMap>
         </div>
-        <div className="col-span-2 bg-yellow-300">
-          <div className="flex flex-row justify-evenly gap-4">
-            <div className="flex flex-col gap-4">
-              <div>
-                <p>
-                  Truck Info: {truck?.year} {truck?.make} {truck?.model}
+
+        {/* Trip Details Section */}
+        <div className="col-span-2 bg-base-200 rounded-lg shadow-lg p-6">
+          <div className="flex justify-between gap-8">
+            {/* Truck Information */}
+            <div className="space-y-4">
+              <div className="bg-base-100 p-4 rounded-lg">
+                <h3 className="text-lg font-semibold mb-2">Truck Details</h3>
+                <p className="mb-2">
+                  {truck?.year} {truck?.make} {truck?.model} -{" "}
+                  {truck?.truckType}
                 </p>
-                <p> Truck Type: {truck?.truckType}</p>
-              </div>
-              <div className="grid grid-cols-2">
-                <p>Length: {truck?.length}m </p>
-                <p>Width: {truck?.width}m </p>
-                <p>Height: {truck?.height}m </p>
-                <p>Payload Capacity:{truck?.maxLoadCapacity}kg </p>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <p>Length: {truck?.length}m</p>
+                  <p>Width: {truck?.width}m</p>
+                  <p>Height: {truck?.height}m</p>
+                  <p>Max Load: {truck?.maxLoadCapacity}kg</p>
+                </div>
               </div>
             </div>
 
-            <div>
-              <fieldset className="fieldset">
-                <legend className="fieldset-legend">Cargo Weight</legend>
+            {/* Cargo Information */}
+            <div className="space-y-4">
+              <fieldset className="space-y-2">
+                <legend className="text-base font-medium">
+                  Cargo Weight (kg)
+                </legend>
                 <input
                   type="number"
-                  className="input"
-                  placeholder="Type here"
+                  className="input input-bordered w-full focus:outline-none focus:ring-0"
+                  placeholder="Enter cargo weight"
                   value={cargoWeight}
                   onChange={(e) => setCargoWeight(Number(e.target.value))}
                 />
               </fieldset>
-              <fieldset className="fieldset">
-                <legend className="$$fieldset-legend">Cargo Description</legend>
+
+              <fieldset className="space-y-2">
+                <legend className="text-base font-medium">
+                  Cargo Description
+                </legend>
                 <textarea
-                  className="textarea h-24"
-                  placeholder="Type here"
+                  className="textarea textarea-bordered w-full h-24 focus:outline-none focus:ring-0"
+                  placeholder="Describe your cargo"
                   value={cargoDescription}
                   onChange={(e) => setCargoDescription(e.target.value)}
-                ></textarea>
+                />
               </fieldset>
             </div>
-            <div>
-              <p>Issuer Detials:</p>
-              <p>{tripIssuer?.name}</p>
-              <p>{tripIssuer?.email}</p>
+
+            {/* Issuer Details */}
+            <div className="bg-base-100 p-4 rounded-lg">
+              <h3 className="text-lg font-semibold mb-2">Trip Issuer</h3>
+              <p className="mb-1">{tripIssuer?.name}</p>
+              <p className="text-base-content/80">{tripIssuer?.email}</p>
             </div>
           </div>
         </div>
-        <div className="bg-pink-400 p-4">
-          <p>Base Price: R{trip?.basePrice}</p>
-          <p>Distance: {distance.toFixed(2)} km</p>
-          <p>Variable Price: R{trip?.variablePrice} / km</p>
-          <p>Total: R{tripPrice.toFixed(2)}</p>
-          {/**If the owner of the trip */}
-          {userId === trip?.userId ? (
-            <p> You are the trip issuer</p>
-          ) : booked ? (
-            <button className="btn btn-error" onClick={handleCancelTrip}>
-              Cancel Booking
-            </button>
-          ) : (
-            <button className="btn btn-primary" onClick={handleBookTrip}>
-              Book Trip
-            </button>
-          )}
+
+        {/* Price and Action Section */}
+        <div className="bg-base-200 rounded-lg shadow-lg p-6">
+          <div className="space-y-2 mb-4">
+            <p className="flex justify-between">
+              <span>Base Price:</span>
+              <span className="font-semibold">R{trip?.basePrice}</span>
+            </p>
+            <p className="flex justify-between">
+              <span>Distance:</span>
+              <span>{distance.toFixed(2)} km</span>
+            </p>
+            <p className="flex justify-between">
+              <span>Rate per km:</span>
+              <span>R{trip?.variablePrice}</span>
+            </p>
+            <div className="border-t border-base-300 my-2" />
+            <p className="flex justify-between text-lg font-semibold">
+              <span>Total:</span>
+              <span>R{tripPrice.toFixed(2)}</span>
+            </p>
+          </div>
+
+          <div className="flex justify-center">
+            {userId === trip?.userId ? (
+              <p className="text-base-content/80">You are the trip issuer</p>
+            ) : booked ? (
+              <button
+                className="btn btn-error btn-wide"
+                onClick={handleCancelTrip}
+              >
+                Cancel Booking
+              </button>
+            ) : (
+              <button
+                className="btn btn-primary btn-wide"
+                onClick={handleBookTrip}
+              >
+                Book Trip
+              </button>
+            )}
+          </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

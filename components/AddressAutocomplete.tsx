@@ -35,7 +35,7 @@ export const AddressAutocomplete = ({
       <Combobox value={value} onChange={handleSelect}>
         <div className="relative">
           <Combobox.Input
-            className="input w-full"
+            className="input input-bordered w-full focus:outline-none focus:ring-0"
             placeholder="Type address"
             value={inputValue}
             onChange={(e) => onInputChange(e.target.value)}
