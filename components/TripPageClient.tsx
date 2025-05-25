@@ -13,7 +13,6 @@ import usePlacesAutocomplete, {
 } from "use-places-autocomplete";
 import { usePlacesWithRestrictions } from "@/hooks/usePlacesWithRestrictions";
 import { AddressAutocomplete } from "./AddressAutocomplete";
-import { log } from "console";
 import { useUser } from "@clerk/nextjs";
 type DirectionsResult = google.maps.DirectionsResult;
 
@@ -52,6 +51,13 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
   const [distance, setDistance] = useState<number>(0);
   const tripPrice =
     (trip?.basePrice ?? 0) + (trip?.variablePrice ?? 0) * distance;
+
+  // Add after your other useEffect
+  useEffect(() => {
+    if (trip?.isBooked !== undefined) {
+      setBooked(trip.isBooked);
+    }
+  }, [trip?.isBooked]);
 
   // Format date and time
   const formatDateTime = (dateInput: string | number) => {
@@ -129,6 +135,7 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
   // Book event handler
   const bookTrip = useMutation(api.trip.setTripBooked);
   const purchaseTrip = useMutation(api.purchasetrip.createPurchaseTrip);
+  const setTripAdresses = useMutation(api.trip.setTripAddresses);
 
   const handleBookTrip = async () => {
     // Check if truck data is loaded
@@ -161,6 +168,12 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
       // Set trip to booked
       await bookTrip({ tripId: trip?._id as Id<"trip"> });
       setBooked(true);
+      // Update trips origin and destination addresses
+      await setTripAdresses({
+        tripId: trip?._id as Id<"trip">,
+        originAdress: pickupAddress,
+        destinationAddress: deliveryAddress,
+      });
       // Create trip purchase object
       await purchaseTrip({
         tripId: trip?._id as Id<"trip">,

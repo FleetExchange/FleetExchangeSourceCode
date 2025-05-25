@@ -203,6 +203,28 @@ export const setTripBooked = mutation({
   },
 });
 
+// Set trip adresses
+export const setTripAddresses = mutation({
+  args: {
+    tripId: v.id("trip"),
+    originAdress: v.string(),
+    destinationAddress: v.string(),
+  },
+  handler: async (ctx, { tripId, originAdress, destinationAddress }) => {
+    const trip = await ctx.db.get(tripId);
+    if (!trip) {
+      throw new Error("Trip not found");
+    }
+
+    await ctx.db.patch(tripId, {
+      originAddress: originAdress,
+      destinationAddress: destinationAddress,
+    });
+
+    return trip._id;
+  },
+});
+
 // Set trip cancelled
 export const setTripCancelled = mutation({
   args: { tripId: v.id("trip") },
@@ -217,5 +239,16 @@ export const setTripCancelled = mutation({
     });
 
     return trip._id;
+  },
+});
+
+// Get trip by Id array
+export const getTruckByIdArray = query({
+  args: {
+    tripIds: v.array(v.id("trip")),
+  },
+  handler: async (ctx, { tripIds }) => {
+    const trips = await Promise.all(tripIds.map((id) => ctx.db.get(id)));
+    return trips.filter((trip) => trip !== null); // Remove any nulls if trips were deleted
   },
 });

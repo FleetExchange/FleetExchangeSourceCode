@@ -44,7 +44,9 @@ const Sidebar = () => {
             <a className="text-primary">My Trips</a>
           </li>
           <li>
-            <a className="text-primary">Booked Trips</a>
+            <Link href="/myBookings" className="text-primary">
+              My Bookings
+            </Link>
           </li>
           <li>
             <a className="text-primary">Create</a>

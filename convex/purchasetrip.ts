@@ -44,3 +44,15 @@ export const deletePurchaseTrip = mutation({
     return true;
   },
 });
+
+export const getPurchaseTripById = query({
+  args: { userId: v.id("users") },
+  handler: async (ctx, { userId }) => {
+    const purchaseTrips = await ctx.db
+      .query("purchaseTrip")
+      .filter((q) => q.eq(q.field("userId"), userId))
+      .collect();
+
+    return purchaseTrips;
+  },
+});
