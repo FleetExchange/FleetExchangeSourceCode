@@ -243,7 +243,7 @@ export const setTripCancelled = mutation({
 });
 
 // Get trip by Id array
-export const getTruckByIdArray = query({
+export const getTripByIdArray = query({
   args: {
     tripIds: v.array(v.id("trip")),
   },

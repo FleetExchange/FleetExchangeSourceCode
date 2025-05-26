@@ -12,9 +12,6 @@ import NewFleetModal from "./NewFleetModal";
 import EditFleetCard from "./EditFleetCard";
 import EditFleetModal from "./EditFleetModal";
 import Link from "next/link";
-import { action } from "@/convex/_generated/server";
-
-type SortOption = "registration" | "payload" | "length" | "width" | "height";
 
 const FleetManagerTable = () => {
   // Get the logged in user identity
