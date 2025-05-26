@@ -111,7 +111,7 @@ export default function TripCard({ tripId }: { tripId: Id<"trip"> }) {
 
         <Link
           href={{
-            pathname: "/trip",
+            pathname: "/tripClient",
             query: {
               tripId: tripId as string,
             },

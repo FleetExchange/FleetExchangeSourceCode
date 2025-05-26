@@ -10,17 +10,9 @@ import { useState } from "react";
 
 type SortOption = "Price Asc" | "Price Desc" | "Date Asc" | "Date Desc";
 
-const MyBookedTripsTable = () => {
+const MyUnbookedTripsTable = () => {
   // define all states for filtering and sorting
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusSelection, setStatusSelection] = useState<
-    | "Awaiting Confirmation"
-    | "Booked"
-    | "Dispatched"
-    | "Delivered"
-    | "Cancelled"
-    | "Refunded"
-  >("Awaiting Confirmation");
   const [pastOrUpcoming, setPastOrFuture] = useState<
     "All Trips" | "Upcomming Trips" | "Past Trips"
   >("All Trips");
@@ -39,39 +31,27 @@ const MyBookedTripsTable = () => {
     clerkId: user?.id ?? "skip",
   })?._id;
 
-  // Get all the trips that belongs to the user and that are booked
+  // Get all the trips that belongs to the user
   const userTrips = useQuery(api.trip.getTripsByIssuerId, {
     issuerId: userId ?? "skip",
   });
+  // Only process unbooked trips if we have userTrips
+  const unbookedTrips =
+    userTrips?.filter((trip) => trip.isBooked === false) ?? [];
 
-  // Only process booked trips if we have userTrips
-  const bookedTrips = userTrips?.filter((trip) => trip.isBooked === true) ?? [];
-
-  // Get all tripIds from the booked Trips
-  const bookedTripIds = bookedTrips.map((booking) => booking._id as Id<"trip">);
-
-  // Get all the purchaseTrips that have the bookedTripIds
-  const purchasedTrips = useQuery(api.purchasetrip.getPurchaseTripByIdArray, {
-    tripIds: bookedTripIds.length > 0 ? bookedTripIds : [],
-  });
-
-  // Get all the trucks from the booked trips
-  const bookedTrucks = bookedTrips.map((trip) => trip.truckId);
+  // Get all the trucks from the user trips
+  const userTripTrucks = (unbookedTrips ?? []).map((trip) => trip.truckId);
   // Get all the trucks by a array of truck IDs
   const trucks = useQuery(api.truck.getTruckByIdArray, {
-    truckIds: bookedTrucks.length > 0 ? bookedTrucks : [],
+    truckIds: userTripTrucks.length > 0 ? userTripTrucks : [],
   });
 
-  if (!userTrips || !purchasedTrips) {
+  if (!userTrips) {
     return <div className="p-4">Loading trips...</div>;
   }
 
   // Add this filtering function before the return statement
-  const filteredBookings = bookedTrips?.filter((trip) => {
-    const purchase = purchasedTrips?.find((t) => t.tripId === trip._id);
-
-    if (!purchase) return false;
-
+  const filteredTrips = unbookedTrips?.filter((trip) => {
     // Filter by past or upcoming trips
     const currentDate = new Date();
     if (pastOrUpcoming === "Upcomming Trips") {
@@ -86,24 +66,18 @@ const MyBookedTripsTable = () => {
 
     const searchString = searchTerm.toLowerCase();
     return (
-      (trip.originCity?.toLowerCase().includes(searchString) ||
-        trip.destinationCity?.toLowerCase().includes(searchString)) &&
-      purchase.status === statusSelection
+      trip.originCity?.toLowerCase().includes(searchString) ||
+      trip.destinationCity?.toLowerCase().includes(searchString)
     );
   });
 
   // Sort the filtered bookings based on the selected sort option
-  const sortedAndFilteredBookings = filteredBookings?.sort((a, b) => {
-    const tripA = purchasedTrips.find((t) => t.tripId === a._id);
-    const tripB = purchasedTrips?.find((t) => t.tripId === b._id);
-
-    if (!tripA || !tripB) return 0;
-
+  const sortedAndFilteredTrips = filteredTrips?.sort((a, b) => {
     switch (sortBy) {
       case "Price Asc":
-        return tripA.amount - tripB.amount;
+        return a.basePrice - b.basePrice;
       case "Price Desc":
-        return tripB.amount - tripA.amount;
+        return b.basePrice - a.basePrice;
       case "Date Asc":
         return (a.departureDate || 0) - (b.departureDate || 0);
       case "Date Desc":
@@ -116,7 +90,7 @@ const MyBookedTripsTable = () => {
   return (
     <>
       <div className="fixed top-[50px] flex w-full max-w-8xl flex-col p-8">
-        <p>My Trips that are booked</p>
+        <p>My Trips that are not Booked</p>
         {/** Action bar */}
         <div className="felx-row flex justify-between gap-2 bg-base-100 border-1 border-base-300 rounded-t-xl items-center px-5 py-2">
           <div className="flex flex-row justify-start gap-4 items-center">
@@ -134,31 +108,6 @@ const MyBookedTripsTable = () => {
               </label>
             </div>
 
-            {/** Status Selection */}
-            <select
-              className="select focus:ring-none focus:outline-none"
-              value={statusSelection}
-              onChange={(e) =>
-                setStatusSelection(
-                  e.target.value as
-                    | "Awaiting Confirmation"
-                    | "Booked"
-                    | "Dispatched"
-                    | "Delivered"
-                    | "Cancelled"
-                    | "Refunded"
-                )
-              }
-            >
-              <option value="Awaiting Confirmation">
-                Awaiting Confirmation
-              </option>
-              <option value="Booked">Booked</option>
-              <option value="Dispatched">Dispatched</option>
-              <option value="Delivered">Delivered</option>
-              <option value="Cancelled">Cancelled</option>
-              <option value="Refunded">Refunded</option>
-            </select>
             {/** Past/Upcomming */}
             <select
               className="select focus:ring-none focus:outline-none"
@@ -203,35 +152,30 @@ const MyBookedTripsTable = () => {
                   <th>Departure Date</th>
                   <th>Arrival Date</th>
                   <th>Truck</th>
-                  <th>Amount</th>
-                  <th>Status</th>
+                  <th>Base Price</th>
                   <th></th>
                 </tr>
               </thead>
               {/* Table Body */}
               <tbody>
-                {sortedAndFilteredBookings?.map((booking, index) => {
-                  const purchase = purchasedTrips?.find(
-                    (t) => t.tripId === booking._id
-                  );
-                  const truck = trucks?.find((t) => t._id === booking.truckId);
+                {sortedAndFilteredTrips?.map((trip, index) => {
+                  const truck = trucks?.find((t) => t._id === trip.truckId);
 
                   return (
-                    <tr key={booking._id} className="bg-base-100">
+                    <tr key={trip._id} className="bg-base-100">
                       <th>{index + 1}</th>
-                      <td>{booking.originCity}</td>
-                      <td>{booking.destinationCity}</td>
-                      <td>{formatDate(booking.departureDate)}</td>
-                      <td>{formatDate(booking.arrivalDate)}</td>
+                      <td>{trip.originCity}</td>
+                      <td>{trip.destinationCity}</td>
+                      <td>{formatDate(trip.departureDate)}</td>
+                      <td>{formatDate(trip.arrivalDate)}</td>
                       <td>{truck?.registration}</td>
-                      <td>{purchase?.amount}</td>
-                      <td>{purchase?.status}</td>
+                      <td>{trip?.basePrice}</td>
 
                       <td>
                         <Link
                           href={{
                             pathname: "/tripOwner",
-                            query: { tripId: booking._id as string },
+                            query: { tripId: trip._id as string },
                           }}
                         >
                           <button className="btn btn-square bg-base-100 border-none">
@@ -251,4 +195,4 @@ const MyBookedTripsTable = () => {
   );
 };
 
-export default MyBookedTripsTable;
+export default MyUnbookedTripsTable;

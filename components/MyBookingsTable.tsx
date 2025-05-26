@@ -210,7 +210,7 @@ const MyBookingsTable = () => {
                       <td>
                         <Link
                           href={{
-                            pathname: "/trip",
+                            pathname: "/tripClient",
                             query: { tripId: booking.tripId as string },
                           }}
                         >
