@@ -37,11 +37,11 @@ const Sidebar = () => {
               Fleet Manager
             </Link>
           </li>
+
           <li>
-            <a className="text-primary">Trip Manager</a>
-          </li>
-          <li>
-            <a className="text-primary">My Trips</a>
+            <Link href="/myTrips" className="text-primary">
+              My Trips
+            </Link>
           </li>
           <li>
             <Link href="/myBookings" className="text-primary">

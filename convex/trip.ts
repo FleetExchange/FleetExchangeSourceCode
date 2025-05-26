@@ -252,3 +252,16 @@ export const getTripByIdArray = query({
     return trips.filter((trip) => trip !== null); // Remove any nulls if trips were deleted
   },
 });
+
+// Get trips by IssuerID
+export const getTripsByIssuerId = query({
+  args: { issuerId: v.union(v.id("users"), v.literal("skip")) },
+  handler: async (ctx, args) => {
+    if (args.issuerId === "skip") return [];
+
+    return await ctx.db
+      .query("trip")
+      .filter((q) => q.eq(q.field("userId"), args.issuerId))
+      .collect();
+  },
+});

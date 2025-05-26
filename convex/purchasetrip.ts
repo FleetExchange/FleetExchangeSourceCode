@@ -80,3 +80,18 @@ export const getPurchaseTripByTripId = query({
     return purchaseTrips;
   },
 });
+
+// Get purchase by Id array of tripIds
+export const getPurchaseTripByIdArray = query({
+  args: {
+    tripIds: v.array(v.id("trip")),
+  },
+  handler: async (ctx, { tripIds }) => {
+    const purchaseTrips = await ctx.db
+      .query("purchaseTrip")
+      .filter((q) => q.and(...tripIds.map((id) => q.eq(q.field("tripId"), id))))
+      .collect();
+
+    return purchaseTrips;
+  },
+});
