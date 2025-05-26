@@ -7,11 +7,21 @@ export const createPurchaseTrip = mutation({
     userId: v.id("users"),
     amount: v.number(),
     freightNotes: v.string(),
-    logisticNotes: v.string(),
+    pickupInstructions: v.string(),
+    deliveryInstructions: v.string(),
+    cargoWeight: v.number(), // Total weight of the items to be shipped
   },
   handler: async (
     ctx,
-    { tripId, userId, amount, freightNotes, logisticNotes }
+    {
+      tripId,
+      userId,
+      amount,
+      freightNotes,
+      pickupInstructions,
+      deliveryInstructions,
+      cargoWeight,
+    }
   ) => {
     const newPurchaseTripId = await ctx.db.insert("purchaseTrip", {
       tripId,
@@ -20,7 +30,9 @@ export const createPurchaseTrip = mutation({
       status: "Awaiting Confirmation",
       amount,
       freightNotes,
-      logisticNotes,
+      pickupInstructions,
+      deliveryInstructions,
+      cargoWeight,
     });
 
     return newPurchaseTripId;
@@ -52,6 +64,18 @@ export const getPurchaseTripById = query({
       .query("purchaseTrip")
       .filter((q) => q.eq(q.field("userId"), userId))
       .collect();
+
+    return purchaseTrips;
+  },
+});
+
+export const getPurchaseTripByTripId = query({
+  args: { tripId: v.id("trip") },
+  handler: async (ctx, { tripId }) => {
+    const purchaseTrips = await ctx.db
+      .query("purchaseTrip")
+      .filter((q) => q.eq(q.field("tripId"), tripId))
+      .first();
 
     return purchaseTrips;
   },

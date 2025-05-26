@@ -23,23 +23,37 @@ interface TripPageClientProps {
 const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
   // Get the logged in user identity
   const { user } = useUser();
-  // This is the Clerk user ID
-  const clerkId = user!.id;
-  // User Id in Convex
+
+  // Get user's Convex ID
   const userId = useQuery(api.users.getUserByClerkId, {
-    clerkId: clerkId,
+    clerkId: user?.id ?? "skip",
   })?._id;
 
   // Object of the trip being used
-  const trip = useQuery(api.trip.getById, { tripId: tripId as Id<"trip"> });
-  const truck = useQuery(api.truck.getTruckById, {
-    truckId: trip?.truckId as Id<"truck">,
-  });
-  const tripIssuer = useQuery(api.users.getUserById, {
-    userId: trip?.userId as Id<"users">,
+  const trip = useQuery(api.trip.getById, {
+    tripId: tripId as Id<"trip">,
   });
 
-  // Consts for new trip data from client
+  // Only query truck if we have a truckId
+  const truck = useQuery(api.truck.getTruckById, {
+    truckId: trip?.truckId ?? "skip",
+  });
+
+  // Only query trip issuer if we have a userId
+  const tripIssuer = useQuery(
+    api.users.getUserById,
+    trip?.userId ? { userId: trip.userId as Id<"users"> } : "skip"
+  );
+
+  // Only query purchase details if we have a tripId
+  const purchaseTripDetails = useQuery(
+    api.purchasetrip.getPurchaseTripByTripId,
+    {
+      tripId: tripId as Id<"trip">,
+    }
+  );
+
+  // State declarations
   const [booked, setBooked] = useState(trip?.isBooked ?? false);
   const [pickupAddress, setPickupAddress] = useState("");
   const [pickupInstructions, setPickupInstructions] = useState("");
@@ -52,7 +66,7 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
   const tripPrice =
     (trip?.basePrice ?? 0) + (trip?.variablePrice ?? 0) * distance;
 
-  // Add after your other useEffect
+  // Get whether the trip is booked or not
   useEffect(() => {
     if (trip?.isBooked !== undefined) {
       setBooked(trip.isBooked);
@@ -179,8 +193,10 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
         tripId: trip?._id as Id<"trip">,
         userId: userId as Id<"users">,
         amount: tripPrice,
+        pickupInstructions: pickupInstructions,
+        deliveryInstructions: deliveryInstructions,
         freightNotes: cargoDescription,
-        logisticNotes: "${pickupInstructions} ${deliveryInstructions}",
+        cargoWeight: cargoWeight,
       });
 
       alert("Trip booked successfully!");
@@ -211,6 +227,32 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
       alert("Failed to cancel trip. Please try again.");
     }
   };
+
+  // If the trip is booked set all other fields to the trip data
+  useEffect(() => {
+    if (trip?.isBooked && purchaseTripDetails) {
+      // Set addresses from trip data
+      setPickupAddress(trip.originAddress || "");
+      setDeliveryAddress(trip.destinationAddress || "");
+
+      // Update Places Autocomplete values
+      pickup.setValue(trip.originAddress || "");
+      delivery.setValue(trip.destinationAddress || "");
+
+      // Set instructions and cargo details from purchase details
+      setPickupInstructions(purchaseTripDetails.pickupInstructions || "");
+      setDeliveryInstructions(purchaseTripDetails.deliveryInstructions || "");
+      setCargoDescription(purchaseTripDetails.freightNotes || "");
+      setCargoWeight(purchaseTripDetails.cargoWeight || 0);
+    }
+  }, [
+    trip?.isBooked,
+    trip?.originAddress,
+    trip?.destinationAddress,
+    purchaseTripDetails,
+    pickup.setValue,
+    delivery.setValue,
+  ]);
 
   return (
     <div className="container mx-auto p-6">

@@ -14,9 +14,10 @@ export const getTruck = query({
 
 // get by Id
 export const getTruckById = query({
-  args: { truckId: v.id("truck") },
-  handler: async (ctx, { truckId }) => {
-    return await ctx.db.get(truckId);
+  args: { truckId: v.union(v.id("truck"), v.literal("skip")) },
+  handler: async (ctx, args) => {
+    if (args.truckId === "skip") return null;
+    return await ctx.db.get(args.truckId);
   },
 });
 
