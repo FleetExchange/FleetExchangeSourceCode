@@ -12,11 +12,13 @@ interface Coordinates {
 interface PlacesHookProps {
   cityName: string | undefined;
   defaultCoords?: Coordinates;
+  citiesOnly?: boolean; // New prop to control city-only mode
 }
 
 export const usePlacesWithRestrictions = ({
   cityName,
   defaultCoords = { lat: -26.2041, lng: 28.0473 },
+  citiesOnly = false, // Default to false for backward compatibility
 }: PlacesHookProps) => {
   const [coords, setCoords] = useState<Coordinates>(defaultCoords);
 
@@ -49,14 +51,26 @@ export const usePlacesWithRestrictions = ({
       componentRestrictions: { country: "za" },
       location: new google.maps.LatLng(coords.lat, coords.lng),
       radius: 50000,
+      // Add types restriction only if citiesOnly is true
+      ...(citiesOnly && { types: ["(cities)"] }),
     },
   });
+
+  // Filter suggestions if citiesOnly is true
+  const filteredSuggestions = citiesOnly
+    ? data.filter((suggestion) =>
+        suggestion.types.some(
+          (type) =>
+            type === "locality" || type === "administrative_area_level_2"
+        )
+      )
+    : data;
 
   return {
     ready,
     value,
     status,
-    suggestions: data,
+    suggestions: filteredSuggestions,
     setValue,
     clearSuggestions,
     coords,

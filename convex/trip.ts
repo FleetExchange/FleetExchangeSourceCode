@@ -281,3 +281,35 @@ export const deleteTripById = mutation({
     return trip._id;
   },
 });
+
+// Create trip mutation
+export const createTrip = mutation({
+  args: {
+    userId: v.id("users"),
+    truckId: v.id("truck"),
+    originCity: v.string(),
+    originAddress: v.string(),
+    destinationCity: v.string(),
+    destinationAddress: v.string(),
+    departureDate: v.string(),
+    arrivalDate: v.string(),
+    basePrice: v.number(),
+    variablePrice: v.number(),
+    isBooked: v.boolean(),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.db.insert("trip", {
+      userId: args.userId,
+      truckId: args.truckId,
+      originCity: args.originCity,
+      originAddress: args.originAddress,
+      destinationCity: args.destinationCity,
+      destinationAddress: args.destinationAddress,
+      departureDate: Date.parse(args.departureDate),
+      arrivalDate: Date.parse(args.arrivalDate),
+      basePrice: args.basePrice,
+      variablePrice: args.variablePrice,
+      isBooked: args.isBooked,
+    });
+  },
+});
