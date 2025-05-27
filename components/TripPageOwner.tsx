@@ -15,6 +15,7 @@ import { useQuery } from "convex/react";
 import { useEffect, useState } from "react";
 import { getGeocode, getLatLng } from "use-places-autocomplete";
 import StatusAdvanceButton from "./StatusAdvanceButton";
+import TripRejectButton from "./TripRejectButton";
 
 interface TripPageClientProps {
   tripId: string;
@@ -341,14 +342,21 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
               </p>
             </div>
 
-            <div className="flex justify-center">
+            <div className="flex justify-center flex-col items-center gap-4">
               {/* If the trip is booked: 1.issuer can cancel and refund if necessary 2. Issuer can update status of the trip*/}
               {/* If the trip is not booked: 1.issuer can delete the trip*/}
               {trip?.isBooked === true && purchaseTrip ? (
-                <StatusAdvanceButton
-                  currentStatus="Awaiting Confirmation"
-                  purchaseTripId={purchaseTrip._id}
-                />
+                <>
+                  <StatusAdvanceButton
+                    currentStatus="Awaiting Confirmation"
+                    purchaseTripId={purchaseTrip._id}
+                  />
+                  <TripRejectButton
+                    purchaseTripId={purchaseTrip._id}
+                    tripId={trip._id}
+                    currentStatus={purchaseTrip.status}
+                  />
+                </>
               ) : (
                 <p>Not booked</p>
               )}
