@@ -14,6 +14,7 @@ import usePlacesAutocomplete, {
 import { usePlacesWithRestrictions } from "@/hooks/usePlacesWithRestrictions";
 import { AddressAutocomplete } from "./AddressAutocomplete";
 import { useUser } from "@clerk/nextjs";
+import TripCancelButton from "./TripCancelButton";
 type DirectionsResult = google.maps.DirectionsResult;
 
 interface TripPageClientProps {
@@ -204,27 +205,6 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
       window.location.href = "/discover";
     } catch (error) {
       alert("Failed to book trip. Please try again.");
-    }
-  };
-
-  // Cancel event handler
-  const cancelTrip = useMutation(api.trip.setTripCancelled);
-  const deletePurchaseTrip = useMutation(api.purchasetrip.deletePurchaseTrip);
-  const handleCancelTrip = async () => {
-    // Confrim cancellation
-
-    try {
-      // Set trip to cancelled
-      await cancelTrip({ tripId: trip?._id as Id<"trip"> });
-      setBooked(false);
-      await deletePurchaseTrip({
-        tripId: trip?._id as Id<"trip">,
-      });
-      alert("Trip cancelled successfully!");
-      // Redirect to fleet manager page
-      window.location.href = "/discover";
-    } catch (error) {
-      alert("Failed to cancel trip. Please try again.");
     }
   };
 
@@ -503,12 +483,13 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
             {userId === trip?.userId ? (
               <p className="text-base-content/80">You are the trip issuer</p>
             ) : booked ? (
-              <button
-                className="btn btn-error btn-wide"
-                onClick={handleCancelTrip}
-              >
-                Cancel Booking
-              </button>
+              <TripCancelButton
+                purchaseTripId={purchaseTripDetails?._id as Id<"purchaseTrip">}
+                tripId={trip?._id as Id<"trip">}
+                currentStatus={
+                  purchaseTripDetails?.status || "Awaiting Confirmation"
+                }
+              />
             ) : (
               <button
                 className="btn btn-primary btn-wide"

@@ -11,11 +11,12 @@ import {
 // Import DirectionsResult type from Google Maps types
 // @ts-ignore
 import { DirectionsResult } from "@types/googlemaps";
-import { useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { useEffect, useState } from "react";
 import { getGeocode, getLatLng } from "use-places-autocomplete";
 import StatusAdvanceButton from "./StatusAdvanceButton";
 import TripRejectButton from "./TripRejectButton";
+import TripCancelButton from "./TripCancelButton";
 
 interface TripPageClientProps {
   tripId: string;
@@ -114,6 +115,20 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
 
   const tripPrice =
     (trip?.basePrice ?? 0) + (trip?.variablePrice ?? 0) * distance;
+
+  const deleteTrip = useMutation(api.trip.deleteTripById);
+  const handleDeleteTrip = async () => {
+    try {
+      await deleteTrip({ tripId: tripId as Id<"trip"> });
+      // Optionally: Add a success message or redirect
+      alert("Trip deleted successfully.");
+      // Redirect to myTrips page
+      window.location.href = "/";
+    } catch (error) {
+      console.error("Failed to delete trip:", error);
+      alert("Failed to delete trip. Please try again.");
+    }
+  };
 
   return (
     <div>
@@ -351,14 +366,29 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
                     currentStatus="Awaiting Confirmation"
                     purchaseTripId={purchaseTrip._id}
                   />
-                  <TripRejectButton
-                    purchaseTripId={purchaseTrip._id}
-                    tripId={trip._id}
-                    currentStatus={purchaseTrip.status}
-                  />
+                  {purchaseTrip.status === "Awaiting Confirmation" ? (
+                    <TripRejectButton
+                      purchaseTripId={purchaseTrip._id}
+                      tripId={trip._id}
+                      currentStatus={purchaseTrip.status}
+                    />
+                  ) : (
+                    <TripCancelButton
+                      purchaseTripId={purchaseTrip._id}
+                      tripId={trip._id}
+                      currentStatus={purchaseTrip.status}
+                    />
+                  )}
                 </>
               ) : (
-                <p>Not booked</p>
+                <>
+                  <button
+                    onClick={handleDeleteTrip}
+                    className="btn btn-error btn-sm flex flex-col items-center gap-1 py-2 h-auto min-h-[3rem]"
+                  >
+                    <span className="font-medium">Delete Trip</span>
+                  </button>{" "}
+                </>
               )}
             </div>
           </div>

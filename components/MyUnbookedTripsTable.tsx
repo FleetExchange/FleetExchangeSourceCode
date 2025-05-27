@@ -89,7 +89,7 @@ const MyUnbookedTripsTable = () => {
 
   return (
     <>
-      <div className="fixed top-[50px] flex w-full max-w-8xl flex-col p-8">
+      <div className="relative top-[50px] flex w-full max-w-8xl flex-col p-8">
         <p>My Trips that are not Booked</p>
         {/** Action bar */}
         <div className="felx-row flex justify-between gap-2 bg-base-100 border-1 border-base-300 rounded-t-xl items-center px-5 py-2">

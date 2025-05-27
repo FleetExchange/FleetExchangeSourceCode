@@ -34,6 +34,8 @@ const TripRejectButton = ({
 
       // Optionally: Add a success message or redirect
       alert("Booking rejected successfully");
+      // Redirect to myTrips page
+      window.location.href = "/myTrips";
     } catch (error) {
       console.error("Failed to reject booking:", error);
       alert("Failed to reject booking. Please try again.");

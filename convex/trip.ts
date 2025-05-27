@@ -265,3 +265,19 @@ export const getTripsByIssuerId = query({
       .collect();
   },
 });
+
+// Delete trip by Id
+export const deleteTripById = mutation({
+  args: { tripId: v.id("trip") },
+  handler: async (ctx, { tripId }) => {
+    const trip = await ctx.db.get(tripId);
+    if (!trip) {
+      throw new Error("Trip not found");
+    }
+
+    // Delete the trip
+    await ctx.db.delete(tripId);
+
+    return trip._id;
+  },
+});

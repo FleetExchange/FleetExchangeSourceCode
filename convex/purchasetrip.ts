@@ -108,7 +108,9 @@ export const updatePurchaseTripStatus = mutation({
       v.literal("Awaiting Confirmation"),
       v.literal("Booked"),
       v.literal("Dispatched"),
-      v.literal("Delivered")
+      v.literal("Delivered"),
+      v.literal("Cancelled"),
+      v.literal("Refunded")
     ),
   },
   handler: async (ctx, { purchaseTripId, newStatus }) => {
