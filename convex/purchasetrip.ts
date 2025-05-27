@@ -72,12 +72,17 @@ export const getPurchaseTripById = query({
 export const getPurchaseTripByTripId = query({
   args: { tripId: v.id("trip") },
   handler: async (ctx, { tripId }) => {
-    const purchaseTrips = await ctx.db
+    const purchaseTrip = await ctx.db
       .query("purchaseTrip")
       .filter((q) => q.eq(q.field("tripId"), tripId))
       .first();
 
-    return purchaseTrips;
+    // Explicitly return null if no purchase trip is found
+    if (!purchaseTrip) {
+      return null;
+    }
+
+    return purchaseTrip;
   },
 });
 
@@ -93,5 +98,28 @@ export const getPurchaseTripByIdArray = query({
       .collect();
 
     return purchaseTrips;
+  },
+});
+
+export const updatePurchaseTripStatus = mutation({
+  args: {
+    purchaseTripId: v.id("purchaseTrip"),
+    newStatus: v.union(
+      v.literal("Awaiting Confirmation"),
+      v.literal("Booked"),
+      v.literal("Dispatched"),
+      v.literal("Delivered")
+    ),
+  },
+  handler: async (ctx, { purchaseTripId, newStatus }) => {
+    const existing = await ctx.db.get(purchaseTripId);
+
+    if (!existing) {
+      throw new Error("Purchase trip not found");
+    }
+
+    await ctx.db.patch(purchaseTripId, {
+      status: newStatus,
+    });
   },
 });
