@@ -234,9 +234,10 @@ const NewTruckCard = () => {
                   </legend>
                   <select
                     className="select focus:outline-none focus:ring-0"
-                    defaultValue={fleet}
+                    value={fleet}
                     onChange={(e) => setFleet(e.target.value)}
                   >
+                    <option>Select a Fleet</option>
                     {/* Use optional chaining or fallback */}
                     {(userFleets?.length ? userFleets : []).map(
                       (fleet: { _id: string; fleetName: string }) => (
@@ -256,7 +257,7 @@ const NewTruckCard = () => {
                 </button>
                 <Link href="/fleetManager">
                   <button className="btn btn-soft bg-base-200 outline-none">
-                    Discard
+                    Close
                   </button>
                 </Link>
               </div>

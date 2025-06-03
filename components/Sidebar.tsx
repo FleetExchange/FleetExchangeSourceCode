@@ -48,9 +48,6 @@ const Sidebar = () => {
               My Bookings
             </Link>
           </li>
-          <li>
-            <a className="text-primary">Create</a>
-          </li>
           <hr />
           <li>
             <a className="text-primary">Settings</a>

@@ -47,7 +47,7 @@ const TripCancelButton = ({
   };
 
   // Only show button if trip is booked and not cancelled or refunded
-  if (currentStatus !== "Cancelled" && currentStatus !== "Refunded") {
+  if (currentStatus == "Cancelled" || currentStatus == "Refunded") {
     return null;
   }
 

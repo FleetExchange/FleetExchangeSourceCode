@@ -208,31 +208,28 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
     }
   };
 
-  // If the trip is booked set all other fields to the trip data
+  // Combine the effects and add better dependency control
   useEffect(() => {
-    if (trip?.isBooked && purchaseTripDetails) {
-      // Set addresses from trip data
+    // Only update if we have trip data
+    if (!trip) return;
+
+    // Update booked state
+    setBooked(trip.isBooked ?? false);
+
+    // Only update form fields if trip is booked and we have purchase details
+    if (trip.isBooked && purchaseTripDetails) {
       setPickupAddress(trip.originAddress || "");
       setDeliveryAddress(trip.destinationAddress || "");
-
-      // Update Places Autocomplete values
-      pickup.setValue(trip.originAddress || "");
-      delivery.setValue(trip.destinationAddress || "");
-
-      // Set instructions and cargo details from purchase details
       setPickupInstructions(purchaseTripDetails.pickupInstructions || "");
       setDeliveryInstructions(purchaseTripDetails.deliveryInstructions || "");
       setCargoDescription(purchaseTripDetails.freightNotes || "");
       setCargoWeight(purchaseTripDetails.cargoWeight || 0);
+
+      // Update autocomplete values
+      if (trip.originAddress) pickup.setValue(trip.originAddress);
+      if (trip.destinationAddress) delivery.setValue(trip.destinationAddress);
     }
-  }, [
-    trip?.isBooked,
-    trip?.originAddress,
-    trip?.destinationAddress,
-    purchaseTripDetails,
-    pickup.setValue,
-    delivery.setValue,
-  ]);
+  }, [trip, purchaseTripDetails]); // Simplified dependencies
 
   return (
     <div className="container mx-auto p-6">
@@ -480,20 +477,21 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
           </div>
 
           <div className="flex justify-center">
-            {userId === trip?.userId ? (
+            {!trip || !userId ? (
+              <div className="loading loading-spinner"></div>
+            ) : userId === trip.userId ? (
               <p className="text-base-content/80">You are the trip issuer</p>
-            ) : booked ? (
+            ) : booked && purchaseTripDetails ? (
               <TripCancelButton
-                purchaseTripId={purchaseTripDetails?._id as Id<"purchaseTrip">}
-                tripId={trip?._id as Id<"trip">}
-                currentStatus={
-                  purchaseTripDetails?.status || "Awaiting Confirmation"
-                }
+                purchaseTripId={purchaseTripDetails._id}
+                tripId={trip._id}
+                currentStatus={purchaseTripDetails.status}
               />
             ) : (
               <button
                 className="btn btn-primary btn-wide"
                 onClick={handleBookTrip}
+                disabled={!trip}
               >
                 Book Trip
               </button>
