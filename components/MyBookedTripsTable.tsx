@@ -14,13 +14,14 @@ const MyBookedTripsTable = () => {
   // define all states for filtering and sorting
   const [searchTerm, setSearchTerm] = useState("");
   const [statusSelection, setStatusSelection] = useState<
+    | "Any Status"
     | "Awaiting Confirmation"
     | "Booked"
     | "Dispatched"
     | "Delivered"
     | "Cancelled"
     | "Refunded"
-  >("Awaiting Confirmation");
+  >("Any Status"); // Changed default value
   const [pastOrUpcoming, setPastOrFuture] = useState<
     "All Trips" | "Upcomming Trips" | "Past Trips"
   >("All Trips");
@@ -88,7 +89,7 @@ const MyBookedTripsTable = () => {
     return (
       (trip.originCity?.toLowerCase().includes(searchString) ||
         trip.destinationCity?.toLowerCase().includes(searchString)) &&
-      purchase.status === statusSelection
+      (statusSelection === "Any Status" || purchase.status === statusSelection)
     );
   });
 
@@ -141,6 +142,7 @@ const MyBookedTripsTable = () => {
               onChange={(e) =>
                 setStatusSelection(
                   e.target.value as
+                    | "Any Status"
                     | "Awaiting Confirmation"
                     | "Booked"
                     | "Dispatched"
@@ -150,6 +152,7 @@ const MyBookedTripsTable = () => {
                 )
               }
             >
+              <option value="Any Status">Any Status</option>
               <option value="Awaiting Confirmation">
                 Awaiting Confirmation
               </option>
