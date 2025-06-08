@@ -313,3 +313,29 @@ export const createTrip = mutation({
     });
   },
 });
+
+// get trips by truckId that have upcomming trips
+export const getTripsByTruckId = query({
+  args: { truckId: v.id("truck") },
+  handler: async (ctx, args) => {
+    const currentDate = new Date().getTime();
+
+    const trips = await ctx.db
+      .query("trip")
+      .filter((q) =>
+        q.or(
+          // Check for upcoming trips
+          q.gt(q.field("departureDate"), currentDate),
+          // Check for trips in progress (between departure and arrival)
+          q.and(
+            q.lte(q.field("departureDate"), currentDate),
+            q.gte(q.field("arrivalDate"), currentDate)
+          )
+        )
+      )
+      .filter((q) => q.eq(q.field("truckId"), args.truckId))
+      .collect();
+
+    return trips;
+  },
+});

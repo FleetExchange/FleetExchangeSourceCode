@@ -287,47 +287,71 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
 
           {/* Trip Details Section */}
           <div className="col-span-2 bg-base-200 rounded-lg shadow-lg p-6">
-            <div className="flex justify-evenly gap-8">
+            <div className="grid grid-cols-2 gap-8">
               {/* Truck Information */}
               <div className="space-y-4">
                 <div className="bg-base-100 p-4 rounded-lg">
-                  <h3 className="text-lg font-semibold mb-2">Truck Details</h3>
-                  <p className="mb-2">
-                    {truck?.year} {truck?.make} {truck?.model} -{" "}
-                    {truck?.truckType}
-                  </p>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <p>Length: {truck?.length}m</p>
-                    <p>Width: {truck?.width}m</p>
-                    <p>Height: {truck?.height}m</p>
-                    <p>Max Load: {truck?.maxLoadCapacity}kg</p>
+                  <h3 className="text-lg font-semibold mb-4">Truck Details</h3>
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2 text-base-content/80">
+                      <span className="font-medium">Vehicle:</span>
+                      <span>
+                        {truck?.year} {truck?.make} {truck?.model}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 text-base-content/80">
+                      <span className="font-medium">Type:</span>
+                      <span>{truck?.truckType}</span>
+                    </div>
+                    <div className="divider my-2"></div>
+                    <div className="grid grid-cols-2 gap-y-3">
+                      <div className="flex items-center gap-2">
+                        <span className="text-base-content/70">Length:</span>
+                        <span className="font-medium">{truck?.length}m</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-base-content/70">Width:</span>
+                        <span className="font-medium">{truck?.width}m</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-base-content/70">Height:</span>
+                        <span className="font-medium">{truck?.height}m</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-base-content/70">Max Load:</span>
+                        <span className="font-medium">
+                          {truck?.maxLoadCapacity.toLocaleString()}kg
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
 
               {/* Cargo Information */}
-              <div className="space-y-4">
-                <fieldset className="space-y-2">
-                  <legend className="text-base font-medium">
-                    Cargo Weight (kg)
-                  </legend>
-                  {purchaseTrip !== null ? (
-                    <p>{purchaseTrip?.cargoWeight}</p>
-                  ) : (
-                    <p>N/A</p>
-                  )}
-                </fieldset>
-
-                <fieldset className="space-y-2">
-                  <legend className="text-base font-medium">
-                    Cargo Description
-                  </legend>
-                  {purchaseTrip !== null ? (
-                    <p>{purchaseTrip?.freightNotes}</p>
-                  ) : (
-                    <p>N/A</p>
-                  )}
-                </fieldset>
+              <div className="bg-base-100 p-4 rounded-lg">
+                <h3 className="text-lg font-semibold mb-4">Cargo Details</h3>
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="text-base-content/70 text-sm mb-1">
+                      Cargo Weight
+                    </h4>
+                    <p className="font-medium">
+                      {purchaseTrip?.cargoWeight
+                        ? `${purchaseTrip.cargoWeight.toLocaleString()} kg`
+                        : "N/A"}
+                    </p>
+                  </div>
+                  <div className="divider my-2"></div>
+                  <div>
+                    <h4 className="text-base-content/70 text-sm mb-1">
+                      Cargo Description
+                    </h4>
+                    <p className="font-medium">
+                      {purchaseTrip?.freightNotes || "N/A"}
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

@@ -1,6 +1,5 @@
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
-import { editTruck, newTruck } from "@/convex/truck";
 import { TRUCK_TYPES, TruckType } from "@/shared/truckTypes";
 import { useUser } from "@clerk/nextjs";
 import { useMutation, useQuery } from "convex/react";
@@ -61,26 +60,47 @@ const EditTruckCard: React.FC<EditTruckCardProps> = ({ truckId }) => {
 
   const deleteTruck = useMutation(api.truck.deleteTruck);
   const deleteTruckFromFleet = useMutation(api.fleet.removeTruckFromFleet);
-  const handleDelete = async () => {
-    const deletedTruckId = await deleteTruck({
-      truckId: truckId as Id<"truck">,
-    });
+  const linkedTrips = useQuery(api.trip.getTripsByTruckId, {
+    truckId: truckId as Id<"truck">,
+  });
 
-    // Remove from Fleet
-    const fleetId = userFleets?.find((fleet) =>
-      fleet.trucks.includes(truckId as Id<"truck">)
-    )?._id;
-    if (fleetId) {
-      await deleteTruckFromFleet({
-        fleetId: fleetId as Id<"fleet">,
+  const handleDelete = async () => {
+    if (linkedTrips && linkedTrips.length > 0) {
+      alert(
+        "This truck cannot be deleted because it has trips that are either:\n" +
+          "- Currently in progress\n" +
+          "- Scheduled for the future\n\n" +
+          "Please wait for trips to complete and delete or reassign any future trips before deleting this truck."
+      );
+      return;
+    }
+
+    try {
+      const deletedTruckId = await deleteTruck({
         truckId: truckId as Id<"truck">,
       });
+
+      // Remove from Fleet
+      const fleetId = userFleets?.find((fleet) =>
+        fleet.trucks.includes(truckId as Id<"truck">)
+      )?._id;
+
+      if (fleetId) {
+        await deleteTruckFromFleet({
+          fleetId: fleetId as Id<"fleet">,
+          truckId: truckId as Id<"truck">,
+        });
+      }
+
+      if (deletedTruckId) {
+        alert("Truck successfully deleted.");
+        // Redirect to fleet manager page
+        window.location.href = "/fleetManager";
+      }
+    } catch (error) {
+      console.error("Failed to delete truck:", error);
+      alert("Failed to delete truck. Please try again.");
     }
-    if (deletedTruckId) {
-      alert("Truck Deleted.");
-    }
-    // Redirect to fleet manager page
-    window.location.href = "/fleetManager";
   };
 
   const editTruck = useMutation(api.truck.editTruck); // ✅ Hook at top level
