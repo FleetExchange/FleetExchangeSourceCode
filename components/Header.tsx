@@ -4,11 +4,7 @@ import Link from "next/link";
 import logo from "@/images/logo.png";
 
 function Header() {
-  return (
-    <div>
-      <Link href="/" className="font-bold shrink-0 fixed top-4 left-12"></Link>
-    </div>
-  );
+  return <div></div>;
 }
 
 export default Header;

@@ -44,51 +44,95 @@ export default function DiscoverPage() {
   );
 
   return (
-    <>
-      <div className="flex flex-col space-y-8 mt-20">
-        <div className="relative flex justify-center w-full px-4">
-          {/* Search Bar - Centered */}
-          <div className="w-full max-w-4xl">
-            <SearchBar
-              onSearch={(searchTerm) => {
-                setSearchTerm(searchTerm);
-              }}
-            />
+    <div className="container mx-auto px-4 py-6">
+      {/* Hero Section with Search */}
+      <div className="bg-base-200 rounded-lg shadow-lg p-8 mb-8">
+        <h1 className="text-2xl font-bold text-center mb-6">
+          Find Available Trips
+        </h1>
+        <div className="max-w-4xl mx-auto">
+          <SearchBar
+            onSearch={(searchTerm) => {
+              setSearchTerm(searchTerm);
+            }}
+          />
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="flex flex-col md:flex-row gap-6">
+        {/* Filters Sidebar */}
+        <div className="w-full md:w-72 lg:w-80">
+          <div className="bg-base-200 rounded-xl shadow-md p-6 sticky top-4">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-lg font-bold">Sort & Filter</h2>
+              <button
+                className="btn btn-ghost btn-sm"
+                onClick={() => {
+                  setFilterTerm({
+                    depDate: "",
+                    depTime: "",
+                    arrDate: "",
+                    arrTime: "",
+                    truckType: "",
+                    width: "",
+                    length: "",
+                    height: "",
+                    payload: "",
+                  });
+                  setSortBy("departureDate");
+                }}
+              >
+                Clear All
+              </button>
+            </div>
+
+            {/* Sort Options */}
+            <div className="space-y-4 mb-8">
+              <h3 className="font-medium text-base-content/70 text-sm uppercase tracking-wide">
+                Sort Options
+              </h3>
+              <div className="form-control">
+                <select
+                  className="select select-bordered w-full bg-base-100"
+                  value={sortBy}
+                  onChange={(e) =>
+                    setSortBy(e.target.value as "price" | "departureDate")
+                  }
+                >
+                  <option value="departureDate">Departure Date</option>
+                  <option value="price">Price</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Filter Section */}
+            <div className="space-y-4">
+              <h3 className="font-medium text-base-content/70 text-sm uppercase tracking-wide">
+                Filters
+              </h3>
+              <div className="bg-base-100 rounded-lg p-4">
+                <FilterBtn
+                  onFilter={(filterTerm) => {
+                    setFilterTerm(filterTerm);
+                  }}
+                />
+              </div>
+            </div>
           </div>
         </div>
 
-        <hr className="border-t border-base-200" />
-
-        <div className="mx-start flex flex-row gap-4 p-8 ">
-          <div className="flex w-1/6 flex-col p-4 border-1 border-base-300 h-[200px]">
-            <fieldset className="fieldset">
-              <select
-                className="select focus:outline-none focus:ring-0"
-                value={sortBy}
-                onChange={(e) =>
-                  setSortBy(e.target.value as "price" | "departureDate")
-                }
-              >
-                <option value="departureDate">Sort By Departure Date</option>
-                <option value="price">Sort By Price</option>
-              </select>
-            </fieldset>
-            <FilterBtn
-              onFilter={(filterTerm) => {
-                setFilterTerm(filterTerm);
-              }}
-            />
-          </div>
-
-          <div className="flex w-3/4 flex-col p-4">
+        {/* Trip List */}
+        <div className="flex-1">
+          <div className="bg-base-100 rounded-lg shadow">
             <TripList
               searchTerm={searchTerm}
               filterTerm={filterTerm}
               sortBy={sortBy}
-            ></TripList>
+            />
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }

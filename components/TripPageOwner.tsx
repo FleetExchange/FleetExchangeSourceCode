@@ -15,6 +15,7 @@ import { useMutation, useQuery } from "convex/react";
 import { useEffect, useState } from "react";
 import { getGeocode, getLatLng } from "use-places-autocomplete";
 import StatusAdvanceButton from "./StatusAdvanceButton";
+import { TripStatus } from "./StatusAdvanceButton";
 import TripRejectButton from "./TripRejectButton";
 import TripCancelButton from "./TripCancelButton";
 
@@ -358,26 +359,54 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
             </div>
 
             <div className="flex justify-center flex-col items-center gap-4">
-              {/* If the trip is booked: 1.issuer can cancel and refund if necessary 2. Issuer can update status of the trip*/}
-              {/* If the trip is not booked: 1.issuer can delete the trip*/}
               {trip?.isBooked === true && purchaseTrip ? (
                 <>
-                  <StatusAdvanceButton
-                    currentStatus="Awaiting Confirmation"
-                    purchaseTripId={purchaseTrip._id}
-                  />
-                  {purchaseTrip.status === "Awaiting Confirmation" ? (
-                    <TripRejectButton
-                      purchaseTripId={purchaseTrip._id}
-                      tripId={trip._id}
-                      currentStatus={purchaseTrip.status}
-                    />
+                  {purchaseTrip.status === "Delivered" ? (
+                    <>
+                      <div className="badge badge-success badge-lg gap-2">
+                        <span className="text-base">✓ Trip Delivered</span>
+                      </div>
+                      <p className="text-sm text-base-content/70 text-center mt-2">
+                        For any queries, refunds, or assistance, please contact
+                        our support line:
+                        <br />
+                        <a
+                          href="tel:+27000000000"
+                          className="text-primary hover:underline"
+                        >
+                          0800 123 456
+                        </a>
+                        {" or "}
+                        <a
+                          href="mailto:support@freightconnect.com"
+                          className="text-primary hover:underline"
+                        >
+                          support@freightconnect.com
+                        </a>
+                      </p>
+                    </>
                   ) : (
-                    <TripCancelButton
+                    <StatusAdvanceButton
+                      currentStatus={purchaseTrip.status as TripStatus}
                       purchaseTripId={purchaseTrip._id}
-                      tripId={trip._id}
-                      currentStatus={purchaseTrip.status}
                     />
+                  )}
+                  {purchaseTrip.status !== "Delivered" && (
+                    <>
+                      {purchaseTrip.status === "Awaiting Confirmation" ? (
+                        <TripRejectButton
+                          purchaseTripId={purchaseTrip._id}
+                          tripId={trip._id}
+                          currentStatus={purchaseTrip.status}
+                        />
+                      ) : (
+                        <TripCancelButton
+                          purchaseTripId={purchaseTrip._id}
+                          tripId={trip._id}
+                          currentStatus={purchaseTrip.status}
+                        />
+                      )}
+                    </>
                   )}
                 </>
               ) : (
@@ -387,7 +416,7 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
                     className="btn btn-error btn-sm flex flex-col items-center gap-1 py-2 h-auto min-h-[3rem]"
                   >
                     <span className="font-medium">Delete Trip</span>
-                  </button>{" "}
+                  </button>
                 </>
               )}
             </div>

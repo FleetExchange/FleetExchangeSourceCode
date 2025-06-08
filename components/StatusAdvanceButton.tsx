@@ -2,14 +2,18 @@
 
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
+import React from "react";
+import { useState } from "react";
+
+export type TripStatus =
+  | "Awaiting Confirmation"
+  | "Booked"
+  | "Dispatched"
+  | "Delivered";
 
 interface StatusAdvanceButtonProps {
-  currentStatus:
-    | "Awaiting Confirmation"
-    | "Booked"
-    | "Dispatched"
-    | "Delivered";
+  currentStatus: TripStatus;
   purchaseTripId: Id<"purchaseTrip">;
 }
 
@@ -17,11 +21,22 @@ const StatusAdvanceButton = ({
   currentStatus,
   purchaseTripId,
 }: StatusAdvanceButtonProps) => {
+  const [status, setStatus] = useState<TripStatus>(currentStatus);
   const updateStatus = useMutation(api.purchasetrip.updatePurchaseTripStatus);
 
-  const getNextStatus = (
-    current: "Awaiting Confirmation" | "Booked" | "Dispatched" | "Delivered"
-  ): "Awaiting Confirmation" | "Booked" | "Dispatched" | "Delivered" => {
+  // Add query to keep status in sync
+  const purchaseTrip = useQuery(api.purchasetrip.getPurchaseTrip, {
+    purchaseTripId,
+  });
+
+  // Update local state when database changes
+  React.useEffect(() => {
+    if (purchaseTrip?.status) {
+      setStatus(purchaseTrip.status as TripStatus);
+    }
+  }, [purchaseTrip?.status]);
+
+  const getNextStatus = (current: TripStatus): TripStatus => {
     switch (current) {
       case "Awaiting Confirmation":
         return "Booked";
@@ -37,18 +52,19 @@ const StatusAdvanceButton = ({
 
   const handleAdvanceStatus = async () => {
     try {
-      const nextStatus = getNextStatus(currentStatus);
+      const nextStatus = getNextStatus(status);
       await updateStatus({
         purchaseTripId,
         newStatus: nextStatus,
       });
+      setStatus(nextStatus); // Update local state immediately
     } catch (error) {
       console.error("Failed to advance status:", error);
     }
   };
 
   // Don't show button if status is already Delivered
-  if (currentStatus === "Delivered") {
+  if (status === "Delivered") {
     return null;
   }
 
@@ -57,12 +73,8 @@ const StatusAdvanceButton = ({
       onClick={handleAdvanceStatus}
       className="btn btn-primary btn-sm flex flex-col items-center gap-1 py-2 h-auto min-h-[3rem]"
     >
-      <span className="text-xs opacity-80">
-        Current Status: {currentStatus}
-      </span>
-      <span className="font-medium">
-        Advance to {getNextStatus(currentStatus)}
-      </span>
+      <span className="text-xs opacity-80">Current Status: {status}</span>
+      <span className="font-medium">Advance to {getNextStatus(status)}</span>
     </button>
   );
 };

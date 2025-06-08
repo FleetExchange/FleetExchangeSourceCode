@@ -101,6 +101,13 @@ export const getPurchaseTripByIdArray = query({
   },
 });
 
+export const getPurchaseTrip = query({
+  args: { purchaseTripId: v.id("purchaseTrip") },
+  handler: async (ctx, args) => {
+    return await ctx.db.get(args.purchaseTripId);
+  },
+});
+
 export const updatePurchaseTripStatus = mutation({
   args: {
     purchaseTripId: v.id("purchaseTrip"),
@@ -108,19 +115,16 @@ export const updatePurchaseTripStatus = mutation({
       v.literal("Awaiting Confirmation"),
       v.literal("Booked"),
       v.literal("Dispatched"),
-      v.literal("Delivered"),
-      v.literal("Cancelled"),
-      v.literal("Refunded")
+      v.literal("Delivered")
     ),
   },
-  handler: async (ctx, { purchaseTripId, newStatus }) => {
-    const existing = await ctx.db.get(purchaseTripId);
+  handler: async (ctx, args) => {
+    const { purchaseTripId, newStatus } = args;
 
-    if (!existing) {
-      throw new Error("Purchase trip not found");
-    }
+    const existingTrip = await ctx.db.get(purchaseTripId);
+    if (!existingTrip) throw new Error("Purchase trip not found");
 
-    await ctx.db.patch(purchaseTripId, {
+    return await ctx.db.patch(purchaseTripId, {
       status: newStatus,
     });
   },

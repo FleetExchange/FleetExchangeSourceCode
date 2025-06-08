@@ -34,7 +34,6 @@ export default function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <ClerkProvider>
           <ConvexClientProvider>
-            <Header />
             <Sidebar />
             <SyncUserWithConvex />
             <GoogleMapsProvider>{children}</GoogleMapsProvider>
