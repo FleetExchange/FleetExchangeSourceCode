@@ -15,6 +15,7 @@ import { usePlacesWithRestrictions } from "@/hooks/usePlacesWithRestrictions";
 import { AddressAutocomplete } from "./AddressAutocomplete";
 import { useUser } from "@clerk/nextjs";
 import TripCancelButton from "./TripCancelButton";
+import { isAddressWithinRange } from "@/utils/geocoding";
 type DirectionsResult = google.maps.DirectionsResult;
 
 interface TripPageClientProps {
@@ -152,6 +153,24 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
   const purchaseTrip = useMutation(api.purchasetrip.createPurchaseTrip);
   const setTripAdresses = useMutation(api.trip.setTripAddresses);
 
+  // Add this validation function inside your component
+  const validateAddress = async (
+    address: string,
+    cityName: string,
+    type: "pickup" | "delivery"
+  ): Promise<boolean> => {
+    const isValid = await isAddressWithinRange(address, cityName);
+
+    if (!isValid) {
+      alert(
+        `The selected ${type} address is too far from ${cityName}. Please select an address within 100km of the city.`
+      );
+      return false;
+    }
+
+    return true;
+  };
+
   const handleBookTrip = async () => {
     // Check if truck data is loaded
     if (!truck) {
@@ -176,6 +195,22 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
     // Now TypeScript knows truck is defined
     if (cargoWeight > truck.maxLoadCapacity) {
       alert("The cargo weight exceeds the truck's maximum load capacity.");
+      return;
+    }
+
+    // Validate addresses are within range
+    const isPickupValid = await validateAddress(
+      pickupAddress,
+      trip?.originCity || "",
+      "pickup"
+    );
+    const isDeliveryValid = await validateAddress(
+      deliveryAddress,
+      trip?.destinationCity || "",
+      "delivery"
+    );
+
+    if (!isPickupValid || !isDeliveryValid) {
       return;
     }
 
@@ -262,15 +297,35 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
                     Pickup Address
                   </legend>
                   <AddressAutocomplete
-                    value={pickupAddress}
-                    onChange={setPickupAddress}
+                    value={pickupAddress || ""} // Ensure we never pass null
+                    onChange={(address) => {
+                      // Just update the value without validation
+                      setPickupAddress(address || "");
+                      pickup.setValue(address || ""); // Add this line to update the input value
+                    }}
                     ready={pickup.ready}
-                    inputValue={pickup.value}
-                    onInputChange={pickup.setValue}
+                    inputValue={pickup.value || ""} // Ensure we never pass null
+                    onInputChange={(value) => {
+                      pickup.setValue(value || "");
+                      // Don't update pickupAddress here, wait for selection
+                    }}
                     suggestions={pickup.suggestions}
                     status={pickup.status}
                     clearSuggestions={pickup.clearSuggestions}
                     label="Pickup Address"
+                    onBlur={async () => {
+                      if (pickupAddress) {
+                        const isValid = await validateAddress(
+                          pickupAddress,
+                          trip?.originCity || "",
+                          "pickup"
+                        );
+                        if (!isValid) {
+                          setPickupAddress("");
+                          pickup.setValue("");
+                        }
+                      }
+                    }}
                   />
                 </fieldset>
 
@@ -309,15 +364,34 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
                     Delivery Address
                   </legend>
                   <AddressAutocomplete
-                    value={deliveryAddress}
-                    onChange={setDeliveryAddress}
+                    value={deliveryAddress || ""} // Ensure we never pass null
+                    onChange={(address) => {
+                      setDeliveryAddress(address || "");
+                      delivery.setValue(address || ""); // Add this line to update the input value
+                    }}
                     ready={delivery.ready}
-                    inputValue={delivery.value}
-                    onInputChange={delivery.setValue}
+                    inputValue={delivery.value || ""} // Ensure we never pass null
+                    onInputChange={(value) => {
+                      delivery.setValue(value || "");
+                      // Don't update deliveryAddress here, wait for selection
+                    }}
                     suggestions={delivery.suggestions}
                     status={delivery.status}
                     clearSuggestions={delivery.clearSuggestions}
                     label="Delivery Address"
+                    onBlur={async () => {
+                      if (deliveryAddress) {
+                        const isValid = await validateAddress(
+                          deliveryAddress,
+                          trip?.destinationCity || "",
+                          "delivery"
+                        );
+                        if (!isValid) {
+                          setDeliveryAddress("");
+                          delivery.setValue("");
+                        }
+                      }
+                    }}
                   />
                 </fieldset>
 

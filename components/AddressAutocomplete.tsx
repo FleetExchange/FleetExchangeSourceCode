@@ -1,66 +1,67 @@
 import { Combobox } from "@headlessui/react";
+import React from "react";
 
 interface AddressAutocompleteProps {
   value: string;
-  onChange: (address: string) => void;
+  onChange: (value: string) => void;
+  onBlur?: () => void;
   ready: boolean;
   inputValue: string;
   onInputChange: (value: string) => void;
-  suggestions: Array<{ place_id: string; description: string }>;
+  suggestions: google.maps.places.AutocompletePrediction[];
   status: string;
   clearSuggestions: () => void;
   label: string;
 }
 
-export const AddressAutocomplete = ({
-  value,
+export const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
+  value = "", // Provide default empty string
   onChange,
+  onBlur,
   ready,
-  inputValue,
+  inputValue = "", // Provide default empty string
   onInputChange,
   suggestions,
   status,
   clearSuggestions,
   label,
-}: AddressAutocompleteProps) => {
+}) => {
   const handleSelect = (address: string) => {
-    onChange(address);
-    onInputChange(address); // Update the input value
+    onChange(address || ""); // Ensure we never pass null
     clearSuggestions();
   };
 
   return (
-    <fieldset className="fieldset">
-      <legend className="fieldset-legend">{label}</legend>
-      <Combobox value={value} onChange={handleSelect}>
+    <div className="w-full">
+      <Combobox value={value || ""} onChange={handleSelect}>
         <div className="relative">
           <Combobox.Input
             className="input input-bordered w-full focus:outline-none focus:ring-0"
             placeholder="Type address"
-            value={inputValue}
+            value={inputValue || ""} // Ensure we never pass null
             onChange={(e) => onInputChange(e.target.value)}
-            displayValue={(address: string) => address}
+            onBlur={onBlur}
             disabled={!ready}
           />
-          {status === "OK" && (
-            <Combobox.Options className="absolute z-10 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base overflow-auto">
-              {suggestions.map(({ place_id, description }) => (
-                <Combobox.Option key={place_id} value={description}>
-                  {({ active }) => (
-                    <div
-                      className={`px-4 py-2 ${
-                        active ? "bg-blue-600 text-white" : "text-gray-900"
-                      }`}
-                    >
-                      {description}
-                    </div>
-                  )}
+          {suggestions.length > 0 && (
+            <Combobox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-base-100 py-1 shadow-lg">
+              {suggestions.map((suggestion) => (
+                <Combobox.Option
+                  key={suggestion.place_id}
+                  value={suggestion.description}
+                  className={({ active }) =>
+                    `relative cursor-pointer select-none py-2 px-4 ${
+                      active ? "bg-primary/10" : ""
+                    }`
+                  }
+                >
+                  {suggestion.description}
                 </Combobox.Option>
               ))}
             </Combobox.Options>
           )}
         </div>
       </Combobox>
-    </fieldset>
+    </div>
   );
 };

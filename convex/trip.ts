@@ -5,6 +5,7 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
+import { cronJobs } from "convex/server";
 
 // Get a trip that adheres to searchterms and filters
 export const getTrip = query({

@@ -18,6 +18,7 @@ export default defineSchema({
     variablePrice: v.number(), // Variable amount for each kg/km **need to do research on this
     userId: v.id("users"), // Company that created trip
     isBooked: v.boolean(), // Has the trip been booked
+    isExpired: v.optional(v.boolean()),
   }),
 
   purchaseTrip: defineTable({
