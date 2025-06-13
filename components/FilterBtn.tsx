@@ -102,6 +102,7 @@ const FilterBtn = ({
                   placeholder="Type here"
                   value={depDate}
                   onChange={(e) => setDepDate(e.target.value)}
+                  min={new Date().toISOString().split("T")[0]} // Prevent past dates
                 />
               </fieldset>
               <fieldset className="fieldset">
@@ -112,6 +113,7 @@ const FilterBtn = ({
                   placeholder="Type here"
                   value={depTime}
                   onChange={(e) => setDepTime(e.target.value)}
+                  min={new Date().toISOString().split("T")[1].slice(0, 5)} // Prevent past times
                 />
               </fieldset>
             </div>
@@ -128,6 +130,7 @@ const FilterBtn = ({
                   placeholder="Type here"
                   value={arrDate}
                   onChange={(e) => setArrDate(e.target.value)}
+                  min={depDate || new Date().toISOString().split("T")[0]} // Prevent past dates
                 />
               </fieldset>
               <fieldset className="fieldset">
@@ -138,6 +141,10 @@ const FilterBtn = ({
                   placeholder="Type here"
                   value={arrTime}
                   onChange={(e) => setArrTime(e.target.value)}
+                  min={
+                    depTime ||
+                    new Date().toISOString().split("T")[1].slice(0, 5)
+                  } // Prevent past times
                 />
               </fieldset>
             </div>
@@ -172,6 +179,7 @@ const FilterBtn = ({
                 <legend className="fieldset-legend">Width</legend>
                 <input
                   type="number"
+                  min="0"
                   className="input focus:outline-none focus:ring-0"
                   placeholder="Type here"
                   value={width}
@@ -183,6 +191,7 @@ const FilterBtn = ({
                 <legend className="fieldset-legend">Length</legend>
                 <input
                   type="number"
+                  min="0"
                   className="input focus:outline-none focus:ring-0"
                   placeholder="Type here"
                   value={length}
@@ -194,6 +203,7 @@ const FilterBtn = ({
                 <legend className="fieldset-legend">Height</legend>
                 <input
                   type="number"
+                  min="0"
                   className="input focus:outline-none focus:ring-0"
                   placeholder="Type here"
                   value={height}
@@ -205,6 +215,7 @@ const FilterBtn = ({
                 <legend className="fieldset-legend">Payload Capacity</legend>
                 <input
                   type="number"
+                  min="0"
                   className="input focus:outline-none focus:ring-0"
                   placeholder="Type here"
                   value={payload}

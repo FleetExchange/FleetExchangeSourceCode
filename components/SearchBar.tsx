@@ -1,7 +1,9 @@
 "use client";
 
+import { usePlacesWithRestrictions } from "@/hooks/usePlacesWithRestrictions";
 import { useState } from "react";
 import { IoIosSearch } from "react-icons/io";
+import { AddressAutocomplete } from "./AddressAutocomplete";
 
 export default function SearchBar({
   onSearch,
@@ -11,6 +13,17 @@ export default function SearchBar({
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [arrival, setArrival] = useState("");
+
+  // Add Places Autocomplete hooks for origin and destination
+  const pickup = usePlacesWithRestrictions({
+    cityName: from,
+    citiesOnly: true, // Enable city-only mode
+  });
+
+  const delivery = usePlacesWithRestrictions({
+    cityName: to,
+    citiesOnly: true, // Enable city-only mode
+  });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,12 +36,23 @@ export default function SearchBar({
         <div className="flex h-18 w-[175px] rounded-2xl hover:bg-base-200 items-center focus-within:bg-base-200">
           <fieldset className="fieldset ml-4">
             <legend className="fieldset-legend ml-3 mb-0 pb-0">Origin</legend>
-            <input
-              type="text"
-              placeholder="Enter City"
+
+            <AddressAutocomplete
               value={from}
-              onChange={(e) => setFrom(e.target.value)}
-              className="input input-ghost w-[120px] input-xs mt-0 pt-0 focus:bg-base-200 focus:outline-none focus:ring-0 focus:border-transparent"
+              onChange={(address) => {
+                setFrom(address || "");
+                pickup.setValue(address || ""); // Add this line to update input value
+              }}
+              ready={pickup.ready}
+              inputValue={pickup.value}
+              onInputChange={(value) => {
+                pickup.setValue(value);
+                // Don't update 'from' here, wait for selection
+              }}
+              suggestions={pickup.suggestions}
+              status={pickup.status}
+              clearSuggestions={pickup.clearSuggestions}
+              label="Enter City"
             />
           </fieldset>
         </div>
@@ -38,12 +62,22 @@ export default function SearchBar({
             <legend className="fieldset-legend ml-3 mb-0 pb-0">
               Destination
             </legend>
-            <input
-              type="text"
-              placeholder="Enter City"
+            <AddressAutocomplete
               value={to}
-              onChange={(e) => setTo(e.target.value)}
-              className="input input-ghost w-[120px] input-xs mt-0 pt-0 focus:bg-base-200 focus:outline-none focus:ring-0 focus:border-transparent"
+              onChange={(address) => {
+                setTo(address || "");
+                delivery.setValue(address || ""); // Add this line to update input value
+              }}
+              ready={delivery.ready}
+              inputValue={delivery.value}
+              onInputChange={(value) => {
+                delivery.setValue(value);
+                // Don't update 'to' here, wait for selection
+              }}
+              suggestions={delivery.suggestions}
+              status={delivery.status}
+              clearSuggestions={delivery.clearSuggestions}
+              label="Enter City"
             />
           </fieldset>
         </div>
@@ -56,6 +90,7 @@ export default function SearchBar({
               type="date"
               value={arrival}
               onChange={(e) => setArrival(e.target.value)}
+              min={new Date().toISOString().split("T")[0]} // Prevent past dates
               className="input input-ghost input-xs mt-0 pt-0 focus:bg-base-200 focus:outline-none focus:ring-0 focus:border-transparent"
             />
           </fieldset>

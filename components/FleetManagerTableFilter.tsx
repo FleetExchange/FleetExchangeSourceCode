@@ -124,6 +124,8 @@ const FleetManagerTableFilter = ({
                 <legend className="fieldset-legend">Year of Model</legend>
                 <input
                   type="number"
+                  min="1900"
+                  max={new Date().getFullYear() + 1}
                   className="input focus:outline-none focus:ring-0"
                   placeholder="Type here"
                   value={year}

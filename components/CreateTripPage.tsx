@@ -58,9 +58,11 @@ const CreateTripPage = () => {
       selectedFleetId ? { fleetId: selectedFleetId } : "skip"
     ) ?? [];
 
-  const fleetTrucks = useQuery(api.truck.getTruckByIdArray, {
-    truckIds: fleetTruckIds,
-  });
+  const fleetTrucks =
+    useQuery(
+      api.truck.getTruckByIdArray,
+      fleetTruckIds.length > 0 ? { truckIds: fleetTruckIds } : "skip"
+    ) ?? [];
 
   const createTrip = useMutation(api.trip.createTrip);
 
@@ -197,7 +199,7 @@ const CreateTripPage = () => {
         />
       </fieldset>
 
-      {/* Simplified Price Inputs */}
+      {/* Price Inputs */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <fieldset className="space-y-2">
           <legend className="text-base font-medium">Base Price (R)</legend>

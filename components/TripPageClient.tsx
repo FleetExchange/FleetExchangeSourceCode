@@ -37,9 +37,10 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
   });
 
   // Only query truck if we have a truckId
-  const truck = useQuery(api.truck.getTruckById, {
-    truckId: trip?.truckId ?? "skip",
-  });
+  const truck = useQuery(
+    api.truck.getTruckById,
+    trip?.truckId ? { truckId: trip.truckId } : "skip"
+  );
 
   // Only query trip issuer if we have a userId
   const tripIssuer = useQuery(
@@ -499,6 +500,7 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
                 </legend>
                 <input
                   type="number"
+                  min="0"
                   className="input input-bordered w-full focus:outline-none focus:ring-0"
                   placeholder="Enter cargo weight"
                   value={cargoWeight}

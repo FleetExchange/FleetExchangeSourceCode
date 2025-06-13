@@ -25,6 +25,11 @@ const EditTruckCard: React.FC<EditTruckCardProps> = ({ truckId }) => {
     userId: userId,
   });
 
+  // Check in which fleet the truck is currently in
+  const currentFleet = userFleets?.find((fleet) =>
+    fleet.trucks.includes(truckForEdit?._id as Id<"truck">)
+  );
+
   const [registration, setRegistration] = useState("");
   const [make, setMake] = useState("");
   const [model, setModel] = useState("");
@@ -48,6 +53,7 @@ const EditTruckCard: React.FC<EditTruckCardProps> = ({ truckId }) => {
       setWidth(truckForEdit.width || 0);
       setLength(truckForEdit.length || 0);
       setHeight(truckForEdit.height || 0);
+      setFleet(currentFleet?._id || ""); // Set fleet to current fleet or empty if not in a fleet
     }
   }, [truckForEdit]); // Runs whenever truckForEdit changes
 
@@ -208,6 +214,8 @@ const EditTruckCard: React.FC<EditTruckCardProps> = ({ truckId }) => {
                 <legend className="fieldset-legend">Model Year</legend>
                 <input
                   type="number"
+                  min="1900"
+                  max={new Date().getFullYear() + 1}
                   className="input focus:outline-none focus:ring-0"
                   value={year}
                   onChange={(e) => setYear(e.target.value)}
@@ -243,6 +251,7 @@ const EditTruckCard: React.FC<EditTruckCardProps> = ({ truckId }) => {
                     <legend className="fieldset-legend">Width</legend>
                     <input
                       type="number"
+                      min="0"
                       className="input focus:outline-none focus:ring-0"
                       value={width}
                       onChange={(e) => setWidth(parseFloat(e.target.value))}
@@ -253,6 +262,7 @@ const EditTruckCard: React.FC<EditTruckCardProps> = ({ truckId }) => {
                     <legend className="fieldset-legend">Length</legend>
                     <input
                       type="number"
+                      min="0"
                       className="input focus:outline-none focus:ring-0"
                       value={length}
                       onChange={(e) => setLength(parseFloat(e.target.value))}
@@ -263,6 +273,7 @@ const EditTruckCard: React.FC<EditTruckCardProps> = ({ truckId }) => {
                     <legend className="fieldset-legend">Height</legend>
                     <input
                       type="number"
+                      min="0"
                       className="input focus:outline-none focus:ring-0"
                       value={height}
                       onChange={(e) => setHeight(parseFloat(e.target.value))}
@@ -275,6 +286,7 @@ const EditTruckCard: React.FC<EditTruckCardProps> = ({ truckId }) => {
                     </legend>
                     <input
                       type="number"
+                      min="0"
                       className="input focus:outline-none focus:ring-0"
                       value={maxLoadCapacity}
                       onChange={(e) =>
@@ -297,7 +309,7 @@ const EditTruckCard: React.FC<EditTruckCardProps> = ({ truckId }) => {
                   </legend>
                   <select
                     className="select focus:outline-none focus:ring-0"
-                    defaultValue={fleet}
+                    value={fleet}
                     onChange={(e) => setFleet(e.target.value)}
                   >
                     <option value="">Select a fleet</option>

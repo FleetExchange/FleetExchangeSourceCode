@@ -140,6 +140,8 @@ const NewTruckCard = () => {
                 <legend className="fieldset-legend">Model Year</legend>
                 <input
                   type="number"
+                  min="1900"
+                  max={new Date().getFullYear() + 1}
                   className="input focus:outline-none focus:ring-0"
                   placeholder="Type here"
                   value={year}
@@ -176,6 +178,7 @@ const NewTruckCard = () => {
                     <legend className="fieldset-legend">Width</legend>
                     <input
                       type="number"
+                      min="0"
                       className="input focus:outline-none focus:ring-0"
                       placeholder="Type here"
                       value={width}
@@ -187,6 +190,7 @@ const NewTruckCard = () => {
                     <legend className="fieldset-legend">Length</legend>
                     <input
                       type="number"
+                      min="0"
                       className="input focus:outline-none focus:ring-0"
                       placeholder="Type here"
                       value={length}
@@ -198,6 +202,7 @@ const NewTruckCard = () => {
                     <legend className="fieldset-legend">Height</legend>
                     <input
                       type="number"
+                      min="0"
                       className="input focus:outline-none focus:ring-0"
                       placeholder="Type here"
                       value={height}
@@ -211,6 +216,7 @@ const NewTruckCard = () => {
                     </legend>
                     <input
                       type="number"
+                      min="0"
                       className="input focus:outline-none focus:ring-0"
                       placeholder="Type here"
                       value={maxLoadCapacity}

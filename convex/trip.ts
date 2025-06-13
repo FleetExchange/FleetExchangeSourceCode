@@ -175,6 +175,11 @@ export const getTrip = query({
       });
     }
 
+    // make sure trip isExpire != true
+    trips = trips.filter((trip) => {
+      return trip.isExpired != true;
+    });
+
     return trips;
   },
 });
