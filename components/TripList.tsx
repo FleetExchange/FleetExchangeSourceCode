@@ -6,6 +6,8 @@ import Spinner from "./spinner";
 import { CalendarDays, Ticket } from "lucide-react";
 import TripCard from "./TripCard";
 import { TbClipboardOff } from "react-icons/tb";
+import { useState } from "react";
+import PaginationControls from "./PaginationControls";
 
 type SortOption = "departureDate" | "price";
 
@@ -27,6 +29,7 @@ type FilterTerm = {
   payload: string;
 };
 
+const ITEMS_PER_PAGE = 20;
 const TripList = ({
   searchTerm,
   filterTerm,
@@ -36,10 +39,20 @@ const TripList = ({
   filterTerm: FilterTerm;
   sortBy: SortOption;
 }) => {
+  const [currentPage, setCurrentPage] = useState(1);
+
   //Get all events
   const fetchedTrip = useQuery(api.trip.getTrip, { searchTerm, filterTerm });
-
   let trip = [...(fetchedTrip ?? [])]; // Safe copy, never undefined
+
+  // Calculate pagination values
+  const totalItems = trip.length;
+  const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+
+  // Get current page items
+  const currentItems = trip.slice(startIndex, endIndex);
 
   // Sorted events
   if (sortBy === "departureDate") {
@@ -85,11 +98,22 @@ const TripList = ({
 
       {/* Upcoming Trips Grid */}
       {trip.length > 0 ? (
-        <div className="grid grid-cols-1 mb-12">
-          {trip.map((trip) => (
-            <TripCard key={trip._id} tripId={trip._id} />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-1 mb-12">
+            {currentItems.map((trip) => (
+              <TripCard key={trip._id} tripId={trip._id} />
+            ))}
+          </div>
+          <PaginationControls
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={(page) => {
+              setCurrentPage(page);
+              // Scroll to top of list
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
+          />
+        </>
       ) : (
         <div className="bg-base-100 rounded-lg p-12 text-center mb-12">
           <TbClipboardOff className="w-12 h-12 text-neutral-400 mx-auto mb-4" />

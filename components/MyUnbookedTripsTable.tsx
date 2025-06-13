@@ -7,10 +7,15 @@ import { CiMenuKebab, CiSearch } from "react-icons/ci";
 
 import Link from "next/link";
 import { useState } from "react";
+import PaginationControls from "./PaginationControls";
 
 type SortOption = "Price Asc" | "Price Desc" | "Date Asc" | "Date Desc";
 
 const MyUnbookedTripsTable = () => {
+  // Pagination constant
+  const ITEMS_PER_PAGE = 20;
+  const [currentPage, setCurrentPage] = useState(1);
+
   // define all states for filtering and sorting
   const [searchTerm, setSearchTerm] = useState("");
   const [pastOrUpcoming, setPastOrFuture] = useState<
@@ -87,6 +92,15 @@ const MyUnbookedTripsTable = () => {
     }
   });
 
+  // Calculate pagination values
+  const totalItems = sortedAndFilteredTrips.length;
+  const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+
+  // Get current page items
+  const currentItems = sortedAndFilteredTrips.slice(startIndex, endIndex);
+
   return (
     <>
       <div className="relative top-[50px] flex w-full max-w-8xl flex-col p-8">
@@ -136,6 +150,15 @@ const MyUnbookedTripsTable = () => {
               <option value="Price Asc">Price Ascending</option>
               <option value="Price Desc">Price Descending</option>
             </select>
+            <PaginationControls
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={(page) => {
+                setCurrentPage(page);
+                // Scroll to top of list
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }}
+            />
           </div>
         </div>
 
@@ -158,7 +181,7 @@ const MyUnbookedTripsTable = () => {
               </thead>
               {/* Table Body */}
               <tbody>
-                {sortedAndFilteredTrips?.map((trip, index) => {
+                {currentItems?.map((trip, index) => {
                   const truck = trucks?.find((t) => t._id === trip.truckId);
 
                   return (

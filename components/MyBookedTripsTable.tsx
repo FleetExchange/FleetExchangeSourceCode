@@ -7,10 +7,15 @@ import { CiMenuKebab, CiSearch } from "react-icons/ci";
 
 import Link from "next/link";
 import { useState } from "react";
+import PaginationControls from "./PaginationControls";
 
 type SortOption = "Price Asc" | "Price Desc" | "Date Asc" | "Date Desc";
 
 const MyBookedTripsTable = () => {
+  // Pagination constant
+  const ITEMS_PER_PAGE = 20;
+  const [currentPage, setCurrentPage] = useState(1);
+
   // define all states for filtering and sorting
   const [searchTerm, setSearchTerm] = useState("");
   const [statusSelection, setStatusSelection] = useState<
@@ -114,6 +119,15 @@ const MyBookedTripsTable = () => {
     }
   });
 
+  // Calculate pagination values
+  const totalItems = sortedAndFilteredBookings.length;
+  const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+
+  // Get current page items
+  const currentItems = sortedAndFilteredBookings.slice(startIndex, endIndex);
+
   return (
     <>
       <div className="relative top-[50px] flex w-full max-w-8xl flex-col p-8">
@@ -190,6 +204,15 @@ const MyBookedTripsTable = () => {
               <option value="Price Asc">Price Ascending</option>
               <option value="Price Desc">Price Descending</option>
             </select>
+            <PaginationControls
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={(page) => {
+                setCurrentPage(page);
+                // Scroll to top of list
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }}
+            />
           </div>
         </div>
 
@@ -213,7 +236,7 @@ const MyBookedTripsTable = () => {
               </thead>
               {/* Table Body */}
               <tbody>
-                {sortedAndFilteredBookings?.map((booking, index) => {
+                {currentItems?.map((booking, index) => {
                   const purchase = purchasedTrips?.find(
                     (t) => t.tripId === booking._id
                   );

@@ -3,12 +3,12 @@ import { mutation, query } from "./_generated/server";
 
 export const getFleetForCurrentUser = query({
   args: {
-    userId: v.string(), // userId passed from frontend
+    userId: v.union(v.string(), v.literal("skip")),
   },
   handler: async (ctx, { userId }) => {
-    // Check if the userId exists
-    if (!userId) {
-      throw new Error("User ID is required");
+    // Handle the skip case
+    if (userId === "skip") {
+      return null;
     }
 
     // Query user by Clerk's userId
@@ -21,7 +21,7 @@ export const getFleetForCurrentUser = query({
       throw new Error("User not found in Convex DB");
     }
 
-    // Now that we have the user, query their fleets
+    // Query their fleets
     return await ctx.db
       .query("fleet")
       .filter((q) => q.eq(q.field("userId"), user._id)) // Query fleets by user ID

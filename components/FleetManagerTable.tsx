@@ -12,17 +12,23 @@ import NewFleetModal from "./NewFleetModal";
 import EditFleetCard from "./EditFleetCard";
 import EditFleetModal from "./EditFleetModal";
 import Link from "next/link";
+import PaginationControls from "./PaginationControls";
 
 const FleetManagerTable = () => {
+  // Pagination constant
+  const ITEMS_PER_PAGE = 20;
+  const [currentPage, setCurrentPage] = useState(1);
+
   // Get the logged in user identity
   const { user } = useUser();
   // This is the Clerk user ID
   const userId = user?.id ?? "";
 
   // Get all fleets that belong to user
-  const userFleets = useQuery(api.fleet.getFleetForCurrentUser, {
-    userId: userId,
-  });
+  const userFleets = useQuery(
+    api.fleet.getFleetForCurrentUser,
+    userId ? { userId } : "skip"
+  );
   // Set the current selected fleet from selector
   const [userFleet, setUserFleet] = useState<string | undefined>(undefined);
 
@@ -115,10 +121,36 @@ const FleetManagerTable = () => {
     filteredTrucks.sort((a, b) => a.height - b.height);
   }
 
+  // Add loading state handling
+  if (!user || !userId) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        Loading user...
+      </div>
+    );
+  }
+
+  if (!userFleets) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        Loading fleets...
+      </div>
+    );
+  }
+
   // If the user has no fleets, a message is shown
   if (!userFleets) {
     return <p>Loading fleets...</p>; // or a spinner
   }
+
+  // Calculate pagination values
+  const totalItems = filteredTrucks.length;
+  const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+
+  // Get current page items
+  const currentItems = filteredTrucks.slice(startIndex, endIndex);
 
   return (
     <>
@@ -179,6 +211,15 @@ const FleetManagerTable = () => {
                 setFilterTerm(filterTerm);
               }}
             />
+            <PaginationControls
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={(page) => {
+                setCurrentPage(page);
+                // Scroll to top of list
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }}
+            />
           </div>
 
           {/* Action Button */}
@@ -232,7 +273,7 @@ const FleetManagerTable = () => {
               </thead>
               {/* Table Body */}
               <tbody>
-                {filteredTrucks.map((truck, index) => (
+                {currentItems.map((truck, index) => (
                   <tr key={truck.registration} className="bg-base-100">
                     <th>{index + 1}</th>
                     <td>{truck.registration}</td>

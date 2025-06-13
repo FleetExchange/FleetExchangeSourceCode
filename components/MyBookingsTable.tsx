@@ -7,10 +7,15 @@ import { CiMenuKebab, CiSearch } from "react-icons/ci";
 
 import Link from "next/link";
 import { useState } from "react";
+import PaginationControls from "./PaginationControls";
 
 type SortOption = "Price Asc" | "Price Desc" | "Date Asc" | "Date Desc";
 
 const MyBookingsTable = () => {
+  // Pagination constant
+  const ITEMS_PER_PAGE = 20;
+  const [currentPage, setCurrentPage] = useState(1);
+
   // Get the logged in user identity
   const { user } = useUser();
   // This is the Clerk user ID
@@ -56,30 +61,31 @@ const MyBookingsTable = () => {
   const [sortBy, setSortBy] = useState<SortOption>("Date Asc");
 
   // Add this filtering function before the return statement
-  const filteredBookings = userBookings?.filter((booking) => {
-    const trip = trips?.find((t) => t._id === booking.tripId);
+  const filteredBookings =
+    userBookings?.filter((booking) => {
+      const trip = trips?.find((t) => t._id === booking.tripId);
 
-    if (!trip) return false;
+      if (!trip) return false;
 
-    // Filter by past or upcoming trips
-    const currentDate = new Date();
-    if (pastOrUpcoming === "Upcomming Trips") {
-      if (trip.departureDate && new Date(trip.departureDate) < currentDate) {
-        return false; // Exclude past trips
+      // Filter by past or upcoming trips
+      const currentDate = new Date();
+      if (pastOrUpcoming === "Upcomming Trips") {
+        if (trip.departureDate && new Date(trip.departureDate) < currentDate) {
+          return false; // Exclude past trips
+        }
+      } else if (pastOrUpcoming === "Past Trips") {
+        if (trip.departureDate && new Date(trip.departureDate) >= currentDate) {
+          return false; // Exclude upcoming trips
+        }
       }
-    } else if (pastOrUpcoming === "Past Trips") {
-      if (trip.departureDate && new Date(trip.departureDate) >= currentDate) {
-        return false; // Exclude upcoming trips
-      }
-    }
 
-    const searchString = searchTerm.toLowerCase();
-    return (
-      (trip.originAddress?.toLowerCase().includes(searchString) ||
-        trip.destinationAddress?.toLowerCase().includes(searchString)) &&
-      (statusSelection === "Any Status" || booking.status === statusSelection)
-    );
-  });
+      const searchString = searchTerm.toLowerCase();
+      return (
+        (trip.originAddress?.toLowerCase().includes(searchString) ||
+          trip.destinationAddress?.toLowerCase().includes(searchString)) &&
+        (statusSelection === "Any Status" || booking.status === statusSelection)
+      );
+    }) ?? [];
   // Sort the filtered bookings based on the selected sort option
   const sortedAndFilteredBookings = filteredBookings?.sort((a, b) => {
     const tripA = trips?.find((t) => t._id === a.tripId);
@@ -100,6 +106,15 @@ const MyBookingsTable = () => {
         return 0;
     }
   });
+
+  // Calculate pagination values
+  const totalItems = sortedAndFilteredBookings.length;
+  const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+
+  // Get current page items
+  const currentItems = sortedAndFilteredBookings.slice(startIndex, endIndex);
 
   return (
     <>
@@ -176,6 +191,15 @@ const MyBookingsTable = () => {
               <option value="Price Asc">Price Ascending</option>
               <option value="Price Desc">Price Descending</option>
             </select>
+            <PaginationControls
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={(page) => {
+                setCurrentPage(page);
+                // Scroll to top of list
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }}
+            />
           </div>
         </div>
 
@@ -198,7 +222,7 @@ const MyBookingsTable = () => {
               </thead>
               {/* Table Body */}
               <tbody>
-                {sortedAndFilteredBookings?.map((booking, index) => {
+                {currentItems?.map((booking, index) => {
                   const trip = trips?.find((t) => t._id === booking.tripId);
 
                   return (
