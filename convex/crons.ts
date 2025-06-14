@@ -19,6 +19,7 @@ export const markExpiredTrips = internalMutation({
       .filter((q) =>
         q.and(
           q.eq(q.field("isBooked"), false),
+          q.eq(q.field("isExpired"), false),
           q.lt(q.field("departureDate"), currentDate)
         )
       )
