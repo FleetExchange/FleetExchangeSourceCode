@@ -53,22 +53,17 @@ export default defineSchema({
   }),
 
   users: defineTable({
-    clerkId: v.string(), // Store Clerk ID here
-    name: v.string(), // Name of the company
-    email: v.string(), // Companies Email address registered with account
-    /*stripeConnectId: v.optional(v.string()),
-    userType: v.optional(
-      v.union(
-        // Type of account the company has, admin is placeholder for business accounts
-        v.literal("transporter"),
-        v.literal("client"),
-        v.literal("admin")
-      )
+    clerkId: v.string(),
+    role: v.union(
+      v.literal("client"),
+      v.literal("transporter"),
+      v.literal("admin")
     ),
-    logo: v.optional(v.string()),*/
-  })
-    .index("by_email", ["email"])
-    .index("by_clerk_id", ["clerkId"]),
+    isApproved: v.boolean(),
+    email: v.string(),
+    name: v.string(),
+    createdAt: v.optional(v.number()), // Make this optional
+  }).index("by_clerk_id", ["clerkId"]),
 
   fleet: defineTable({
     fleetName: v.string(), // Name of the fleet

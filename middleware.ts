@@ -1,10 +1,5 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
-
-const isProtectedRoute = createRouteMatcher(["/(.*)"]);
-
-export default clerkMiddleware(async (auth, req) => {
-  if (isProtectedRoute(req)) await auth.protect();
-});
+import { NextResponse } from "next/server";
 
 export const config = {
   matcher: [
@@ -14,3 +9,34 @@ export const config = {
     "/(api|trpc)(.*)",
   ],
 };
+
+const isProtectedRoute = createRouteMatcher([
+  "/transporter(.*)",
+  "/client(.*)",
+  "/admin(.*)",
+]);
+
+const isPublicRoute = createRouteMatcher([
+  "/",
+  "/signUp(.*)",
+  "/signIn(.*)",
+  "/pending-approval",
+  "/unauthorized",
+]);
+
+export default clerkMiddleware(async (auth, req) => {
+  const { userId } = await auth();
+
+  // Allow access to public routes
+  if (isPublicRoute(req)) {
+    return;
+  }
+
+  // Redirect to sign-in if accessing protected route without authentication
+  if (isProtectedRoute(req) && !userId) {
+    return (await auth()).redirectToSignIn();
+  }
+
+  // For authenticated users on protected routes, let the components handle role checking
+  return;
+});
