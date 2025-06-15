@@ -62,7 +62,7 @@ export default defineSchema({
     isApproved: v.boolean(),
     email: v.string(),
     name: v.string(),
-    contactNumber: v.optional(v.string()),
+    contactNumber: v.string(),
     createdAt: v.optional(v.number()), // Make this optional
   }).index("by_clerk_id", ["clerkId"]),
 

@@ -102,7 +102,7 @@ const CreateAccountPage = () => {
               path="/create-account"
               routing="path"
               signInUrl="/sign-in"
-              afterSignUpUrl="/pending-approval"
+              fallbackRedirectUrl="/pending-approval" // ← Changed from afterSignUpUrl
               appearance={{
                 elements: {
                   formButtonPrimary: "btn btn-primary w-full",
