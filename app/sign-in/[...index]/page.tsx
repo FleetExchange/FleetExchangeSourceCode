@@ -25,7 +25,7 @@ const Page = () => {
   return (
     <div className="min-h-screen bg-base-200 flex items-center justify-center">
       <SignIn
-        path="/signIn"
+        path="/sign-in"
         routing="path"
         signUpUrl="/signUp"
         afterSignInUrl="/dashboard"

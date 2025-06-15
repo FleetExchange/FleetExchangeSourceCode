@@ -1,5 +1,4 @@
 "use client";
-import { SignUp } from "@clerk/nextjs";
 import { useUser } from "@clerk/nextjs";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -7,20 +6,20 @@ import { useRouter } from "next/navigation";
 const Page = () => {
   const { user, isLoaded } = useUser();
   const router = useRouter();
-  const [selectedRole, setSelectedRole] = useState<
-    "client" | "transporter" | ""
-  >("");
-  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [formData, setFormData] = useState({
+    role: "",
+    businessName: "",
+    contactNumber: "",
+    acceptedTerms: false,
+  });
 
   // Redirect if user is already signed in
   useEffect(() => {
     if (isLoaded && user) {
-      // You could also check their role and redirect to specific dashboard
-      router.push("/dashboard"); // or wherever your main app is
+      router.push("/dashboard");
     }
   }, [isLoaded, user, router]);
 
-  // Show loading while checking auth status
   if (!isLoaded) {
     return (
       <div className="min-h-screen bg-base-200 flex items-center justify-center">
@@ -29,10 +28,15 @@ const Page = () => {
     );
   }
 
-  // Don't render signup form if user is signed in
   if (user) {
-    return null; // or a loading spinner while redirecting
+    return null;
   }
+
+  const handleContinue = () => {
+    // Save to localStorage and redirect to create-account page
+    localStorage.setItem("freightConnectProfileData", JSON.stringify(formData));
+    router.push("/create-account");
+  };
 
   return (
     <div className="min-h-screen bg-base-200 flex">
@@ -41,19 +45,19 @@ const Page = () => {
         <div className="w-full max-w-md">
           <div className="bg-base-100 rounded-lg shadow-lg p-8">
             <h1 className="text-2xl font-bold text-center mb-6">
-              Create Account
+              Account Information
             </h1>
 
             {/* Role Selection */}
-            <div className="mb-6">
+            <div className="mb-4">
               <label className="label">
-                <span className="label-text font-medium">Account Type</span>
+                <span className="label-text font-medium">Account Type *</span>
               </label>
               <select
                 className="select select-bordered w-full"
-                value={selectedRole}
+                value={formData.role}
                 onChange={(e) =>
-                  setSelectedRole(e.target.value as "client" | "transporter")
+                  setFormData({ ...formData, role: e.target.value })
                 }
               >
                 <option value="">Select account type</option>
@@ -64,14 +68,51 @@ const Page = () => {
               </select>
             </div>
 
+            {/* Business Name */}
+            <div className="mb-4">
+              <label className="label">
+                <span className="label-text font-medium">Business Name *</span>
+              </label>
+              <input
+                type="text"
+                className="input input-bordered w-full"
+                placeholder="Your business name"
+                value={formData.businessName}
+                onChange={(e) =>
+                  setFormData({ ...formData, businessName: e.target.value })
+                }
+              />
+            </div>
+
+            {/* Contact Number */}
+            <div className="mb-4">
+              <label className="label">
+                <span className="label-text font-medium">Contact Number *</span>
+              </label>
+              <input
+                type="tel"
+                className="input input-bordered w-full"
+                placeholder="+27 123 456 7890"
+                value={formData.contactNumber}
+                onChange={(e) =>
+                  setFormData({ ...formData, contactNumber: e.target.value })
+                }
+              />
+            </div>
+
             {/* Terms Checkbox */}
             <div className="form-control mb-6">
               <label className="label cursor-pointer">
                 <input
                   type="checkbox"
                   className="checkbox checkbox-primary"
-                  checked={acceptedTerms}
-                  onChange={(e) => setAcceptedTerms(e.target.checked)}
+                  checked={formData.acceptedTerms}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      acceptedTerms: e.target.checked,
+                    })
+                  }
                 />
                 <span className="label-text ml-2">
                   I agree to the Terms of Service and Privacy Policy
@@ -79,29 +120,28 @@ const Page = () => {
               </label>
             </div>
 
-            {/* Clerk SignUp Component */}
-            {selectedRole && acceptedTerms && (
-              <SignUp
-                path="/signUp"
-                routing="path"
-                signInUrl="/signIn"
-                afterSignUpUrl="/pending-approval"
-                appearance={
-                  {
-                    /* ... */
-                  }
-                }
-                // Pass selectedRole as public metadata
-                unsafeMetadata={{
-                  role: selectedRole,
-                }}
-              />
-            )}
+            {/* Continue Button */}
+            <button
+              className="btn btn-primary w-full"
+              disabled={
+                !formData.role ||
+                !formData.businessName ||
+                !formData.contactNumber ||
+                !formData.acceptedTerms
+              }
+              onClick={handleContinue}
+            >
+              Continue to Account Creation
+            </button>
 
-            {(!selectedRole || !acceptedTerms) && (
-              <div className="text-center text-base-content/60">
-                Please select an account type and accept terms to continue
-              </div>
+            {/* Validation Message */}
+            {(!formData.role ||
+              !formData.businessName ||
+              !formData.contactNumber ||
+              !formData.acceptedTerms) && (
+              <p className="text-sm text-base-content/60 text-center mt-2">
+                Please fill in all fields and accept terms to continue
+              </p>
             )}
           </div>
         </div>
@@ -112,7 +152,7 @@ const Page = () => {
         <div className="max-w-lg">
           <h2 className="text-3xl font-bold mb-6">Join FreightConnect</h2>
 
-          {selectedRole === "client" && (
+          {formData.role === "client" && (
             <div className="space-y-4">
               <h3 className="text-xl font-semibold">As a Client, you can:</h3>
               <ul className="space-y-2">
@@ -132,7 +172,7 @@ const Page = () => {
             </div>
           )}
 
-          {selectedRole === "transporter" && (
+          {formData.role === "transporter" && (
             <div className="space-y-4">
               <h3 className="text-xl font-semibold">
                 As a Transporter, you can:
@@ -154,7 +194,7 @@ const Page = () => {
             </div>
           )}
 
-          {!selectedRole && (
+          {!formData.role && (
             <div className="space-y-4">
               <h3 className="text-xl font-semibold">
                 Why Choose FreightConnect?

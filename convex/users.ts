@@ -24,31 +24,36 @@ export const getUserByClerkId = query({
 
 export const updateUser = mutation({
   args: {
-    userId: v.string(), // Clerk ID
+    userId: v.string(),
     name: v.string(),
     email: v.string(),
+    role: v.union(v.literal("client"), v.literal("transporter")),
+    contactNumber: v.string(),
   },
-  handler: async (ctx, { userId, name, email }) => {
+  handler: async (ctx, args) => {
     const existingUser = await ctx.db
       .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", userId))
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.userId))
       .first();
 
     if (existingUser) {
       await ctx.db.patch(existingUser._id, {
-        name,
-        email,
+        name: args.name,
+        email: args.email,
+        role: args.role,
+        contactNumber: args.contactNumber,
       });
       return existingUser._id;
     }
 
     const newUserId = await ctx.db.insert("users", {
-      clerkId: userId,
-      name,
-      email,
-      role: "client", // Default role for new users
-      isApproved: false, // Default approval status
-      createdAt: Date.now(), // Current timestamp
+      clerkId: args.userId,
+      name: args.name,
+      email: args.email,
+      role: args.role,
+      isApproved: false,
+      createdAt: Date.now(),
+      contactNumber: args.contactNumber,
     });
 
     return newUserId;
@@ -85,15 +90,18 @@ export const createUserFromClerk = mutation({
     name: v.string(),
     email: v.string(),
     role: v.union(v.literal("client"), v.literal("transporter")),
+    contactNumber: v.string(),
   },
-  handler: async (ctx, { userId, name, email, role }) => {
+  handler: async (ctx, args) => {
+    console.log("Creating user with role:", args.role); // Debug log
     return await ctx.db.insert("users", {
-      clerkId: userId,
-      name,
-      email,
-      role,
+      clerkId: args.userId,
+      name: args.name,
+      email: args.email,
+      role: args.role,
       isApproved: false,
       createdAt: Date.now(),
+      contactNumber: args.contactNumber,
     });
   },
 });
