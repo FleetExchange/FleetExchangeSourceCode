@@ -87,22 +87,11 @@ const CreateAccountPage = () => {
               Create Your Account
             </h1>
 
-            {/* Debug logging */}
-            {(() => {
-              console.log("=== CREATE ACCOUNT DEBUG ===");
-              console.log("Profile data loaded:", profileData);
-              console.log("Role:", profileData.role);
-              console.log("Business name:", profileData.businessName);
-              console.log("Contact:", profileData.contactNumber);
-              console.log("============================");
-              return null;
-            })()}
-
             <SignUp
               path="/create-account"
               routing="path"
               signInUrl="/sign-in"
-              fallbackRedirectUrl="/pending-approval" // ← Changed from afterSignUpUrl
+              fallbackRedirectUrl="/pending-approval"
               appearance={{
                 elements: {
                   formButtonPrimary: "btn btn-primary w-full",
