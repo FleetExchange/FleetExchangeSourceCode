@@ -6,13 +6,9 @@ export default function ClientLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" data-theme="corporate">
-      <body>
-        <div className="flex">
-          <Sidebar />
-          <main className="flex-1">{children}</main>
-        </div>
-      </body>
-    </html>
+    <div className="flex">
+      <Sidebar />
+      <main className="flex-1">{children}</main>
+    </div>
   );
 }

@@ -20,7 +20,7 @@ const Page = () => {
   // Redirect if user is approved
   useEffect(() => {
     if (isLoaded && convexUser?.isApproved) {
-      <RoleBasedRedirect />;
+      router.push(`/${convexUser.role}/dashboard`); // ✅ Redirect properly
     }
   }, [isLoaded, convexUser, router]);
 
@@ -39,11 +39,16 @@ const Page = () => {
     );
   }
 
-  // If user is approved, don't show this page (redirect will happen)
+  // If user is approved, show loading while redirect happens
   if (convexUser?.isApproved) {
     return (
       <div className="min-h-screen bg-base-200 flex items-center justify-center">
-        <div className="loading loading-spinner loading-lg"></div>
+        <div className="text-center">
+          <div className="loading loading-spinner loading-lg mb-4"></div>
+          <p className="text-base-content/60">
+            Account approved! Redirecting to dashboard...
+          </p>
+        </div>
       </div>
     );
   }

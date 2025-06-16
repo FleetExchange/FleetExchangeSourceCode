@@ -32,7 +32,8 @@ const CreateAccountPage = () => {
   // Redirect if user is already signed in
   useEffect(() => {
     if (isLoaded && user) {
-      <RoleBasedRedirect />;
+      router.push("/sign-in"); // Redirect to sign-in if user is already logged in
+      return;
     }
   }, [isLoaded, user, router]);
 

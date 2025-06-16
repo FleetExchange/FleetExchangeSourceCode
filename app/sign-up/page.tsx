@@ -3,6 +3,8 @@ import { useUser } from "@clerk/nextjs";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import RoleBasedRedirect from "@/components/RoleBasedRedirect";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 
 const Page = () => {
   const { user, isLoaded } = useUser();
@@ -17,7 +19,9 @@ const Page = () => {
   // Redirect if user is already signed in
   useEffect(() => {
     if (isLoaded && user) {
-      <RoleBasedRedirect />;
+      // if the user is logged in, push to sign in page because they should not be here and there is handling based on type of user and approval state
+      router.push("/sign-in"); // Or handle redirect logic
+      return;
     }
   }, [isLoaded, user, router]);
 
@@ -30,7 +34,7 @@ const Page = () => {
   }
 
   if (user) {
-    return null;
+    return <RoleBasedRedirect />;
   }
 
   const handleContinue = () => {
