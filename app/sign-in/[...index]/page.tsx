@@ -1,25 +1,17 @@
 "use client";
 import { SignIn } from "@clerk/nextjs";
 import { useUser } from "@clerk/nextjs";
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import RoleBasedRedirect from "@/components/RoleBasedRedirect";
 
 const Page = () => {
   const { user, isLoaded } = useUser();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (isLoaded && user) {
-      router.push("/dashboard");
-    }
-  }, [isLoaded, user, router]);
 
   if (!isLoaded) {
     return <div className="loading loading-spinner loading-lg"></div>;
   }
 
   if (user) {
-    return null;
+    return <RoleBasedRedirect />;
   }
 
   return (
@@ -27,8 +19,8 @@ const Page = () => {
       <SignIn
         path="/sign-in"
         routing="path"
-        signUpUrl="/signUp"
-        afterSignInUrl="/dashboard"
+        signUpUrl="/sign-up"
+        fallbackRedirectUrl="/pending-approval"
       />
     </div>
   );

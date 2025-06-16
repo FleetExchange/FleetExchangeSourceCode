@@ -1,5 +1,11 @@
 "use client";
 
-const page = () => {};
+const TransporterDashPage = () => {
+  return (
+    <div>
+      <h1> Transporter Dashboard </h1>
+    </div>
+  );
+};
 
-export default page;
+export default TransporterDashPage;

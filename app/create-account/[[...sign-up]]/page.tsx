@@ -3,6 +3,7 @@ import { SignUp } from "@clerk/nextjs";
 import { useUser } from "@clerk/nextjs";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import RoleBasedRedirect from "@/components/RoleBasedRedirect";
 
 interface ProfileData {
   role: string;
@@ -21,7 +22,7 @@ const CreateAccountPage = () => {
 
     if (!savedData) {
       // If no profile data, redirect back to signup
-      router.push("/signUp");
+      router.push("/sign-up");
       return;
     }
 
@@ -31,7 +32,7 @@ const CreateAccountPage = () => {
   // Redirect if user is already signed in
   useEffect(() => {
     if (isLoaded && user) {
-      router.push("/dashboard");
+      <RoleBasedRedirect />;
     }
   }, [isLoaded, user, router]);
 
@@ -59,7 +60,7 @@ const CreateAccountPage = () => {
                 <span>Step 2 of 2</span>
                 <button
                   className="btn btn-ghost btn-sm"
-                  onClick={() => router.push("/signUp")}
+                  onClick={() => router.push("/sign-up")}
                 >
                   ← Back
                 </button>

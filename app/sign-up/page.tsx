@@ -2,6 +2,7 @@
 import { useUser } from "@clerk/nextjs";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import RoleBasedRedirect from "@/components/RoleBasedRedirect";
 
 const Page = () => {
   const { user, isLoaded } = useUser();
@@ -16,7 +17,7 @@ const Page = () => {
   // Redirect if user is already signed in
   useEffect(() => {
     if (isLoaded && user) {
-      router.push("/dashboard");
+      <RoleBasedRedirect />;
     }
   }, [isLoaded, user, router]);
 

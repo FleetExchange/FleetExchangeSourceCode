@@ -5,6 +5,7 @@ import { api } from "@/convex/_generated/api";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { Clock, Mail, Phone, CheckCircle } from "lucide-react";
+import RoleBasedRedirect from "@/components/RoleBasedRedirect";
 
 const Page = () => {
   const { user, isLoaded } = useUser();
@@ -19,24 +20,14 @@ const Page = () => {
   // Redirect if user is approved
   useEffect(() => {
     if (isLoaded && convexUser?.isApproved) {
-      const role = convexUser.role;
-      switch (role) {
-        case "client":
-          router.push("/client/dashboard");
-          break;
-        case "transporter":
-          router.push("/transporter/dashboard");
-          break;
-        default:
-          router.push("/dashboard");
-      }
+      <RoleBasedRedirect />;
     }
   }, [isLoaded, convexUser, router]);
 
   // Redirect if no user
   useEffect(() => {
     if (isLoaded && !user) {
-      router.push("/signIn");
+      router.push("/sign-in");
     }
   }, [isLoaded, user, router]);
 
