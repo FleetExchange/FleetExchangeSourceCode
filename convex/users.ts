@@ -111,3 +111,14 @@ export const getAllUsers = query({
     return await ctx.db.query("users").collect();
   },
 });
+
+export const getUsersByIds = query({
+  args: { userIds: v.array(v.id("users")) },
+  handler: async (ctx, args) => {
+    if (args.userIds.length === 0) return [];
+
+    const users = await Promise.all(args.userIds.map((id) => ctx.db.get(id)));
+
+    return users.filter((user) => user !== null);
+  },
+});
