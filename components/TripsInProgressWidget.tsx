@@ -4,9 +4,9 @@ import { Id } from "@/convex/_generated/dataModel";
 import { useUser } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
 import { useRouter } from "next/navigation";
-import { MapPin, Calendar, User, ChevronRight } from "lucide-react";
+import { MapPin, Calendar, User, ChevronRight, Truck } from "lucide-react";
 
-const TripToApproveWidget = () => {
+const TripsInProgressWidget = () => {
   const { user } = useUser();
   const router = useRouter();
 
@@ -31,13 +31,14 @@ const TripToApproveWidget = () => {
     tripIds: bookedTripIds.length > 0 ? bookedTripIds : [],
   });
 
-  // Filter for trips that are awaiting confirmation
-  const tripsToApprove =
-    purchasedTrips?.filter((trip) => trip.status === "Awaiting Confirmation") ??
-    [];
+  // Filter for trips that are in progress (booked or dispatched)
+  const tripsInProgress =
+    purchasedTrips?.filter(
+      (trip) => trip.status === "Booked" || trip.status === "Dispatched"
+    ) ?? [];
 
-  // Get all unique booker IDs from trips to approve
-  const bookerIds = [...new Set(tripsToApprove.map((trip) => trip.userId))];
+  // Get all unique booker IDs from trips in progress
+  const bookerIds = [...new Set(tripsInProgress.map((trip) => trip.userId))];
 
   // Get all booker user details
   const bookers = useQuery(api.users.getUsersByIds, {
@@ -69,35 +70,48 @@ const TripToApproveWidget = () => {
     return trip;
   };
 
+  // Helper function to get status badge styling
+  const getStatusBadge = (status: string) => {
+    switch (status.toLowerCase()) {
+      case "booked":
+        return { className: "badge-info", text: "Booked" };
+      case "dispatched":
+        return { className: "badge-success", text: "Dispatched" };
+      default:
+        return { className: "badge-neutral", text: status };
+    }
+  };
+
   return (
     <div className="bg-base-100 rounded-lg shadow-lg p-6 h-full">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-semibold text-warning">Trips to Approve</h2>
-        <div className="badge badge-warning">{tripsToApprove.length}</div>
+        <h2 className="text-xl font-semibold text-info">Trips in Progress</h2>
+        <div className="badge badge-info">{tripsInProgress.length}</div>
       </div>
 
-      {tripsToApprove.length === 0 ? (
+      {tripsInProgress.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-8 text-center">
           <div className="w-16 h-16 bg-base-200 rounded-full flex items-center justify-center mb-4">
-            <Calendar className="w-8 h-8 text-base-content/40" />
+            <Truck className="w-8 h-8 text-base-content/40" />
           </div>
-          <p className="text-base-content/60">No pending approvals</p>
+          <p className="text-base-content/60">No active trips</p>
           <p className="text-sm text-base-content/40 mt-1">
-            New bookings will appear here
+            Active trips will appear here
           </p>
         </div>
       ) : (
         <div className="space-y-3 max-h-80 overflow-y-auto">
-          {tripsToApprove.map((purchasedTrip) => {
+          {tripsInProgress.map((purchasedTrip) => {
             const trip = getTripDetails(purchasedTrip);
             const bookerName = getBookerName(purchasedTrip.userId);
+            const statusBadge = getStatusBadge(purchasedTrip.status);
 
             if (!trip) return null;
 
             return (
               <div
                 key={purchasedTrip._id}
-                onClick={() => handleTripClick(trip._id)}
+                onClick={() => handleTripClick(purchasedTrip.tripId)}
                 className="border border-base-300 rounded-lg p-4 hover:bg-base-200 cursor-pointer transition-colors duration-200 group"
               >
                 {/* Trip Route */}
@@ -120,7 +134,7 @@ const TripToApproveWidget = () => {
                   <div className="flex items-center gap-2">
                     <User className="w-3 h-3 text-info flex-shrink-0" />
                     <div className="min-w-0">
-                      <div className="text-base-content/60">Booked by</div>
+                      <div className="text-base-content/60">Client</div>
                       <div className="font-medium text-base-content truncate">
                         {bookerName}
                       </div>
@@ -140,11 +154,11 @@ const TripToApproveWidget = () => {
 
                 {/* Status Badge */}
                 <div className="mt-3 flex justify-between items-center">
-                  <div className="badge badge-warning badge-sm">
-                    Awaiting Confirmation
+                  <div className={`badge badge-sm ${statusBadge.className}`}>
+                    {statusBadge.text}
                   </div>
                   <div className="text-xs text-base-content/40">
-                    Click to review
+                    Click to manage
                   </div>
                 </div>
               </div>
@@ -153,13 +167,13 @@ const TripToApproveWidget = () => {
         </div>
       )}
 
-      {tripsToApprove.length > 3 && (
+      {tripsInProgress.length > 3 && (
         <div className="mt-4 text-center">
           <button
             onClick={() => router.push("/myTrips")}
             className="btn btn-ghost btn-sm"
           >
-            View All Pending Trips
+            View All Active Trips
           </button>
         </div>
       )}
@@ -167,4 +181,4 @@ const TripToApproveWidget = () => {
   );
 };
 
-export default TripToApproveWidget;
+export default TripsInProgressWidget;

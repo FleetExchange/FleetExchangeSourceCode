@@ -1,5 +1,6 @@
 "use client";
 
+import TripsInProgressWidget from "@/components/TripsInProgressWidget";
 import TripToApproveWidget from "@/components/TripToApproveWidget";
 
 const TransporterDashPage = () => {
@@ -19,24 +20,10 @@ const TransporterDashPage = () => {
         {/* Main Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
           {/* Trips to Approve */}
-          <div className="bg-base-100 rounded-lg shadow-lg p-6">
-            <h2 className="text-xl font-semibold mb-4 text-warning">
-              Trips to Approve
-            </h2>
-            <div className="text-center text-base-content/60">
-              <TripToApproveWidget />
-            </div>
-          </div>
+          <TripToApproveWidget />
 
           {/* Trips in Progress - Takes 2 columns on large screens */}
-          <div className="lg:col-span-2 bg-base-100 rounded-lg shadow-lg p-6">
-            <h2 className="text-xl font-semibold mb-4 text-info">
-              Trips in Progress
-            </h2>
-            <div className="text-center text-base-content/60">
-              No active trips
-            </div>
-          </div>
+          <TripsInProgressWidget />
 
           {/* My Bookings - Full width on mobile, spans remaining space */}
           <div className="lg:col-span-3 bg-base-100 rounded-lg shadow-lg p-6">
