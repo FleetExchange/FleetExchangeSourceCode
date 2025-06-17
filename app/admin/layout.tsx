@@ -1,4 +1,4 @@
-import Sidebar from "@/components/Sidebar";
+import Sidebar from "@/components/AdminSidebar";
 
 export default function AdminLayout({
   children,
@@ -7,7 +7,7 @@ export default function AdminLayout({
 }>) {
   return (
     <div className="flex">
-      <Sidebar />
+      <Sidebar loggedInRole="admin" />
       <main className="flex-1">{children}</main>
     </div>
   );

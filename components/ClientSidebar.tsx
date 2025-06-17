@@ -1,10 +1,8 @@
 import React from "react";
-import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
+import { SignedIn, UserButton } from "@clerk/nextjs";
 import {
   CiHome,
   CiCompass1,
-  CiDeliveryTruck,
-  CiBookmark,
   CiShoppingCart,
   CiSettings,
   CiUser,
@@ -12,7 +10,7 @@ import {
 import { CiMenuBurger } from "react-icons/ci";
 import Link from "next/link";
 
-const Sidebar = () => {
+const ClientSidebar = () => {
   return (
     <div className="drawer z-50">
       <input id="my-drawer" type="checkbox" className="drawer-toggle" />
@@ -37,7 +35,7 @@ const Sidebar = () => {
             <ul className="space-y-2">
               <li>
                 <Link
-                  href="/"
+                  href="/client/dashboard"
                   className="flex items-center gap-3 p-3 hover:bg-base-300 rounded-lg"
                 >
                   <CiHome className="w-5 h-5" />
@@ -53,24 +51,7 @@ const Sidebar = () => {
                   <span>Discover</span>
                 </Link>
               </li>
-              <li>
-                <Link
-                  href="/fleetManager"
-                  className="flex items-center gap-3 p-3 hover:bg-base-300 rounded-lg"
-                >
-                  <CiDeliveryTruck className="w-5 h-5" />
-                  <span>Fleet Manager</span>
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/myTrips"
-                  className="flex items-center gap-3 p-3 hover:bg-base-300 rounded-lg"
-                >
-                  <CiBookmark className="w-5 h-5" />
-                  <span>My Trips</span>
-                </Link>
-              </li>
+
               <li>
                 <Link
                   href="/myBookings"
@@ -112,18 +93,10 @@ const Sidebar = () => {
           <div className="mt-auto pt-4 border-t border-base-300">
             <SignedIn>
               <div className="flex items-center gap-3 p-3 rounded-lg">
-                <UserButton afterSignOutUrl="/" />
+                <UserButton afterSignOutUrl="/sign-in" />
                 <span className="text-sm font-medium">Profile</span>
               </div>
             </SignedIn>
-            <SignedOut>
-              <SignInButton mode="modal">
-                <button className="btn btn-primary w-full gap-2">
-                  <CiUser className="w-5 h-5" />
-                  Sign In
-                </button>
-              </SignInButton>
-            </SignedOut>
           </div>
         </div>
       </div>
@@ -131,4 +104,4 @@ const Sidebar = () => {
   );
 };
 
-export default Sidebar;
+export default ClientSidebar;

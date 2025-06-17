@@ -1,4 +1,4 @@
-import Sidebar from "@/components/Sidebar";
+import TransporterSidebar from "@/components/TransporterSidebar";
 
 export default function TransporterLayout({
   children,
@@ -7,7 +7,7 @@ export default function TransporterLayout({
 }>) {
   return (
     <div className="flex">
-      <Sidebar />
+      <TransporterSidebar />
       <main className="flex-1">{children}</main>
     </div>
   );

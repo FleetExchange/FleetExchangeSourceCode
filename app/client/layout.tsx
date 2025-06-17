@@ -1,4 +1,4 @@
-import Sidebar from "@/components/Sidebar";
+import ClientSidebar from "@/components/ClientSidebar";
 
 export default function ClientLayout({
   children,
@@ -7,7 +7,7 @@ export default function ClientLayout({
 }>) {
   return (
     <div className="flex">
-      <Sidebar />
+      <ClientSidebar />
       <main className="flex-1">{children}</main>
     </div>
   );
