@@ -1,5 +1,7 @@
 "use client";
 
+import MyBookingsWidget from "@/components/MyBookingsWidget";
+import TransporterStatsWidget from "@/components/TransporterStatsWidget";
 import TripsInProgressWidget from "@/components/TripsInProgressWidget";
 import TripToApproveWidget from "@/components/TripToApproveWidget";
 
@@ -26,38 +28,11 @@ const TransporterDashPage = () => {
           <TripsInProgressWidget />
 
           {/* My Bookings - Full width on mobile, spans remaining space */}
-          <div className="lg:col-span-3 bg-base-100 rounded-lg shadow-lg p-6">
-            <h2 className="text-xl font-semibold mb-4 text-success">
-              My Bookings
-            </h2>
-            <div className="text-center text-base-content/60">
-              No bookings yet
-            </div>
-          </div>
+          <MyBookingsWidget />
         </div>
 
         {/* Stats Section */}
-        <div className="bg-base-100 rounded-lg shadow-lg p-6">
-          <h2 className="text-xl font-semibold mb-4">Statistics</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="stat bg-base-200 rounded-lg">
-              <div className="stat-title">Total Trips</div>
-              <div className="stat-value text-primary">0</div>
-            </div>
-            <div className="stat bg-base-200 rounded-lg">
-              <div className="stat-title">Revenue</div>
-              <div className="stat-value text-success">R0</div>
-            </div>
-            <div className="stat bg-base-200 rounded-lg">
-              <div className="stat-title">Active Routes</div>
-              <div className="stat-value text-info">0</div>
-            </div>
-            <div className="stat bg-base-200 rounded-lg">
-              <div className="stat-title">Rating</div>
-              <div className="stat-value text-warning">5.0</div>
-            </div>
-          </div>
-        </div>
+        <TransporterStatsWidget />
       </div>
     </div>
   );
