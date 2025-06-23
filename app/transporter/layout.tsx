@@ -8,9 +8,8 @@ export default function TransporterLayout({
   return (
     <div className="flex min-h-screen">
       {/* Sidebar */}
-      <aside className="w-64 bg-base-100">
-        <TransporterSidebar />
-      </aside>
+
+      <TransporterSidebar />
 
       {/* Main content area - THIS should take remaining space */}
       <main className="flex-1 overflow-auto">{children}</main>

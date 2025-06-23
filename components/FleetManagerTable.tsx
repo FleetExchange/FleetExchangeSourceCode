@@ -153,161 +153,157 @@ const FleetManagerTable = () => {
   const currentItems = filteredTrucks.slice(startIndex, endIndex);
 
   return (
-    <>
-      <div className="fixed top-[50px] flex w-full max-w-8xl flex-col p-8">
-        {/** Action bar */}
-        <div className="felx-row flex justify-between gap-2 bg-base-100 border-1 border-base-300 rounded-t-xl items-center px-5 py-2">
-          <div className="flex flex-row justify-start gap-4 items-center">
-            {/* Search Bar */}
-            <div>
-              <label className="input">
-                <CiSearch />
-                <input
-                  className="input focus:ring-0 focus:outline-none"
-                  type="search"
-                  placeholder="Search"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </label>
-            </div>
-
-            {/* Fleet selector */}
-            <select
-              defaultValue={userFleet}
-              onChange={handleFleetChange}
-              className="select focus:ring-none focus:outline-none"
-            >
-              {userFleets.map((fleet: { _id: string; fleetName: string }) => (
-                <option key={fleet._id} value={fleet._id}>
-                  {fleet.fleetName}
-                </option>
-              ))}
-            </select>
-            {/* Sorting Selector */}
-            <select
-              className="select focus:ring-none focus:outline-none"
-              value={sortBy}
-              onChange={(e) =>
-                setSortBy(
-                  e.target.value as
-                    | "registration"
-                    | "payload"
-                    | "length"
-                    | "width"
-                    | "height"
-                )
-              }
-            >
-              <option value="registration">Sort By Registration</option>
-              <option value="payload">Sort By Payload Capacity</option>
-              <option value="length">Sort By Length</option>
-              <option value="width">Sort By Width</option>
-              <option value="height">Sort By Height</option>
-            </select>
-            {/* Filter Button */}
-            <FleetManagerTableFilter
-              onFilter={(filterTerm) => {
-                setFilterTerm(filterTerm);
-              }}
-            />
-            <PaginationControls
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={(page) => {
-                setCurrentPage(page);
-                // Scroll to top of list
-                window.scrollTo({ top: 0, behavior: "smooth" });
-              }}
-            />
+    <div className="flex w-full flex-col">
+      {/** Action bar */}
+      <div className="flex flex-row justify-between gap-2 bg-base-100 border border-base-300 rounded-t-xl items-center px-5 py-4">
+        <div className="flex flex-row justify-start gap-4 items-center">
+          {/* Search Bar */}
+          <div className="form-control">
+            <label className="input input-bordered flex items-center gap-2">
+              <CiSearch className="w-4 h-4 opacity-70" />
+              <input
+                type="text"
+                className="grow"
+                placeholder="Search"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </label>
           </div>
 
-          {/* Action Button */}
-          <div className="dropdown dropdown-end">
-            <div tabIndex={0} role="button" className="btn btn-primary m-1">
-              Actions
-            </div>
-            <ul
-              tabIndex={0}
-              className="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm"
-            >
-              <li>
-                <Link
-                  href={{
-                    pathname: "/truckManager",
-                    query: { action: "create", truckId: "" },
-                  }}
-                >
-                  Create Truck
-                </Link>
-              </li>
-              <li>
-                <NewFleetCard />
-                {userFleets && <NewFleetModal fleets={userFleets} />}
-                <EditFleetCard />
-                {userFleets && <EditFleetModal UserFleets={userFleets} />}
-              </li>
-            </ul>
-          </div>
+          {/* Fleet selector */}
+          <select
+            value={userFleet || ""}
+            onChange={handleFleetChange}
+            className="select select-bordered w-full max-w-xs"
+          >
+            {userFleets?.map((fleet: { _id: string; fleetName: string }) => (
+              <option key={fleet._id} value={fleet._id}>
+                {fleet.fleetName}
+              </option>
+            ))}
+          </select>
+
+          {/* Sorting Selector */}
+          <select
+            className="select select-bordered w-full max-w-xs"
+            value={sortBy}
+            onChange={(e) =>
+              setSortBy(
+                e.target.value as
+                  | "registration"
+                  | "payload"
+                  | "length"
+                  | "width"
+                  | "height"
+              )
+            }
+          >
+            <option value="registration">Sort By Registration</option>
+            <option value="payload">Sort By Payload Capacity</option>
+            <option value="length">Sort By Length</option>
+            <option value="width">Sort By Width</option>
+            <option value="height">Sort By Height</option>
+          </select>
+
+          {/* Filter Button */}
+          <FleetManagerTableFilter
+            onFilter={(filterTerm) => {
+              setFilterTerm(filterTerm);
+            }}
+          />
+
+          <PaginationControls
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={(page) => {
+              setCurrentPage(page);
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
+          />
         </div>
 
-        {/** Table */}
-        <div>
-          <div className="overflow-x-auto border-1 border-base-300 border-t-0">
-            <table className="table">
-              {/* head */}
-              <thead>
-                <tr>
-                  <th>Index</th>
-                  <th>Registration</th>
-                  <th>Type</th>
-                  <th>Make</th>
-                  <th>Model</th>
-                  <th>Year</th>
-                  <th>Payload Capacity (kg)</th>
-                  <th>Length (m) </th>
-                  <th>Width (m) </th>
-                  <th>Height (m) </th>
-                  <th></th>
-                </tr>
-              </thead>
-              {/* Table Body */}
-              <tbody>
-                {currentItems.map((truck, index) => (
-                  <tr key={truck.registration} className="bg-base-100">
-                    <th>{index + 1}</th>
-                    <td>{truck.registration}</td>
-                    <td>{truck.truckType}</td>
-                    <td>{truck.make}</td>
-                    <td>{truck.model}</td>
-                    <td>{truck.year}</td>
-                    <td>{truck.maxLoadCapacity}</td>
-                    <td>{truck.length}</td>
-                    <td>{truck.width}</td>
-                    <td>{truck.height}</td>
-                    <th>
-                      <Link
-                        href={{
-                          pathname: "/truckManager",
-                          query: {
-                            action: "edit",
-                            truckId: truck._id as string,
-                          },
-                        }}
-                      >
-                        <button className="btn btn-square bg-base-100 border-none">
-                          <CiMenuKebab />
-                        </button>
-                      </Link>
-                    </th>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        {/* Action Button */}
+        <div className="dropdown dropdown-end">
+          <div tabIndex={0} role="button" className="btn btn-primary">
+            Actions
           </div>
+          <ul
+            tabIndex={0}
+            className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow"
+          >
+            <li>
+              <Link
+                href={{
+                  pathname: "/truckManager",
+                  query: { action: "create", truckId: "" },
+                }}
+              >
+                Create Truck
+              </Link>
+            </li>
+            <li>
+              <NewFleetCard />
+              {userFleets && <NewFleetModal fleets={userFleets} />}
+              <EditFleetCard />
+              {userFleets && <EditFleetModal UserFleets={userFleets} />}
+            </li>
+          </ul>
         </div>
       </div>
-    </>
+
+      {/** Table */}
+      <div className="overflow-x-auto border border-base-300 border-t-0 rounded-b-xl">
+        <table className="table table-zebra w-full">
+          <thead>
+            <tr>
+              <th>Index</th>
+              <th>Registration</th>
+              <th>Type</th>
+              <th>Make</th>
+              <th>Model</th>
+              <th>Year</th>
+              <th>Payload Capacity (kg)</th>
+              <th>Length (m)</th>
+              <th>Width (m)</th>
+              <th>Height (m)</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {currentItems.map((truck, index) => (
+              <tr key={truck.registration}>
+                <th>{startIndex + index + 1}</th>
+                <td>{truck.registration}</td>
+                <td>{truck.truckType}</td>
+                <td>{truck.make}</td>
+                <td>{truck.model}</td>
+                <td>{truck.year}</td>
+                <td>{truck.maxLoadCapacity}</td>
+                <td>{truck.length}</td>
+                <td>{truck.width}</td>
+                <td>{truck.height}</td>
+                <td>
+                  <Link
+                    href={{
+                      pathname: "/truckManager",
+                      query: {
+                        action: "edit",
+                        truckId: truck._id as string,
+                      },
+                    }}
+                  >
+                    <button className="btn btn-ghost btn-sm">
+                      <CiMenuKebab />
+                    </button>
+                  </Link>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 };
 

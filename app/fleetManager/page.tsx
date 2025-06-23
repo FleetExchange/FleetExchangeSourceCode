@@ -4,11 +4,26 @@ import FleetManagerTable from "@/components/FleetManagerTable";
 
 const page = () => {
   return (
-    <>
-      <div className="flex flex-col justify-start w-full fixed top-[50px]">
-        <FleetManagerTable></FleetManagerTable>
+    <div className="min-h-screen pl-24 pr-6 py-6 bg-base-200">
+      <div className="w-full max-w-none">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-base-content">
+            Fleet Manager
+          </h1>
+          <p className="text-base-content/60 mt-2">
+            Manage your fleet vehicles and track their status
+          </p>
+        </div>
+
+        {/* Fleet Manager Table */}
+        <div className="bg-base-100 rounded-lg shadow-sm overflow-hidden">
+          <div className="overflow-x-auto">
+            <FleetManagerTable />
+          </div>
+        </div>
       </div>
-    </>
+    </div>
   );
 };
 

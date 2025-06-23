@@ -14,109 +14,118 @@ import Link from "next/link";
 
 const TransporterSidebar = () => {
   return (
-    <div className="drawer z-50">
-      <input id="my-drawer" type="checkbox" className="drawer-toggle" />
-      <div className="drawer-content fixed left-5 top-5">
-        {/* Page content here */}
-        <label htmlFor="my-drawer" className="btn btn-ghost drawer-button">
-          <CiMenuBurger className="w-6 h-6" />
-        </label>
-      </div>
-
-      <div className="drawer-side">
-        <label htmlFor="my-drawer" className="drawer-overlay"></label>
-        <div className="menu bg-base-200 w-80 min-h-full p-4 flex flex-col">
-          {/* Header */}
-          <div className="flex items-center gap-2 px-2 mb-6">
-            <h1 className="text-xl font-bold">FreightConnect</h1>
+    <div className="group min-h-screen w-20 hover:w-50 bg-primary transition-all duration-300 ease-in-out overflow-hidden">
+      <div className="flex flex-col h-full">
+        {/* Header */}
+        <div className="flex items-center justify-center group-hover:justify-start gap-3 mb-6 p-3 transition-all duration-300">
+          <div className="w-8 h-8 bg-white bg-opacity-20 rounded-lg flex items-center justify-center text-primary font-bold">
+            F
           </div>
+          <span className="hidden group-hover:block transition-opacity duration-300 whitespace-nowrap text-white">
+            FreightConnect
+          </span>
+        </div>
 
-          {/* Main Navigation - Flex Grow to Push Sign In to Bottom */}
-          <div className="flex-grow">
-            {/* Navigation Links */}
-            <ul className="space-y-2">
-              <li>
-                <Link
-                  href="/transporter/dashboard"
-                  className="flex items-center gap-3 p-3 hover:bg-base-300 rounded-lg"
-                >
-                  <CiHome className="w-5 h-5" />
-                  <span>Dashboard</span>
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/discover"
-                  className="flex items-center gap-3 p-3 hover:bg-base-300 rounded-lg"
-                >
-                  <CiCompass1 className="w-5 h-5" />
-                  <span>Discover</span>
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/fleetManager"
-                  className="flex items-center gap-3 p-3 hover:bg-base-300 rounded-lg"
-                >
-                  <CiDeliveryTruck className="w-5 h-5" />
-                  <span>Fleet Manager</span>
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/myTrips"
-                  className="flex items-center gap-3 p-3 hover:bg-base-300 rounded-lg"
-                >
-                  <CiBookmark className="w-5 h-5" />
-                  <span>My Trips</span>
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/myBookings"
-                  className="flex items-center gap-3 p-3 hover:bg-base-300 rounded-lg"
-                >
-                  <CiShoppingCart className="w-5 h-5" />
-                  <span>My Bookings</span>
-                </Link>
-              </li>
-            </ul>
+        {/* Main Navigation */}
+        <div className="flex-grow px-2">
+          <ul className="space-y-2">
+            <li>
+              <Link
+                href="/transporter/dashboard"
+                className="flex items-center justify-center group-hover:justify-start gap-3 p-3 hover:bg-blue-100 hover:bg-opacity-10 rounded-lg transition-all duration-300"
+              >
+                <CiHome className="w-6 h-6 text-white flex-shrink-0" />
+                <span className="hidden group-hover:block whitespace-nowrap text-white">
+                  Dashboard
+                </span>
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/discover"
+                className="flex items-center justify-center group-hover:justify-start gap-3 p-3 hover:bg-blue-100 hover:bg-opacity-10 rounded-lg transition-all duration-300"
+              >
+                <CiCompass1 className="w-6 h-6 text-white flex-shrink-0" />
+                <span className="hidden group-hover:block whitespace-nowrap text-white">
+                  Discover
+                </span>
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/fleetManager"
+                className="flex items-center justify-center group-hover:justify-start gap-3 p-3 hover:bg-blue-100 hover:bg-opacity-10 rounded-lg transition-all duration-300"
+              >
+                <CiDeliveryTruck className="w-6 h-6 text-white flex-shrink-0" />
+                <span className="hidden group-hover:block whitespace-nowrap text-white">
+                  Fleet Manager
+                </span>
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/myTrips"
+                className="flex items-center justify-center group-hover:justify-start gap-3 p-3 hover:bg-blue-100 hover:bg-opacity-10 rounded-lg transition-all duration-300"
+              >
+                <CiBookmark className="w-6 h-6 text-white flex-shrink-0" />
+                <span className="hidden group-hover:block whitespace-nowrap text-white">
+                  My Trips
+                </span>
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/myBookings"
+                className="flex items-center justify-center group-hover:justify-start gap-3 p-3 hover:bg-blue-100 hover:bg-opacity-10 rounded-lg transition-all duration-300"
+              >
+                <CiShoppingCart className="w-6 h-6 text-white flex-shrink-0" />
+                <span className="hidden group-hover:block whitespace-nowrap text-white">
+                  My Bookings
+                </span>
+              </Link>
+            </li>
+          </ul>
 
-            {/* Divider */}
-            <div className="divider my-4"></div>
+          <div className="my-4 border-t border-white border-opacity-20"></div>
 
-            {/* Settings Section */}
-            <ul className="space-y-2">
-              <li>
-                <Link
-                  href="/settings"
-                  className="flex items-center gap-3 p-3 hover:bg-base-300 rounded-lg"
-                >
-                  <CiSettings className="w-5 h-5" />
-                  <span>Settings</span>
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/account"
-                  className="flex items-center gap-3 p-3 hover:bg-base-300 rounded-lg"
-                >
-                  <CiUser className="w-5 h-5" />
-                  <span>Account</span>
-                </Link>
-              </li>
-            </ul>
-          </div>
+          <ul className="space-y-2">
+            <li>
+              <Link
+                href="/settings"
+                className="flex items-center justify-center group-hover:justify-start gap-3 p-3 hover:bg-blue-100 hover:bg-opacity-10 rounded-lg transition-all duration-300"
+              >
+                <CiSettings className="w-6 h-6 text-white flex-shrink-0" />
+                <span className="hidden group-hover:block whitespace-nowrap text-white">
+                  Settings
+                </span>
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/account"
+                className="flex items-center justify-center group-hover:justify-start gap-3 p-3 hover:bg-blue-100 hover:bg-opacity-10 rounded-lg transition-all duration-300"
+              >
+                <CiUser className="w-6 h-6 text-white flex-shrink-0" />
+                <span className="hidden group-hover:block whitespace-nowrap text-white">
+                  Account
+                </span>
+              </Link>
+            </li>
+          </ul>
+        </div>
 
-          {/* User Section - Always at Bottom */}
-          <div className="mt-auto pt-4 border-t border-base-300">
-            <SignedIn>
-              <div className="flex items-center gap-3 p-3 rounded-lg">
+        {/* User Section */}
+        <div className="mt-auto p-3 border-t border-white border-opacity-20">
+          <SignedIn>
+            <div className="flex items-center justify-center group-hover:justify-start gap-3 p-2 rounded-lg transition-all duration-300">
+              <div className="w-6 h-6 flex items-center justify-center">
                 <UserButton afterSignOutUrl="/sign-in" />
-                <span className="text-sm font-medium">Profile</span>
               </div>
-            </SignedIn>
-          </div>
+              <span className="hidden group-hover:block whitespace-nowrap text-sm font-medium text-white">
+                Profile
+              </span>
+            </div>
+          </SignedIn>
         </div>
       </div>
     </div>

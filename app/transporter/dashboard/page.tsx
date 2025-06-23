@@ -7,7 +7,7 @@ import TripToApproveWidget from "@/components/TripToApproveWidget";
 
 const TransporterDashPage = () => {
   return (
-    <div className="min-h-screen p-6 bg-base-200">
+    <div className="min-h-screen pl-24 p-6 bg-base-200">
       <div className="w-full">
         {/* Header */}
         <div className="mb-8">

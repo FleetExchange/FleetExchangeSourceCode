@@ -43,9 +43,15 @@ export default function FleetManagerLayout({
   }
 
   return (
-    <div className="flex">
-      <TransporterSidebar />
-      <main className="flex-1">{children}</main>
-    </div>
+    <>
+      <div className="flex min-h-screen">
+        {/* Sidebar */}
+
+        <TransporterSidebar />
+
+        {/* Main content area - THIS should take remaining space */}
+        <main className="flex-1 overflow-auto">{children}</main>
+      </div>
+    </>
   );
 }
