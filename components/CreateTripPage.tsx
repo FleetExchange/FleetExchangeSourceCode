@@ -146,7 +146,10 @@ const CreateTripPage = () => {
         <legend className="text-base font-medium">Origin City</legend>
         <AddressAutocomplete
           value={originCity}
-          onChange={setOriginCity}
+          onChange={(city) => {
+            setOriginCity(city);
+            pickup.setValue(city); // Keep input and state in sync
+          }}
           ready={pickup.ready}
           inputValue={pickup.value}
           onInputChange={pickup.setValue}
@@ -162,7 +165,10 @@ const CreateTripPage = () => {
         <legend className="text-base font-medium">Destination City</legend>
         <AddressAutocomplete
           value={destinationCity}
-          onChange={setDestinationCity}
+          onChange={(city) => {
+            setDestinationCity(city);
+            delivery.setValue(city); // Keep input and state in sync
+          }}
           ready={delivery.ready}
           inputValue={delivery.value}
           onInputChange={delivery.setValue}
