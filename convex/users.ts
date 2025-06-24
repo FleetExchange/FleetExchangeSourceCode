@@ -122,3 +122,26 @@ export const getUsersByIds = query({
     return users.filter((user) => user !== null);
   },
 });
+
+export const updateUserRating = mutation({
+  args: {
+    userId: v.id("users"),
+    rating: v.number(),
+  },
+  handler: async (ctx, { userId, rating }) => {
+    const user = await ctx.db.get(userId);
+    if (!user) throw new Error("User not found");
+
+    const ratingCount = user.ratingCount || 0;
+
+    // Calculate new average rating
+    const newAverageRating =
+      ((user.averageRating || 0) * (user.ratingCount || 0) + rating) /
+      (ratingCount || 1);
+
+    return await ctx.db.patch(userId, {
+      averageRating: newAverageRating,
+      ratingCount: (user.ratingCount || 0) + 1,
+    });
+  },
+});

@@ -18,6 +18,7 @@ import StatusAdvanceButton from "./StatusAdvanceButton";
 import { TripStatus } from "./StatusAdvanceButton";
 import TripRejectButton from "./TripRejectButton";
 import TripCancelButton from "./TripCancelButton";
+import TripRatingComponent from "./TripRatingComponent";
 
 interface TripPageClientProps {
   tripId: string;
@@ -392,6 +393,15 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
                       <div className="badge badge-success badge-lg gap-2">
                         <span className="text-base">✓ Trip Delivered</span>
                       </div>
+
+                      {/* Always show the rating component - let it handle the display logic */}
+                      <div className="w-full mt-4">
+                        <TripRatingComponent
+                          purchaseTripId={purchaseTrip._id}
+                          readOnly={true}
+                        />
+                      </div>
+
                       <p className="text-sm text-base-content/70 text-center mt-2">
                         For any queries, refunds, or assistance, please contact
                         our support line:

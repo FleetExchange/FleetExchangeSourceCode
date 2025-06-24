@@ -40,6 +40,8 @@ export default defineSchema({
     deliveryInstructions: v.string(),
     freightNotes: v.string(), // Description of the freight
     cargoWeight: v.number(), // Total weight of the items to be shipped
+    tripRating: v.optional(v.number()), // Rating of the trip out of 5
+    tripRatingComment: v.optional(v.string()), // Comment for the rating
   }),
 
   freightRequest: defineTable({
@@ -64,6 +66,8 @@ export default defineSchema({
     name: v.string(),
     contactNumber: v.string(),
     createdAt: v.optional(v.number()), // Make this optional
+    averageRating: v.optional(v.number()), // Average rating of the user
+    ratingCount: v.optional(v.number()), // Number of ratings received by the user
   }).index("by_clerk_id", ["clerkId"]),
 
   fleet: defineTable({

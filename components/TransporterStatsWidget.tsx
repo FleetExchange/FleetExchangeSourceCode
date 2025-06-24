@@ -61,7 +61,7 @@ const TransporterStatsWidget = () => {
       purchasedTrips?.filter((trip) => trip.status === "Delivered").length ?? 0;
 
     // Calculate average rating (mock for now - you can implement actual ratings)
-    const averageRating = totalCompletedTrips > 0 ? 4.8 : 0;
+    const averageRating = convexUser?.averageRating ?? 0;
 
     return {
       tripsThisMonth: tripsThisMonth.length,

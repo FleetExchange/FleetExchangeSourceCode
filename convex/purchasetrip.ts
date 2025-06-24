@@ -92,12 +92,20 @@ export const getPurchaseTripByIdArray = query({
     tripIds: v.array(v.id("trip")),
   },
   handler: async (ctx, { tripIds }) => {
-    const purchaseTrips = await ctx.db
-      .query("purchaseTrip")
-      .filter((q) => q.and(...tripIds.map((id) => q.eq(q.field("tripId"), id))))
-      .collect();
+    // Handle edge case of empty array
+    if (tripIds.length === 0) {
+      return [];
+    }
 
-    return purchaseTrips;
+    // More efficient approach - get all purchase trips first, then filter
+    const allPurchaseTrips = await ctx.db.query("purchaseTrip").collect();
+
+    // Filter in memory (more reliable than complex DB filters)
+    const filteredTrips = allPurchaseTrips.filter((trip) =>
+      tripIds.includes(trip.tripId)
+    );
+
+    return filteredTrips;
   },
 });
 
@@ -142,5 +150,26 @@ export const getPurchaseTripByUserId = query({
       .collect();
 
     return purchaseTrips;
+  },
+});
+
+// Add trip rating
+export const addTripRating = mutation({
+  args: {
+    purchaseTripId: v.id("purchaseTrip"),
+    rating: v.number(),
+    comment: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    // Validate rating is between 1-5
+    if (args.rating < 1 || args.rating > 5) {
+      throw new Error("Rating must be between 1 and 5");
+    }
+
+    // Update the purchase trip with the rating
+    await ctx.db.patch(args.purchaseTripId, {
+      tripRating: args.rating,
+      tripRatingComment: args.comment || "",
+    });
   },
 });

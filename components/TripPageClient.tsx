@@ -16,6 +16,7 @@ import { AddressAutocomplete } from "./AddressAutocomplete";
 import { useUser } from "@clerk/nextjs";
 import TripCancelButton from "./TripCancelButton";
 import { isAddressWithinRange } from "@/utils/geocoding";
+import TripRatingComponent from "./TripRatingComponent";
 type DirectionsResult = google.maps.DirectionsResult;
 
 interface TripPageClientProps {
@@ -558,11 +559,15 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
             ) : userId === trip.userId ? (
               <p className="text-base-content/80">You are the trip issuer</p>
             ) : booked && purchaseTripDetails ? (
-              <TripCancelButton
-                purchaseTripId={purchaseTripDetails._id}
-                tripId={trip._id}
-                currentStatus={purchaseTripDetails.status}
-              />
+              purchaseTripDetails.status === "Delivered" ? (
+                <TripRatingComponent purchaseTripId={purchaseTripDetails._id} />
+              ) : (
+                <TripCancelButton
+                  purchaseTripId={purchaseTripDetails._id}
+                  tripId={trip._id}
+                  currentStatus={purchaseTripDetails.status}
+                />
+              )
             ) : (
               <button
                 className="btn btn-primary btn-wide"
