@@ -128,6 +128,26 @@ const MyBookedTripsTable = () => {
   // Get current page items
   const currentItems = sortedAndFilteredBookings.slice(startIndex, endIndex);
 
+  // Customise badge based on status
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "Booked":
+        return <span className="badge badge-primary">{status}</span>;
+      case "Dispatched":
+        return <span className="badge badge-info">{status}</span>;
+      case "Delivered":
+        return <span className="badge badge-success">{status}</span>;
+      case "Cancelled":
+        return <span className="badge badge-error">{status}</span>;
+      case "Refunded":
+        return <span className="badge badge-warning">{status}</span>;
+      case "Awaiting Confirmation":
+        return <span className="badge badge-neutral">Awaiting</span>;
+      default:
+        return <span className="badge badge-ghost">{status}</span>;
+    }
+  };
+
   return (
     <>
       <div className="relative top-[50px] flex w-full max-w-8xl flex-col p-8">
@@ -251,8 +271,8 @@ const MyBookedTripsTable = () => {
                       <td>{formatDate(booking.arrivalDate)}</td>
                       <td>{truck?.registration}</td>
                       <td>{purchase?.amount}</td>
-                      <td>{purchase?.status}</td>
 
+                      <td>{getStatusBadge(purchase?.status || "")}</td>
                       <td>
                         <Link
                           href={{

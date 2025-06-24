@@ -67,7 +67,7 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
   const [directions, setDirections] = useState<DirectionsResult | null>(null);
   const [distance, setDistance] = useState<number>(0);
   const tripPrice =
-    (trip?.basePrice ?? 0) + (trip?.variablePrice ?? 0) * distance;
+    (trip?.basePrice ?? 0) + (trip?.variablePrice ?? 0) * cargoWeight;
 
   // Get whether the trip is booked or not
   useEffect(() => {
@@ -409,6 +409,10 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
                 </fieldset>
               </div>
             </div>
+            <p className="flex justify-between">
+              <span>Distance:</span>
+              <span>{distance.toFixed(2)} km</span>
+            </p>
           </div>
         </div>
 
@@ -538,11 +542,7 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
               <span className="font-semibold">R{trip?.basePrice}</span>
             </p>
             <p className="flex justify-between">
-              <span>Distance:</span>
-              <span>{distance.toFixed(2)} km</span>
-            </p>
-            <p className="flex justify-between">
-              <span>Rate per km:</span>
+              <span>Rate per kg:</span>
               <span>R{trip?.variablePrice}</span>
             </p>
             <div className="border-t border-base-300 my-2" />

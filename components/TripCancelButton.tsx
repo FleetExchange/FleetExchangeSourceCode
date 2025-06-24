@@ -39,7 +39,7 @@ const TripCancelButton = ({
         "Booking cancelled successfully - Refund will be processed shortly."
       );
       // Redirect to myTrips page
-      window.location.href = "/";
+      window.location.href = "/myTrips";
     } catch (error) {
       console.error("Failed to cancel booking:", error);
       alert("Failed to cancel booking. Please try again.");

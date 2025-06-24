@@ -225,7 +225,7 @@ const CreateTripPage = () => {
 
         <fieldset className="space-y-2">
           <legend className="text-base font-medium">
-            Variable Price (R/km)
+            Variable Price (R/kg)
           </legend>
           <label className="input-group">
             <span>R</span>
@@ -238,7 +238,7 @@ const CreateTripPage = () => {
               value={variablePrice}
               onChange={handleVariablePrice}
             />
-            <span>/km</span>
+            <span>/kg</span>
           </label>
         </fieldset>
       </div>
