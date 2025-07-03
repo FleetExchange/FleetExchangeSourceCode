@@ -1,6 +1,2 @@
 @import "tailwindcss";
-@plugin "daisyui" {
-  themes:
-    corporate --default,
-    dark --prefersdark;
-}
+@import "../themes/FreightConnect.css";

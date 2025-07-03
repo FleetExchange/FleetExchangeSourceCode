@@ -3,9 +3,6 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ConvexClientProvider } from "@/components/ConvexClientProvider";
-import Sidebar from "@/components/AdminSidebar";
-import Header from "@/components/Header";
-import Maps from "@/components/Maps";
 import { GoogleMapsProvider } from "@/components/GoogleMapsProvider";
 
 const geistSans = Geist({
@@ -29,7 +26,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" data-theme="corporate">
+    <html lang="en" data-theme="freightconnect">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <ClerkProvider>
           <ConvexClientProvider>

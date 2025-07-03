@@ -1,0 +1,52 @@
+[data-theme="freightconnect"] {
+  /* Remove these - they're not valid CSS properties */
+  /* default: true; */
+  /* prefersdark: false; */
+  color-scheme: light;
+
+  /* Base colors - converted to DaisyUI format */
+  --b1: 98% 0.005 260; /* base-100 */
+  --b2: 93% 0.01 260; /* base-200 */
+  --b3: 88% 0.015 260; /* base-300 */
+  --bc: 20% 0.02 260; /* base-content */
+
+  /* Primary colors */
+  --p: 42% 0.199 265.638; /* primary */
+  --pc: 98% 0.015 260; /* primary-content */
+
+  /* Secondary colors */
+  --s: 54% 0.245 262.881; /* secondary */
+  --sc: 98% 0.015 260; /* secondary-content */
+
+  /* Accent colors */
+  --a: 80% 0.105 251.813; /* accent */
+  --ac: 98% 0.015 260; /* accent-content */
+
+  /* Neutral colors */
+  --n: 35% 0.03 260; /* neutral */
+  --nc: 98% 0.015 260; /* neutral-content */
+
+  /* Status colors */
+  --in: 78% 0.154 211.53; /* info */
+  --inc: 98% 0.015 260; /* info-content */
+  --su: 75% 0.15 170; /* success */
+  --suc: 98% 0.015 260; /* success-content */
+  --wa: 78% 0.18 80; /* warning */
+  --wac: 98% 0.015 260; /* warning-content */
+  --er: 65% 0.22 25; /* error */
+  --erc: 98% 0.015 260; /* error-content */
+
+  /* Border radius */
+  --rounded-box: 0.5rem;
+  --rounded-btn: 0.5rem;
+  --rounded-badge: 1rem;
+
+  /* Animation duration */
+  --animation-btn: 0.25s;
+  --animation-input: 0.2s;
+
+  /* Border width */
+  --border-btn: 1.5px;
+  --tab-border: 1.5px;
+  --tab-radius: 0.5rem;
+}
