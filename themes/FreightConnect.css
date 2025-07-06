@@ -1,40 +1,37 @@
 [data-theme="freightconnect"] {
-  /* Remove these - they're not valid CSS properties */
-  /* default: true; */
-  /* prefersdark: false; */
   color-scheme: light;
 
-  /* Base colors - converted to DaisyUI format */
-  --b1: 98% 0.005 260; /* base-100 */
-  --b2: 93% 0.01 260; /* base-200 */
-  --b3: 88% 0.015 260; /* base-300 */
-  --bc: 20% 0.02 260; /* base-content */
+  /* Base colors */
+  --b1: rgb(250, 251, 254); /* base-100 */
+  --b2: rgb(232, 235, 245); /* base-200 */
+  --b3: rgb(210, 217, 236); /* base-300 */
+  --bc: rgb(51, 58, 74); /* base-content */
 
   /* Primary colors */
-  --p: 42% 0.199 265.638; /* primary */
-  --pc: 98% 0.015 260; /* primary-content */
+  --p: rgb(28, 42, 110); /* primary */
+  --pc: rgb(250, 251, 254); /* primary-content */
 
   /* Secondary colors */
-  --s: 54% 0.245 262.881; /* secondary */
-  --sc: 98% 0.015 260; /* secondary-content */
+  --s: rgb(0, 92, 255); /* secondary */
+  --sc: rgb(250, 251, 254); /* secondary-content */
 
   /* Accent colors */
-  --a: 80% 0.105 251.813; /* accent */
-  --ac: 98% 0.015 260; /* accent-content */
+  --a: rgb(135, 188, 255); /* accent */
+  --ac: rgb(250, 251, 254); /* accent-content */
 
   /* Neutral colors */
-  --n: 35% 0.03 260; /* neutral */
-  --nc: 98% 0.015 260; /* neutral-content */
+  --n: rgb(51, 58, 74); /* neutral */
+  --nc: rgb(250, 251, 254); /* neutral-content */
 
   /* Status colors */
-  --in: 78% 0.154 211.53; /* info */
-  --inc: 98% 0.015 260; /* info-content */
-  --su: 75% 0.15 170; /* success */
-  --suc: 98% 0.015 260; /* success-content */
-  --wa: 78% 0.18 80; /* warning */
-  --wac: 98% 0.015 260; /* warning-content */
-  --er: 65% 0.22 25; /* error */
-  --erc: 98% 0.015 260; /* error-content */
+  --in: rgb(0, 221, 255); /* info */
+  --inc: rgb(250, 251, 254); /* info-content */
+  --su: rgb(0, 218, 146); /* success */
+  --suc: rgb(250, 251, 254); /* success-content */
+  --wa: rgb(255, 196, 0); /* warning */
+  --wac: rgb(250, 251, 254); /* warning-content */
+  --er: rgb(255, 66, 66); /* error */
+  --erc: rgb(250, 251, 254); /* error-content */
 
   /* Border radius */
   --rounded-box: 0.5rem;

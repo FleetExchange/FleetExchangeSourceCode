@@ -9,6 +9,7 @@ import { FaLongArrowAltRight } from "react-icons/fa";
 import { BsTruck } from "react-icons/bs";
 import { BsBoxSeam } from "react-icons/bs";
 import Link from "next/link";
+import { IoPersonOutline } from "react-icons/io5";
 
 export default function TripCard({ tripId }: { tripId: Id<"trip"> }) {
   const router = useRouter();
@@ -30,12 +31,14 @@ export default function TripCard({ tripId }: { tripId: Id<"trip"> }) {
       <div className="flex flex-row justify-between gap-2">
         <div className="flex flex-row  items-center avatar avatar-placeholder gap-2">
           <div className="bg-neutral text-neutral-content w-8 rounded-full">
-            <span className="text-xs">WT</span>
+            <span className="text-xs">
+              <IoPersonOutline />
+            </span>
           </div>
           <h3 className="text-sm">{tripOwner?.name}</h3>
         </div>
 
-        <div className="flex justify-end badge badge-soft badge-success rounded-2xl">
+        <div className="flex justify-end badge badge-info rounded-2xl">
           From R{trip?.basePrice}
         </div>
       </div>
@@ -76,39 +79,45 @@ export default function TripCard({ tripId }: { tripId: Id<"trip"> }) {
         </div>
       </div>
 
-      <hr className="border-t border-base-200 mt-4 mb-4"></hr>
+      <hr className="border-t border-base-300 mt-4 mb-4"></hr>
 
-      <div className="flex flex-row justify-between">
-        <div className="flex flex-row gap-6">
-          <div className=" flex flex-col">
-            <div className="flex flex-row items-center gap-2">
-              <BsTruck />
-              <p className="text-sm">Truck Type: {truck?.truckType}</p>
+      <div className="flex flex-row justify-between items-center gap-6 w-full">
+        {/* Truck Info Card */}
+        <div className="bg-base-200 rounded-lg p-4 flex flex-col gap-3 min-w-[260px] w-fit">
+          {/* Top row: Type & Payload */}
+          <div className="flex flex-row gap-8 justify-start">
+            <div className="flex items-center gap-2">
+              <BsTruck className="text-primary" />
+              <span className="font-medium text-base-content">Type:</span>
+              <span className="text-sm">{truck?.truckType}</span>
             </div>
-            <div className="flex flex-row items-center gap-2">
-              <BsBoxSeam />
-              <p className="text-sm">
-                Payload Capacity: {truck?.maxLoadCapacity} KG
-              </p>
+            <div className="flex items-center gap-2">
+              <BsBoxSeam className="text-primary" />
+              <span className="font-medium text-base-content">Payload:</span>
+              <span className="text-sm">{truck?.maxLoadCapacity} KG</span>
             </div>
           </div>
-
-          <div className=" flex flex-col">
-            <div className="flex flex-row items-center gap-2">
-              <CiRuler />
-              <p className="text-sm">Width: {truck?.width} m</p>
+          {/* Bottom row: Dimensions */}
+          <div className="flex flex-row gap-6 justify-start mt-2">
+            <div className="flex items-center gap-2">
+              <CiRuler className="text-primary" />
+              <span className="font-medium text-base-content">W:</span>
+              <span className="text-sm">{truck?.width} m</span>
             </div>
-            <div className="flex flex-row items-center gap-2">
-              <CiRuler />
-              <p className="text-sm">Length: {truck?.length} m</p>
+            <div className="flex items-center gap-2">
+              <CiRuler className="text-primary" />
+              <span className="font-medium text-base-content">L:</span>
+              <span className="text-sm">{truck?.length} m</span>
             </div>
-            <div className="flex flex-row items-center gap-2">
-              <CiRuler />
-              <p className="text-sm">Height: {truck?.height} m</p>
+            <div className="flex items-center gap-2">
+              <CiRuler className="text-primary" />
+              <span className="font-medium text-base-content">H:</span>
+              <span className="text-sm">{truck?.height} m</span>
             </div>
           </div>
         </div>
 
+        {/* View Trip Button */}
         <Link
           href={{
             pathname: "/tripClient",

@@ -94,7 +94,7 @@ export default function DiscoverPage() {
               </h3>
               <div className="form-control">
                 <select
-                  className="select select-bordered w-full bg-base-100"
+                  className="select select-bordered w-full bg-base-100 border-none focus:outline-none focus:ring-0 shadow-none"
                   value={sortBy}
                   onChange={(e) =>
                     setSortBy(e.target.value as "price" | "departureDate")
@@ -111,7 +111,7 @@ export default function DiscoverPage() {
               <h3 className="font-medium text-base-content/70 text-sm uppercase tracking-wide">
                 Filters
               </h3>
-              <div className="bg-base-100 rounded-lg p-4">
+              <div className="space-y-2">
                 <FilterBtn
                   onFilter={(filterTerm) => {
                     setFilterTerm(filterTerm);

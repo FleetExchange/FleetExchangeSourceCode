@@ -79,7 +79,7 @@ const TripList = ({
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
         <div>
-          <h1 className="text-3xl font-bold text-neutral-800">
+          <h1 className="text-3xl font-bold text-neutral-800 mt-2">
             Upcomming Trips
           </h1>
           <p className="mt-2 text-neutral-600">

@@ -20,15 +20,17 @@ const TransporterDashPage = () => {
         </div>
 
         {/* Main Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
           {/* Trips to Approve */}
           <TripToApproveWidget />
 
-          {/* Trips in Progress - Takes 2 columns on large screens */}
-          <TripsInProgressWidget />
-
           {/* My Bookings - Full width on mobile, spans remaining space */}
           <MyBookingsWidget />
+        </div>
+        <div className="mb-8">
+          {" "}
+          {/* Trips in Progress - Takes 2 columns on large screens */}
+          <TripsInProgressWidget />
         </div>
 
         {/* Stats Section */}

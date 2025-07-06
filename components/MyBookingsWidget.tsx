@@ -88,7 +88,7 @@ const MyBookingsWidget = () => {
   };
 
   return (
-    <div className="lg:col-span-3 bg-base-100 rounded-lg shadow-lg p-6 h-full">
+    <div className="lg:col-span-2 bg-base-100 rounded-lg shadow-lg p-6 h-full">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-semibold text-success">My Bookings</h2>
         <div className="badge badge-success">

@@ -26,7 +26,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" data-theme="freightconnect">
+    <html lang="en" data-theme="corporate">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <ClerkProvider>
           <ConvexClientProvider>

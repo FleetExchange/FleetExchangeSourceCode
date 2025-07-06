@@ -36,9 +36,9 @@ export const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
       <Combobox value={value || ""} onChange={handleSelect}>
         <div className="relative">
           <Combobox.Input
-            className="input input-bordered w-full focus:outline-none focus:ring-0"
+            className="input border-none w-full focus:outline-none focus:ring-0 shadow-none"
             placeholder="Type address"
-            value={inputValue || ""} // Ensure we never pass null
+            value={inputValue || ""}
             onChange={(e) => onInputChange(e.target.value)}
             onBlur={onBlur}
             disabled={!ready}
