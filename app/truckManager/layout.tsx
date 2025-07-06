@@ -44,7 +44,6 @@ export default function TruckManagerLayout({
 
   return (
     <div className="flex">
-      <TransporterSidebar />
       <main className="flex-1">{children}</main>
     </div>
   );

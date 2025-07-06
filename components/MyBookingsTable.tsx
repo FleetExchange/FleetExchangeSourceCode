@@ -109,7 +109,8 @@ const MyBookingsTable = () => {
 
   // Calculate pagination values
   const totalItems = sortedAndFilteredBookings.length;
-  const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+  const totalPages =
+    totalItems === 0 ? 0 : Math.ceil(totalItems / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const endIndex = startIndex + ITEMS_PER_PAGE;
 
@@ -138,13 +139,13 @@ const MyBookingsTable = () => {
 
   return (
     <>
-      <div className="fixed top-[50px] flex w-full max-w-8xl flex-col p-8">
+      <div className=" flex w-full  flex-col ">
         {/** Action bar */}
         <div className="felx-row flex justify-between gap-2 bg-base-100 border-1 border-base-300 rounded-t-xl items-center px-5 py-2">
           <div className="flex flex-row justify-start gap-4 items-center">
             {/* Search Bar */}
             <div>
-              <label className="input">
+              <label className="input focus:outline-none focus:ring-none w-full max-w-sm">
                 <CiSearch />
                 <input
                   className="input focus:ring-0 focus:outline-none"
@@ -212,7 +213,7 @@ const MyBookingsTable = () => {
               <option value="Price Desc">Price Descending</option>
             </select>
             <PaginationControls
-              currentPage={currentPage}
+              currentPage={totalPages === 0 ? 0 : currentPage}
               totalPages={totalPages}
               onPageChange={(page) => {
                 setCurrentPage(page);

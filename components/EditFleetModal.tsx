@@ -93,7 +93,7 @@ const EditFleetModal = ({ UserFleets }: { UserFleets: Fleet[] }) => {
           <select
             defaultValue={userFleet}
             onChange={handleFleetChange}
-            className="select"
+            className="select focus:outline-none focus:ring-0"
           >
             {UserFleets.map((fleet: { _id: string; fleetName: string }) => (
               <option key={fleet._id} value={fleet._id}>

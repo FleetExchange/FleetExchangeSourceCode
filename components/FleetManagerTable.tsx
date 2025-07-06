@@ -158,24 +158,24 @@ const FleetManagerTable = () => {
       <div className="flex flex-row justify-between gap-2 bg-base-100 border border-base-300 rounded-t-xl items-center px-5 py-4">
         <div className="flex flex-row justify-start gap-4 items-center">
           {/* Search Bar */}
-          <div className="form-control">
-            <label className="input input-bordered flex items-center gap-2">
+          <div className="form-control max-w-sm ">
+            <div className="input flex items-center gap-2 focus:outline-none focus:ring-0">
               <CiSearch className="w-4 h-4 opacity-70" />
               <input
                 type="text"
-                className="grow"
-                placeholder="Search"
+                className="grow focus:outline-none focus:ring-0 bg-transparent"
+                placeholder="Search Registration"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
-            </label>
+            </div>
           </div>
 
           {/* Fleet selector */}
           <select
             value={userFleet || ""}
             onChange={handleFleetChange}
-            className="select select-bordered w-full max-w-xs"
+            className="select select-bordered max-w-xs focus:outline-none focus:ring-0"
           >
             {userFleets?.map((fleet: { _id: string; fleetName: string }) => (
               <option key={fleet._id} value={fleet._id}>
@@ -186,7 +186,7 @@ const FleetManagerTable = () => {
 
           {/* Sorting Selector */}
           <select
-            className="select select-bordered w-full max-w-xs"
+            className="select select-bordered max-w-xs focus:outline-none focus:ring-0"
             value={sortBy}
             onChange={(e) =>
               setSortBy(

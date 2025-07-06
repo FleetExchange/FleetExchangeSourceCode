@@ -11,14 +11,14 @@ import Link from "next/link";
 
 const ClientSidebar = () => {
   return (
-    <div className="group min-h-screen w-20 hover:w-50 bg-primary transition-all duration-300 ease-in-out overflow-hidden">
+    <div className="group fixed left-0 top-0 z-50 min-h-screen w-20 hover:w-50 bg-primary transition-all duration-300 ease-in-out overflow-hidden shadow-lg">
       <div className="flex flex-col h-full">
         {/* Header */}
         <div className="flex items-center justify-center group-hover:justify-start gap-3 mb-6 p-3 transition-all duration-300">
-          <div className="w-8 h-8 bg-white bg-opacity-20 rounded-lg flex items-center justify-center text-primary font-bold">
+          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-primary-content font-bold">
             F
           </div>
-          <span className="hidden group-hover:block transition-opacity duration-300 whitespace-nowrap text-white">
+          <span className="hidden group-hover:block transition-opacity duration-300 whitespace-nowrap text-primary-content font-semibold">
             FreightConnect
           </span>
         </div>
@@ -29,10 +29,10 @@ const ClientSidebar = () => {
             <li>
               <Link
                 href="/client/dashboard"
-                className="flex items-center justify-center group-hover:justify-start gap-3 p-3 hover:bg-blue-100 hover:bg-opacity-10 rounded-lg transition-all duration-300"
+                className="flex items-center justify-center group-hover:justify-start gap-3 p-3 hover:bg-secondary rounded-lg transition-all duration-300"
               >
-                <CiHome className="w-6 h-6 text-white flex-shrink-0" />
-                <span className="hidden group-hover:block whitespace-nowrap text-white">
+                <CiHome className="w-6 h-6 text-primary-content flex-shrink-0" />
+                <span className="hidden group-hover:block whitespace-nowrap text-primary-content">
                   Dashboard
                 </span>
               </Link>
@@ -40,10 +40,10 @@ const ClientSidebar = () => {
             <li>
               <Link
                 href="/discover"
-                className="flex items-center justify-center group-hover:justify-start gap-3 p-3 hover:bg-blue-100 hover:bg-opacity-10 rounded-lg transition-all duration-300"
+                className="flex items-center justify-center group-hover:justify-start gap-3 p-3 hover:bg-secondary rounded-lg transition-all duration-300"
               >
-                <CiCompass1 className="w-6 h-6 text-white flex-shrink-0" />
-                <span className="hidden group-hover:block whitespace-nowrap text-white">
+                <CiCompass1 className="w-6 h-6 text-primary-content flex-shrink-0" />
+                <span className="hidden group-hover:block whitespace-nowrap text-primary-content">
                   Discover
                 </span>
               </Link>
@@ -51,26 +51,26 @@ const ClientSidebar = () => {
             <li>
               <Link
                 href="/myBookings"
-                className="flex items-center justify-center group-hover:justify-start gap-3 p-3 hover:bg-blue-100 hover:bg-opacity-10 rounded-lg transition-all duration-300"
+                className="flex items-center justify-center group-hover:justify-start gap-3 p-3 hover:bg-secondary rounded-lg transition-all duration-300"
               >
-                <CiShoppingCart className="w-6 h-6 text-white flex-shrink-0" />
-                <span className="hidden group-hover:block whitespace-nowrap text-white">
+                <CiShoppingCart className="w-6 h-6 text-primary-content flex-shrink-0" />
+                <span className="hidden group-hover:block whitespace-nowrap text-primary-content">
                   My Bookings
                 </span>
               </Link>
             </li>
           </ul>
 
-          <div className="my-4 border-t border-white border-opacity-20"></div>
+          <div className="my-4 border-t border-primary-content border-opacity-20"></div>
 
           <ul className="space-y-2">
             <li>
               <Link
                 href="/settings"
-                className="flex items-center justify-center group-hover:justify-start gap-3 p-3 hover:bg-blue-100 hover:bg-opacity-10 rounded-lg transition-all duration-300"
+                className="flex items-center justify-center group-hover:justify-start gap-3 p-3 hover:bg-secondary rounded-lg transition-all duration-300"
               >
-                <CiSettings className="w-6 h-6 text-white flex-shrink-0" />
-                <span className="hidden group-hover:block whitespace-nowrap text-white">
+                <CiSettings className="w-6 h-6 text-primary-content flex-shrink-0" />
+                <span className="hidden group-hover:block whitespace-nowrap text-primary-content">
                   Settings
                 </span>
               </Link>
@@ -78,25 +78,26 @@ const ClientSidebar = () => {
             <li>
               <Link
                 href="/account"
-                className="flex items-center justify-center group-hover:justify-start gap-3 p-3 hover:bg-blue-100 hover:bg-opacity-10 rounded-lg transition-all duration-300"
+                className="flex items-center justify-center group-hover:justify-start gap-3 p-3 hover:bg-secondary rounded-lg transition-all duration-300"
               >
-                <CiUser className="w-6 h-6 text-white flex-shrink-0" />
-                <span className="hidden group-hover:block whitespace-nowrap text-white">
+                <CiUser className="w-6 h-6 text-primary-content flex-shrink-0" />
+                <span className="hidden group-hover:block whitespace-nowrap text-primary-content">
                   Account
                 </span>
               </Link>
             </li>
           </ul>
+          <div className="my-4 border-t border-primary-content border-opacity-20"></div>
         </div>
 
         {/* User Section */}
-        <div className="mt-auto p-3 border-t border-white border-opacity-20">
+        <div className="mt-auto p-3">
           <SignedIn>
             <div className="flex items-center justify-center group-hover:justify-start gap-3 p-2 rounded-lg transition-all duration-300">
               <div className="w-6 h-6 flex items-center justify-center">
                 <UserButton afterSignOutUrl="/sign-in" />
               </div>
-              <span className="hidden group-hover:block whitespace-nowrap text-sm font-medium text-white">
+              <span className="hidden group-hover:block whitespace-nowrap text-sm font-medium text-primary-content">
                 Profile
               </span>
             </div>

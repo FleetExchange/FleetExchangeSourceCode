@@ -121,7 +121,8 @@ const MyBookedTripsTable = () => {
 
   // Calculate pagination values
   const totalItems = sortedAndFilteredBookings.length;
-  const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+  const totalPages =
+    totalItems === 0 ? 0 : Math.ceil(totalItems / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const endIndex = startIndex + ITEMS_PER_PAGE;
 
@@ -150,8 +151,18 @@ const MyBookedTripsTable = () => {
 
   return (
     <>
-      <div className="relative top-[50px] flex w-full max-w-8xl flex-col p-8">
-        <p>My Trips that are booked</p>
+      <div className="flex w-full max-w-8xl flex-col p-8">
+        {/* Improved Table Heading */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-2">
+          <div>
+            <h2 className="text-2xl font-bold text-base-content mb-1">
+              Booked Trips
+            </h2>
+            <p className="text-base-content/60 text-sm">
+              All your trips that have been booked and their current status.
+            </p>
+          </div>
+        </div>
         {/** Action bar */}
         <div className="felx-row flex justify-between gap-2 bg-base-100 border-1 border-base-300 rounded-t-xl items-center px-5 py-2">
           <div className="flex flex-row justify-start gap-4 items-center">
@@ -225,7 +236,7 @@ const MyBookedTripsTable = () => {
               <option value="Price Desc">Price Descending</option>
             </select>
             <PaginationControls
-              currentPage={currentPage}
+              currentPage={totalPages === 0 ? 0 : currentPage}
               totalPages={totalPages}
               onPageChange={(page) => {
                 setCurrentPage(page);

@@ -172,179 +172,169 @@ const EditTruckCard: React.FC<EditTruckCardProps> = ({ truckId }) => {
   };
 
   return (
-    <>
-      <div className="flex items w-full bg-base-100">
-        <div className="flex flex-col gap-4 p-4 w-full">
-          <h1 className="text-2xl">Edit Truck</h1>
-          <hr className="border-base-200 w-full"></hr>
-          <div className="mt-2">
-            {/** Truck Information */}
-            <h1 className="font-bold">General Information</h1>
-            <div className="flex flex-row gap-4">
-              <fieldset className="fieldset">
-                <legend className="fieldset-legend">Registration Number</legend>
-                <input
-                  type="text"
-                  className="input focus:outline-none focus:ring-0"
-                  value={registration}
-                  onChange={(e) => setRegistration(e.target.value)}
-                />
-              </fieldset>
-            </div>
-            <div className="flex flex-row gap-4">
-              <fieldset className="fieldset">
-                <legend className="fieldset-legend">Vehicle Make</legend>
-                <input
-                  type="text"
-                  className="input focus:outline-none focus:ring-0"
-                  value={make}
-                  onChange={(e) => setMake(e.target.value)}
-                />
-              </fieldset>
-              <fieldset className="fieldset">
-                <legend className="fieldset-legend">Vehicle Model</legend>
-                <input
-                  type="text"
-                  className="input focus:outline-none focus:ring-0"
-                  value={model}
-                  onChange={(e) => setModel(e.target.value)}
-                />
-              </fieldset>
-              <fieldset className="fieldset">
-                <legend className="fieldset-legend">Model Year</legend>
-                <input
-                  type="number"
-                  min="1900"
-                  max={new Date().getFullYear() + 1}
-                  className="input focus:outline-none focus:ring-0"
-                  value={year}
-                  onChange={(e) => setYear(e.target.value)}
-                />
-              </fieldset>
-            </div>
-            <div>
-              <fieldset className="fieldset">
-                <legend className="fieldset-legend">Type Select</legend>
-                <select
-                  id="truckTypeSelect"
-                  className="select focus:outline-none focus:ring-0"
-                  value={truckType}
-                  onChange={(e) => setTruckType(e.target.value as TruckType)}
-                >
-                  <option value="Any">Any</option>
-                  {TRUCK_TYPES.map((type) => (
-                    <option key={type} value={type}>
-                      {type}
-                    </option>
-                  ))}
-                </select>
-              </fieldset>
-            </div>
-            <hr className="border-base-200 w-full mt-4 mb-4"></hr>
+    <div className="flex justify-center items-start min-h-screen bg-base-200 py-10">
+      <div className="w-full max-w-3xl bg-base-100 rounded-2xl shadow-xl p-8">
+        <h1 className="text-3xl font-bold text-primary mb-2">Edit Truck</h1>
+        <p className="text-base-content/70 mb-6">
+          Update your truck details below.
+        </p>
+        <div className="divider my-4" />
 
-            <div className="flex flex-row gap-6">
-              <div>
-                {/** Truck Dimensions */}
-                <h1 className="font-bold">Dimensions & Capacity</h1>
-                <div className="flex flex-row flex-wrap gap-4">
-                  <fieldset className="fieldset">
-                    <legend className="fieldset-legend">Width</legend>
-                    <input
-                      type="number"
-                      min="0"
-                      className="input focus:outline-none focus:ring-0"
-                      value={width}
-                      onChange={(e) => setWidth(parseFloat(e.target.value))}
-                    />
-                    <p className="label">(In Meter)</p>
-                  </fieldset>
-                  <fieldset className="fieldset">
-                    <legend className="fieldset-legend">Length</legend>
-                    <input
-                      type="number"
-                      min="0"
-                      className="input focus:outline-none focus:ring-0"
-                      value={length}
-                      onChange={(e) => setLength(parseFloat(e.target.value))}
-                    />
-                    <p className="label">(In Meter)</p>
-                  </fieldset>
-                  <fieldset className="fieldset">
-                    <legend className="fieldset-legend">Height</legend>
-                    <input
-                      type="number"
-                      min="0"
-                      className="input focus:outline-none focus:ring-0"
-                      value={height}
-                      onChange={(e) => setHeight(parseFloat(e.target.value))}
-                    />
-                    <p className="label">(In Meter)</p>
-                  </fieldset>
-                  <fieldset className="fieldset">
-                    <legend className="fieldset-legend">
-                      Payload Capacity
-                    </legend>
-                    <input
-                      type="number"
-                      min="0"
-                      className="input focus:outline-none focus:ring-0"
-                      value={maxLoadCapacity}
-                      onChange={(e) =>
-                        setMaxLoadCapacity(parseFloat(e.target.value))
-                      }
-                    />
-                    <p className="label">(In Kg)</p>
-                  </fieldset>
-                </div>
-              </div>
-            </div>
-            <hr className="border-base-200 w-full mt-4 mb-4"></hr>
-            {/** Fleet Selection */}
-            <div className="flex flex-row justify-between">
-              <div className="flex flex-col">
-                <h1 className="font-bold">Fleet Selection</h1>
-                <fieldset className="fieldset">
-                  <legend className="fieldset-legend">
-                    Assign the vehicle to a fleet.
-                  </legend>
-                  <select
-                    className="select focus:outline-none focus:ring-0"
-                    value={fleet}
-                    onChange={(e) => setFleet(e.target.value)}
-                  >
-                    <option value="">Select a fleet</option>
-                    {/* Check if userFleets is defined and has length */}
-                    {/* Use optional chaining or fallback */}
-                    {(userFleets?.length ? userFleets : []).map(
-                      (fleet: { _id: string; fleetName: string }) => (
-                        <option key={fleet._id} value={fleet._id}>
-                          {fleet.fleetName}
-                        </option>
-                      )
-                    )}
-                  </select>
-                  <p className="label">Make sure you have created a fleet!</p>
-                </fieldset>
-              </div>
+        {/* General Information */}
+        <h2 className="font-semibold text-lg mb-2">General Information</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+          <fieldset>
+            <legend className="text-sm font-medium mb-1">
+              Registration Number
+            </legend>
+            <input
+              type="text"
+              className="input input-bordered w-full focus:outline-none focus:ring-0"
+              value={registration}
+              onChange={(e) => setRegistration(e.target.value)}
+            />
+          </fieldset>
+          <fieldset>
+            <legend className="text-sm font-medium mb-1">Vehicle Make</legend>
+            <input
+              type="text"
+              className="input input-bordered w-full focus:outline-none focus:ring-0"
+              value={make}
+              onChange={(e) => setMake(e.target.value)}
+            />
+          </fieldset>
+          <fieldset>
+            <legend className="text-sm font-medium mb-1">Vehicle Model</legend>
+            <input
+              type="text"
+              className="input input-bordered w-full focus:outline-none focus:ring-0"
+              value={model}
+              onChange={(e) => setModel(e.target.value)}
+            />
+          </fieldset>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <fieldset>
+            <legend className="text-sm font-medium mb-1">Model Year</legend>
+            <input
+              type="number"
+              min="1900"
+              max={new Date().getFullYear() + 1}
+              className="input input-bordered w-full focus:outline-none focus:ring-0"
+              value={year}
+              onChange={(e) => setYear(e.target.value)}
+            />
+          </fieldset>
+          <fieldset>
+            <legend className="text-sm font-medium mb-1">Type Select</legend>
+            <select
+              id="truckTypeSelect"
+              className="select select-bordered w-full focus:outline-none focus:ring-0"
+              value={truckType}
+              onChange={(e) => setTruckType(e.target.value as TruckType)}
+            >
+              <option value="">Select type</option>
+              {TRUCK_TYPES.map((type) => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
+              ))}
+            </select>
+          </fieldset>
+        </div>
 
-              <div className="flex mt-4 gap-4 items-end">
-                <button className="btn btn-primary" onClick={handleEdit}>
-                  Edit
-                </button>
-                <button className="btn btn-primary" onClick={handleDelete}>
-                  Delete
-                </button>
-                <Link href="/fleetManager">
-                  <button className="btn btn-soft bg-base-200 outline-none">
-                    Close
-                  </button>
-                </Link>
-              </div>
-            </div>
-          </div>
+        <div className="divider my-6" />
+
+        {/* Dimensions & Capacity */}
+        <h2 className="font-semibold text-lg mb-2">Dimensions & Capacity</h2>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+          <fieldset>
+            <legend className="text-sm font-medium mb-1">Width (m)</legend>
+            <input
+              type="number"
+              min="0"
+              className="input input-bordered w-full focus:outline-none focus:ring-0"
+              value={width}
+              onChange={(e) => setWidth(parseFloat(e.target.value))}
+            />
+          </fieldset>
+          <fieldset>
+            <legend className="text-sm font-medium mb-1">Length (m)</legend>
+            <input
+              type="number"
+              min="0"
+              className="input input-bordered w-full focus:outline-none focus:ring-0"
+              value={length}
+              onChange={(e) => setLength(parseFloat(e.target.value))}
+            />
+          </fieldset>
+          <fieldset>
+            <legend className="text-sm font-medium mb-1">Height (m)</legend>
+            <input
+              type="number"
+              min="0"
+              className="input input-bordered w-full focus:outline-none focus:ring-0"
+              value={height}
+              onChange={(e) => setHeight(parseFloat(e.target.value))}
+            />
+          </fieldset>
+          <fieldset>
+            <legend className="text-sm font-medium mb-1">
+              Payload Capacity (kg)
+            </legend>
+            <input
+              type="number"
+              min="0"
+              className="input input-bordered w-full focus:outline-none focus:ring-0"
+              value={maxLoadCapacity}
+              onChange={(e) => setMaxLoadCapacity(parseFloat(e.target.value))}
+            />
+          </fieldset>
+        </div>
+
+        <div className="divider my-6" />
+
+        {/* Fleet Selection */}
+        <h2 className="font-semibold text-lg mb-2">Fleet Selection</h2>
+        <fieldset className="mb-4">
+          <legend className="text-sm font-medium mb-1">
+            Assign the vehicle to a fleet.
+          </legend>
+          <select
+            className="select select-bordered w-full focus:outline-none focus:ring-0"
+            value={fleet}
+            onChange={(e) => setFleet(e.target.value)}
+          >
+            <option value="">Select a fleet</option>
+            {(userFleets?.length ? userFleets : []).map(
+              (fleet: { _id: string; fleetName: string }) => (
+                <option key={fleet._id} value={fleet._id}>
+                  {fleet.fleetName}
+                </option>
+              )
+            )}
+          </select>
+          <p className="label text-xs mt-1 text-base-content/60">
+            Make sure you have created a fleet!
+          </p>
+        </fieldset>
+
+        {/* Action Buttons */}
+        <div className="flex flex-row justify-end gap-4 mt-8">
+          <button className="btn btn-primary" onClick={handleEdit}>
+            Save Changes
+          </button>
+          <button className="btn btn-error" onClick={handleDelete}>
+            Delete
+          </button>
+          <Link href="/fleetManager">
+            <button className="btn btn-ghost bg-base-200 outline-none">
+              Cancel
+            </button>
+          </Link>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

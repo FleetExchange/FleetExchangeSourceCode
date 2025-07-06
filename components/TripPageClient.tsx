@@ -425,7 +425,7 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
                   id="cargo-weight"
                   type="number"
                   min="0"
-                  className="input input-bordered w-full focus:outline-none focus:ring-0"
+                  className="input input-bordered focus:outline-none focus:ring-0"
                   placeholder="Enter cargo weight"
                   value={cargoWeight}
                   onChange={(e) => setCargoWeight(Number(e.target.value))}

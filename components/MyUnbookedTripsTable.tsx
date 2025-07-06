@@ -94,7 +94,8 @@ const MyUnbookedTripsTable = () => {
 
   // Calculate pagination values
   const totalItems = sortedAndFilteredTrips.length;
-  const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+  const totalPages =
+    totalItems === 0 ? 0 : Math.ceil(totalItems / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const endIndex = startIndex + ITEMS_PER_PAGE;
 
@@ -103,28 +104,37 @@ const MyUnbookedTripsTable = () => {
 
   return (
     <>
-      <div className="relative top-[50px] flex w-full max-w-8xl flex-col p-8">
-        <p>My Trips that are not Booked</p>
-        {/** Action bar */}
-        <div className="felx-row flex justify-between gap-2 bg-base-100 border-1 border-base-300 rounded-t-xl items-center px-5 py-2">
+      <div className="flex w-full max-w-8xl flex-col p-8">
+        {/* Improved Table Heading */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-2">
+          <div>
+            <h2 className="text-2xl font-bold text-base-content mb-1">
+              Unbooked Trips
+            </h2>
+            <p className="text-base-content/60 text-sm">
+              These are your trips that have not been booked yet.
+            </p>
+          </div>
+        </div>
+        {/* Action bar */}
+        <div className="flex flex-row justify-between gap-2 bg-base-100 border border-base-300 rounded-t-xl items-center px-5 py-2">
           <div className="flex flex-row justify-start gap-4 items-center">
             {/* Search Bar */}
-            <div>
-              <label className="input">
-                <CiSearch />
+            <div className="form-control w-full max-w-sm">
+              <div className="input input-bordered flex items-center gap-2">
+                <CiSearch className="w-4 h-4 opacity-70" />
                 <input
-                  className="input focus:ring-0 focus:outline-none"
+                  className="grow focus:ring-0 focus:outline-none bg-transparent"
                   type="search"
                   placeholder="Search Address"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
-              </label>
+              </div>
             </div>
-
-            {/** Past/Upcomming */}
+            {/* Past/Upcoming */}
             <select
-              className="select focus:ring-none focus:outline-none"
+              className="select select-bordered focus:ring-0 focus:outline-none"
               value={pastOrUpcoming}
               onChange={(e) =>
                 setPastOrFuture(
@@ -139,9 +149,9 @@ const MyUnbookedTripsTable = () => {
               <option value="Upcomming Trips">Upcomming Trips</option>
               <option value="Past Trips">Past Trips</option>
             </select>
-            {/** Sort By - Price, Date */}
+            {/* Sort By - Price, Date */}
             <select
-              className="select focus:ring-none focus:outline-none"
+              className="select select-bordered focus:ring-0 focus:outline-none"
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as SortOption)}
             >
@@ -151,20 +161,19 @@ const MyUnbookedTripsTable = () => {
               <option value="Price Desc">Price Descending</option>
             </select>
             <PaginationControls
-              currentPage={currentPage}
+              currentPage={totalPages === 0 ? 0 : currentPage}
               totalPages={totalPages}
               onPageChange={(page) => {
                 setCurrentPage(page);
-                // Scroll to top of list
                 window.scrollTo({ top: 0, behavior: "smooth" });
               }}
             />
           </div>
         </div>
 
-        {/** Table */}
+        {/* Table */}
         <div>
-          <div className="overflow-x-auto border-1 border-base-300 border-t-0">
+          <div className="overflow-x-auto border border-base-300 border-t-0">
             <table className="table">
               {/* head */}
               <thead>
@@ -193,7 +202,6 @@ const MyUnbookedTripsTable = () => {
                       <td>{formatDate(trip.arrivalDate)}</td>
                       <td>{truck?.registration}</td>
                       <td>{trip?.basePrice}</td>
-
                       <td>
                         <Link
                           href={{

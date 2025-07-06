@@ -46,9 +46,9 @@ export default function BookingsLayout({
   };
 
   return (
-    <div className="flex">
+    <div className="flex min-h-screen">
       {renderSidebar()}
-      <main className="flex-1">{children}</main>
+      <main className="flex-1 overflow-auto">{children}</main>
     </div>
   );
 }

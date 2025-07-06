@@ -4,7 +4,6 @@ import { api } from "@/convex/_generated/api";
 import { useUser } from "@clerk/nextjs";
 import { useQuery, useMutation } from "convex/react";
 import { useState } from "react";
-
 import { usePlacesWithRestrictions } from "@/hooks/usePlacesWithRestrictions";
 import { AddressAutocomplete } from "./AddressAutocomplete";
 import { Id } from "@/convex/_generated/dataModel";
@@ -140,165 +139,176 @@ const CreateTripPage = () => {
   }
 
   return (
-    <div className="flex flex-col p-4 space-y-4">
-      {/* Origin City Fieldset */}
-      <fieldset className="space-y-2">
-        <legend className="text-base font-medium">Origin City</legend>
-        <AddressAutocomplete
-          value={originCity}
-          onChange={(city) => {
-            setOriginCity(city);
-            pickup.setValue(city); // Keep input and state in sync
-          }}
-          ready={pickup.ready}
-          inputValue={pickup.value}
-          onInputChange={pickup.setValue}
-          suggestions={pickup.suggestions}
-          status={pickup.status}
-          clearSuggestions={pickup.clearSuggestions}
-          label="Origin City"
-        />
-      </fieldset>
+    <div className="flex justify-center items-start min-h-screen bg-base-200 py-10">
+      <div className="w-full max-w-3xl bg-base-100 rounded-2xl shadow-xl p-8">
+        <h1 className="text-3xl font-bold text-primary mb-2">Create Trip</h1>
+        <p className="text-base-content/70 mb-6">
+          Fill in the details below to create a new trip.
+        </p>
+        <div className="divider my-4" />
 
-      {/* Destination City Fieldset */}
-      <fieldset className="space-y-2">
-        <legend className="text-base font-medium">Destination City</legend>
-        <AddressAutocomplete
-          value={destinationCity}
-          onChange={(city) => {
-            setDestinationCity(city);
-            delivery.setValue(city); // Keep input and state in sync
-          }}
-          ready={delivery.ready}
-          inputValue={delivery.value}
-          onInputChange={delivery.setValue}
-          suggestions={delivery.suggestions}
-          status={delivery.status}
-          clearSuggestions={delivery.clearSuggestions}
-          label="Destination City"
-        />
-      </fieldset>
-
-      <fieldset className="space-y-2">
-        <legend className="text-base font-medium">Departure Date</legend>
-        <input
-          type="datetime-local"
-          className="input w-full"
-          value={formatDateForInput(departureDate)}
-          onChange={handleDepartureChange}
-          min={formatDateForInput(new Date().toISOString())} // Can't select past dates
-        />
-      </fieldset>
-
-      <fieldset className="space-y-2">
-        <legend className="text-base font-medium">Arrival Date</legend>
-        <input
-          type="datetime-local"
-          className="input w-full"
-          value={formatDateForInput(arrivalDate)}
-          onChange={handleArrivalChange}
-          min={
-            formatDateForInput(
-              departureDate || new Date().toISOString()
-            ) /* Can't select date before departure */
-          }
-        />
-      </fieldset>
-
-      {/* Price Inputs */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <fieldset className="space-y-2">
-          <legend className="text-base font-medium">Base Price (R)</legend>
-          <label className="input-group">
-            <span>R</span>
-            <input
-              type="number"
-              step="0.01"
-              min="0"
-              placeholder="0.00"
-              className="input input-bordered w-full"
-              value={basePrice}
-              onChange={handleBasePrice}
+        {/* Origin & Destination */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <fieldset className="space-y-2">
+            <legend className="text-base font-medium">Origin City</legend>
+            <AddressAutocomplete
+              value={originCity}
+              onChange={(city) => {
+                setOriginCity(city);
+                pickup.setValue(city);
+              }}
+              ready={pickup.ready}
+              inputValue={pickup.value}
+              onInputChange={pickup.setValue}
+              suggestions={pickup.suggestions}
+              status={pickup.status}
+              clearSuggestions={pickup.clearSuggestions}
+              label="Origin City"
             />
-          </label>
-        </fieldset>
-
-        <fieldset className="space-y-2">
-          <legend className="text-base font-medium">
-            Variable Price (R/kg)
-          </legend>
-          <label className="input-group">
-            <span>R</span>
-            <input
-              type="number"
-              step="0.01"
-              min="0"
-              placeholder="0.00"
-              className="input input-bordered w-full"
-              value={variablePrice}
-              onChange={handleVariablePrice}
+          </fieldset>
+          <fieldset className="space-y-2">
+            <legend className="text-base font-medium">Destination City</legend>
+            <AddressAutocomplete
+              value={destinationCity}
+              onChange={(city) => {
+                setDestinationCity(city);
+                delivery.setValue(city);
+              }}
+              ready={delivery.ready}
+              inputValue={delivery.value}
+              onInputChange={delivery.setValue}
+              suggestions={delivery.suggestions}
+              status={delivery.status}
+              clearSuggestions={delivery.clearSuggestions}
+              label="Destination City"
             />
-            <span>/kg</span>
-          </label>
-        </fieldset>
-      </div>
+          </fieldset>
+        </div>
 
-      {/* Fleet and Truck Selection */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <fieldset className="space-y-2">
-          <legend className="text-base font-medium">Select Fleet</legend>
-          <select
-            className="select select-bordered w-full"
-            value={selectedFleetId || ""}
-            onChange={(e) => {
-              const value = e.target.value;
-              setSelectedFleetId(value ? (value as Id<"fleet">) : null);
-              setSelectedTruckId(null); // Reset truck selection when fleet changes
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <fieldset className="space-y-2">
+            <legend className="text-base font-medium">Departure Date</legend>
+            <input
+              type="datetime-local"
+              className="input input-bordered w-full focus:outline-none focus:ring-0"
+              value={formatDateForInput(departureDate)}
+              onChange={handleDepartureChange}
+              min={formatDateForInput(new Date().toISOString())}
+            />
+          </fieldset>
+          <fieldset className="space-y-2">
+            <legend className="text-base font-medium">Arrival Date</legend>
+            <input
+              type="datetime-local"
+              className="input input-bordered w-full focus:outline-none focus:ring-0"
+              value={formatDateForInput(arrivalDate)}
+              onChange={handleArrivalChange}
+              min={formatDateForInput(
+                departureDate || new Date().toISOString()
+              )}
+            />
+          </fieldset>
+        </div>
+
+        <div className="divider my-6" />
+
+        {/* Price Inputs */}
+        <h2 className="font-semibold text-lg mb-2">Pricing</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <fieldset className="space-y-2">
+            <legend className="text-base font-medium">Base Price (R)</legend>
+            <label className="input-group">
+              <span>R</span>
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                placeholder="0.00"
+                className="input input-bordered w-full focus:outline-none focus:ring-0"
+                value={basePrice}
+                onChange={handleBasePrice}
+              />
+            </label>
+          </fieldset>
+          <fieldset className="space-y-2">
+            <legend className="text-base font-medium">
+              Variable Price (R/kg)
+            </legend>
+            <label className="input-group">
+              <span>R</span>
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                placeholder="0.00"
+                className="input input-bordered w-full focus:outline-none focus:ring-0"
+                value={variablePrice}
+                onChange={handleVariablePrice}
+              />
+              <span>/kg</span>
+            </label>
+          </fieldset>
+        </div>
+
+        <div className="divider my-6" />
+
+        {/* Fleet and Truck Selection */}
+        <h2 className="font-semibold text-lg mb-2">Fleet & Truck</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <fieldset className="space-y-2">
+            <legend className="text-base font-medium">Select Fleet</legend>
+            <select
+              className="select select-bordered w-full focus:outline-none focus:ring-0"
+              value={selectedFleetId || ""}
+              onChange={(e) => {
+                const value = e.target.value;
+                setSelectedFleetId(value ? (value as Id<"fleet">) : null);
+                setSelectedTruckId(null);
+              }}
+            >
+              <option value="">Select a fleet</option>
+              {userFleets?.map((fleet) => (
+                <option key={fleet._id} value={fleet._id}>
+                  {fleet.fleetName}
+                </option>
+              ))}
+            </select>
+          </fieldset>
+          <fieldset className="space-y-2">
+            <legend className="text-base font-medium">Select Truck</legend>
+            <select
+              className="select select-bordered w-full focus:outline-none focus:ring-0"
+              value={selectedTruckId || ""}
+              onChange={(e) => {
+                const value = e.target.value;
+                setSelectedTruckId(value ? (value as Id<"truck">) : null);
+              }}
+              disabled={!selectedFleetId || fleetTruckIds.length === 0}
+            >
+              <option value="">Select a truck</option>
+              {fleetTrucks?.map((truck) => (
+                <option key={truck._id} value={truck._id}>
+                  {truck?.registration} - {truck.model}
+                </option>
+              ))}
+            </select>
+          </fieldset>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex justify-end gap-4 mt-8">
+          <button
+            className="btn btn-ghost"
+            onClick={() => {
+              window.location.href = "/myTrips";
             }}
           >
-            <option value="">Select a fleet</option>
-            {userFleets?.map((fleet) => (
-              <option key={fleet._id} value={fleet._id}>
-                {fleet.fleetName}
-              </option>
-            ))}
-          </select>
-        </fieldset>
-
-        <fieldset className="space-y-2">
-          <legend className="text-base font-medium">Select Truck</legend>
-          <select
-            className="select select-bordered w-full"
-            value={selectedTruckId || ""}
-            onChange={(e) => {
-              const value = e.target.value;
-              setSelectedTruckId(value ? (value as Id<"truck">) : null);
-            }}
-            disabled={!selectedFleetId || fleetTruckIds.length === 0}
-          >
-            <option value="">Select a truck</option>
-            {fleetTrucks?.map((truck) => (
-              <option key={truck._id} value={truck._id}>
-                {truck?.registration} - {truck.model}
-              </option>
-            ))}
-          </select>
-        </fieldset>
-      </div>
-
-      {/* Action Buttons */}
-      <div className="flex justify-end space-x-4 mt-6">
-        <button
-          className="btn btn-ghost"
-          onClick={() => {
-            window.location.href = "/myTrips";
-          }}
-        >
-          Discard
-        </button>
-        <button className="btn btn-primary" onClick={handleCreateTrip}>
-          Create Trip
-        </button>
+            Discard
+          </button>
+          <button className="btn btn-primary" onClick={handleCreateTrip}>
+            Create Trip
+          </button>
+        </div>
       </div>
     </div>
   );
