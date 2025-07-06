@@ -269,23 +269,25 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
   }, [trip, purchaseTripDetails]); // Simplified dependencies
 
   return (
-    <div className="container mx-auto p-6">
-      <div className="grid grid-cols-3 grid-rows-3 gap-6">
-        {/* Main Trip Information Section */}
-        <div className="row-span-2 col-span-2 bg-base-200 rounded-lg shadow-lg">
-          <div className="p-6 space-y-6">
-            <h1 className="text-3xl font-semibold text-base-content">
-              Trip: {trip?.originCity} to {trip?.destinationCity}
+    <div className="container mx-auto px-2 md:px-6 py-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
+        {/* Main Trip Info */}
+        <div className="lg:col-span-2 flex flex-col gap-8">
+          <div className="bg-base-100 rounded-2xl shadow-xl p-8">
+            <h1 className="text-3xl font-bold text-primary mb-6">
+              {trip?.originCity}{" "}
+              <span className="text-base-content/60">to</span>{" "}
+              {trip?.destinationCity}
             </h1>
-
-            <div className="flex justify-between gap-8">
-              {/* Pickup Section */}
-              <div className="flex-1 space-y-4">
-                <div className="bg-base-100 p-4 rounded-lg">
-                  <h2 className="text-xl font-semibold mb-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {/* Pickup */}
+              <div>
+                <div className="mb-4">
+                  <h2 className="text-lg font-semibold flex items-center gap-2">
+                    <span className="badge badge-primary badge-sm" />{" "}
                     {trip?.originCity}
                   </h2>
-                  <p className="text-base-content/80">
+                  <p className="text-base-content/70 text-sm">
                     {departureDateTime && (
                       <span>
                         {departureDateTime.date} at {departureDateTime.time}
@@ -293,24 +295,19 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
                     )}
                   </p>
                 </div>
-
-                <fieldset className="space-y-2">
-                  <legend className="text-base font-medium">
+                <fieldset className="mb-4">
+                  <legend className="text-base font-medium mb-1">
                     Pickup Address
                   </legend>
                   <AddressAutocomplete
-                    value={pickupAddress || ""} // Ensure we never pass null
+                    value={pickupAddress || ""}
                     onChange={(address) => {
-                      // Just update the value without validation
                       setPickupAddress(address || "");
-                      pickup.setValue(address || ""); // Add this line to update the input value
+                      pickup.setValue(address || "");
                     }}
                     ready={pickup.ready}
-                    inputValue={pickup.value || ""} // Ensure we never pass null
-                    onInputChange={(value) => {
-                      pickup.setValue(value || "");
-                      // Don't update pickupAddress here, wait for selection
-                    }}
+                    inputValue={pickup.value || ""}
+                    onInputChange={(value) => pickup.setValue(value || "")}
                     suggestions={pickup.suggestions}
                     status={pickup.status}
                     clearSuggestions={pickup.clearSuggestions}
@@ -330,29 +327,26 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
                     }}
                   />
                 </fieldset>
-
-                <fieldset className="space-y-2">
-                  <legend className="text-base font-medium">
+                <fieldset>
+                  <legend className="text-base font-medium mb-1">
                     Pickup Instructions
                   </legend>
                   <textarea
-                    className="textarea textarea-bordered w-full h-24 focus:outline-none focus:ring-0"
+                    className="textarea textarea-bordered w-full h-20 focus:outline-none focus:ring-0"
                     placeholder="Enter pickup instructions"
                     value={pickupInstructions}
                     onChange={(e) => setPickupInstructions(e.target.value)}
                   />
                 </fieldset>
               </div>
-
-              <div className="w-px bg-base-300" />
-
-              {/* Delivery Section */}
-              <div className="flex-1 space-y-4">
-                <div className="bg-base-100 p-4 rounded-lg">
-                  <h2 className="text-xl font-semibold mb-2">
+              {/* Delivery */}
+              <div>
+                <div className="mb-4">
+                  <h2 className="text-lg font-semibold flex items-center gap-2">
+                    <span className="badge badge-secondary badge-sm" />{" "}
                     {trip?.destinationCity}
                   </h2>
-                  <p className="text-base-content/80">
+                  <p className="text-base-content/70 text-sm">
                     {arrivalDateTime && (
                       <span>
                         {arrivalDateTime.date} at {arrivalDateTime.time}
@@ -360,23 +354,19 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
                     )}
                   </p>
                 </div>
-
-                <fieldset className="space-y-2">
-                  <legend className="text-base font-medium">
+                <fieldset className="mb-4">
+                  <legend className="text-base font-medium mb-1">
                     Delivery Address
                   </legend>
                   <AddressAutocomplete
-                    value={deliveryAddress || ""} // Ensure we never pass null
+                    value={deliveryAddress || ""}
                     onChange={(address) => {
                       setDeliveryAddress(address || "");
-                      delivery.setValue(address || ""); // Add this line to update the input value
+                      delivery.setValue(address || "");
                     }}
                     ready={delivery.ready}
-                    inputValue={delivery.value || ""} // Ensure we never pass null
-                    onInputChange={(value) => {
-                      delivery.setValue(value || "");
-                      // Don't update deliveryAddress here, wait for selection
-                    }}
+                    inputValue={delivery.value || ""}
+                    onInputChange={(value) => delivery.setValue(value || "")}
                     suggestions={delivery.suggestions}
                     status={delivery.status}
                     clearSuggestions={delivery.clearSuggestions}
@@ -396,13 +386,12 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
                     }}
                   />
                 </fieldset>
-
-                <fieldset className="space-y-2">
-                  <legend className="text-base font-medium">
+                <fieldset>
+                  <legend className="text-base font-medium mb-1">
                     Delivery Instructions
                   </legend>
                   <textarea
-                    className="textarea textarea-bordered w-full h-24 focus:outline-none focus:ring-0"
+                    className="textarea textarea-bordered w-full h-20 focus:outline-none focus:ring-0"
                     placeholder="Enter delivery instructions"
                     value={deliveryInstructions}
                     onChange={(e) => setDeliveryInstructions(e.target.value)}
@@ -410,100 +399,30 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
                 </fieldset>
               </div>
             </div>
-            <p className="flex justify-between">
-              <span>Distance:</span>
-              <span>{distance.toFixed(2)} km</span>
-            </p>
-          </div>
-        </div>
-
-        {/* Map Section */}
-        <div className="row-span-2 bg-base-200 rounded-lg shadow-lg overflow-hidden">
-          <GoogleMap
-            mapContainerStyle={mapContainerStyle}
-            options={{
-              zoomControl: true,
-              streetViewControl: true,
-              mapTypeControl: true,
-              fullscreenControl: true,
-              gestureHandling: "greedy", // Changed from cooperative to greedy
-              clickableIcons: false,
-              mapTypeId: google.maps.MapTypeId.ROADMAP,
-            }}
-            zoom={7}
-            center={pickupCoords}
-            onClick={(e) => {
-              // Add click handler if needed
-            }}
-            onLoad={(map) => {
-              // Trigger a resize event after the map loads
-              window.google.maps.event.trigger(map, "resize");
-            }}
-          >
-            {(trip?.originCity || pickupAddress) &&
-              (trip?.destinationCity || deliveryAddress) && (
-                <DirectionsService
-                  options={{
-                    origin:
-                      pickupAddress || `${trip?.originCity}, South Africa`,
-                    destination:
-                      deliveryAddress ||
-                      `${trip?.destinationCity}, South Africa`,
-                    travelMode: google.maps.TravelMode.DRIVING,
-                  }}
-                  callback={(response, status) => {
-                    if (response !== null && status === "OK") {
-                      setDirections(response);
-                      // Get distance in kilometers (converts from meters)
-                      const distanceInKm =
-                        response.routes?.[0]?.legs?.[0]?.distance?.value != null
-                          ? response.routes[0].legs[0].distance.value / 1000
-                          : 0;
-                      setDistance(distanceInKm);
-                    }
-                  }}
-                />
-              )}
-            {directions && (
-              <DirectionsRenderer
-                options={{
-                  suppressMarkers: false,
-                  preserveViewport: false,
-                  draggable: true, // Allow route dragging
-                }}
-                directions={directions}
-              />
-            )}
-          </GoogleMap>
-        </div>
-
-        {/* Trip Details Section */}
-        <div className="col-span-2 bg-base-200 rounded-lg shadow-lg p-6">
-          <div className="flex justify-between gap-8">
-            {/* Truck Information */}
-            <div className="space-y-4">
-              <div className="bg-base-100 p-4 rounded-lg">
-                <h3 className="text-lg font-semibold mb-2">Truck Details</h3>
-                <p className="mb-2">
-                  {truck?.year} {truck?.make} {truck?.model} -{" "}
-                  {truck?.truckType}
-                </p>
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <p>Length: {truck?.length}m</p>
-                  <p>Width: {truck?.width}m</p>
-                  <p>Height: {truck?.height}m</p>
-                  <p>Max Load: {truck?.maxLoadCapacity}kg</p>
-                </div>
-              </div>
+            <div className="divider my-6" />
+            <div className="flex justify-end text-base-content/70 text-sm">
+              <span>
+                Distance:{" "}
+                <span className="font-semibold">{distance.toFixed(2)} km</span>
+              </span>
             </div>
+          </div>
 
-            {/* Cargo Information */}
-            <div className="space-y-4">
-              <fieldset className="space-y-2">
-                <legend className="text-base font-medium">
+          {/* Cargo Section */}
+          <div className="bg-base-100 p-6 rounded-2xl shadow flex flex-col gap-6">
+            <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
+              Cargo Details
+            </h3>
+            <div className="flex flex-col gap-4">
+              <div>
+                <label
+                  className="block text-sm font-medium mb-1"
+                  htmlFor="cargo-weight"
+                >
                   Cargo Weight (kg)
-                </legend>
+                </label>
                 <input
+                  id="cargo-weight"
                   type="number"
                   min="0"
                   className="input input-bordered w-full focus:outline-none focus:ring-0"
@@ -511,72 +430,174 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
                   value={cargoWeight}
                   onChange={(e) => setCargoWeight(Number(e.target.value))}
                 />
-              </fieldset>
-
-              <fieldset className="space-y-2">
-                <legend className="text-base font-medium">
+              </div>
+              <div>
+                <label
+                  className="block text-sm font-medium mb-1"
+                  htmlFor="cargo-description"
+                >
                   Cargo Description
-                </legend>
+                </label>
                 <textarea
-                  className="textarea textarea-bordered w-full h-24 focus:outline-none focus:ring-0"
+                  id="cargo-description"
+                  className="textarea textarea-bordered w-full h-20 focus:outline-none focus:ring-0"
                   placeholder="Describe your cargo"
                   value={cargoDescription}
                   onChange={(e) => setCargoDescription(e.target.value)}
                 />
-              </fieldset>
+              </div>
             </div>
+          </div>
 
-            {/* Issuer Details */}
-            <div className="bg-base-100 p-4 rounded-lg">
-              <h3 className="text-lg font-semibold mb-2">Trip Issuer</h3>
-              <p className="mb-1">{tripIssuer?.name}</p>
-              <p className="text-base-content/80">{tripIssuer?.email}</p>
+          {/* Truck & Issuer (merged) */}
+          <div className="bg-base-100 p-6 rounded-2xl shadow flex flex-col gap-4 md:col-span-2">
+            <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
+              Truck & Issuer Details
+            </h3>
+            <div className="mb-2 text-base font-medium text-center">
+              {truck?.year} {truck?.make} {truck?.model} - {truck?.truckType}
+            </div>
+            <div className="grid grid-cols-4 gap-2 mt-2">
+              <div className="flex flex-col items-center">
+                <span className="text-xs text-base-content/70 mt-1">
+                  Length
+                </span>
+                <span className="font-bold">{truck?.length} m</span>
+              </div>
+              <div className="flex flex-col items-center">
+                <span className="text-xs text-base-content/70 mt-1">Width</span>
+                <span className="font-bold">{truck?.width} m</span>
+              </div>
+              <div className="flex flex-col items-center">
+                <span className="text-xs text-base-content/70 mt-1">
+                  Height
+                </span>
+                <span className="font-bold">{truck?.height} m</span>
+              </div>
+              <div className="flex flex-col items-center">
+                <span className="text-xs text-base-content/70 mt-1">
+                  Max Load
+                </span>
+                <span className="font-bold">{truck?.maxLoadCapacity} kg</span>
+              </div>
+            </div>
+            <div className="divider my-2" />
+            <div>
+              <h4 className="text-base font-semibold mb-1">Trip Issuer</h4>
+              <p className="mb-1">Transporter: {tripIssuer?.name}</p>
+              <p className="text-base-content/80">Email: {tripIssuer?.email}</p>
             </div>
           </div>
         </div>
 
-        {/* Price and Action Section */}
-        <div className="bg-base-200 rounded-lg shadow-lg p-6">
-          <div className="space-y-2 mb-4">
-            <p className="flex justify-between">
-              <span>Base Price:</span>
-              <span className="font-semibold">R{trip?.basePrice}</span>
-            </p>
-            <p className="flex justify-between">
-              <span>Rate per kg:</span>
-              <span>R{trip?.variablePrice}</span>
-            </p>
-            <div className="border-t border-base-300 my-2" />
-            <p className="flex justify-between text-lg font-semibold">
-              <span>Total:</span>
-              <span>R{tripPrice.toFixed(2)}</span>
-            </p>
-          </div>
-
-          <div className="flex justify-center">
-            {!trip || !userId ? (
-              <div className="loading loading-spinner"></div>
-            ) : userId === trip.userId ? (
-              <p className="text-base-content/80">You are the trip issuer</p>
-            ) : booked && purchaseTripDetails ? (
-              purchaseTripDetails.status === "Delivered" ? (
-                <TripRatingComponent purchaseTripId={purchaseTripDetails._id} />
-              ) : (
-                <TripCancelButton
-                  purchaseTripId={purchaseTripDetails._id}
-                  tripId={trip._id}
-                  currentStatus={purchaseTripDetails.status}
+        {/* Map & Price/Action */}
+        <div className="flex flex-col gap-8 h-full">
+          {/* Map */}
+          <div
+            className="bg-base-100 rounded-2xl shadow-xl overflow-hidden"
+            style={{ height: "400px" }}
+          >
+            <GoogleMap
+              mapContainerStyle={{
+                width: "100%",
+                height: "100%",
+              }}
+              options={{
+                zoomControl: true,
+                streetViewControl: true,
+                mapTypeControl: true,
+                fullscreenControl: true,
+                gestureHandling: "greedy",
+                clickableIcons: false,
+                mapTypeId: google.maps.MapTypeId.ROADMAP,
+              }}
+              zoom={7}
+              center={pickupCoords}
+              onClick={(e) => {}}
+              onLoad={(map) => {
+                window.google.maps.event.trigger(map, "resize");
+              }}
+            >
+              {(trip?.originCity || pickupAddress) &&
+                (trip?.destinationCity || deliveryAddress) && (
+                  <DirectionsService
+                    options={{
+                      origin:
+                        pickupAddress || `${trip?.originCity}, South Africa`,
+                      destination:
+                        deliveryAddress ||
+                        `${trip?.destinationCity}, South Africa`,
+                      travelMode: google.maps.TravelMode.DRIVING,
+                    }}
+                    callback={(response, status) => {
+                      if (response !== null && status === "OK") {
+                        setDirections(response);
+                        const distanceInKm =
+                          response.routes?.[0]?.legs?.[0]?.distance?.value !=
+                          null
+                            ? response.routes[0].legs[0].distance.value / 1000
+                            : 0;
+                        setDistance(distanceInKm);
+                      }
+                    }}
+                  />
+                )}
+              {directions && (
+                <DirectionsRenderer
+                  options={{
+                    suppressMarkers: false,
+                    preserveViewport: false,
+                    draggable: true,
+                  }}
+                  directions={directions}
                 />
-              )
-            ) : (
-              <button
-                className="btn btn-primary btn-wide"
-                onClick={handleBookTrip}
-                disabled={!trip}
-              >
-                Book Trip
-              </button>
-            )}
+              )}
+            </GoogleMap>
+          </div>
+          {/* Price & Action */}
+          <div className="bg-base-100 rounded-2xl shadow-xl p-6 flex flex-col gap-4">
+            <div className="space-y-2 mb-4">
+              <p className="flex justify-between">
+                <span>Base Price:</span>
+                <span className="font-semibold">R{trip?.basePrice}</span>
+              </p>
+              <p className="flex justify-between">
+                <span>Rate per kg:</span>
+                <span>R{trip?.variablePrice}</span>
+              </p>
+              <div className="border-t border-base-300 my-2" />
+              <p className="flex justify-between text-lg font-semibold">
+                <span>Total:</span>
+                <span>R{tripPrice.toFixed(2)}</span>
+              </p>
+            </div>
+            <div className="flex justify-center">
+              {!trip || !userId ? (
+                <div className="loading loading-spinner"></div>
+              ) : userId === trip.userId ? (
+                <p className="text-base-content/80">You are the trip issuer</p>
+              ) : booked && purchaseTripDetails ? (
+                purchaseTripDetails.status === "Delivered" ? (
+                  <TripRatingComponent
+                    purchaseTripId={purchaseTripDetails._id}
+                  />
+                ) : (
+                  <TripCancelButton
+                    purchaseTripId={purchaseTripDetails._id}
+                    tripId={trip._id}
+                    currentStatus={purchaseTripDetails.status}
+                  />
+                )
+              ) : (
+                <button
+                  className="btn btn-primary btn-wide"
+                  onClick={handleBookTrip}
+                  disabled={!trip}
+                >
+                  Book Trip
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>

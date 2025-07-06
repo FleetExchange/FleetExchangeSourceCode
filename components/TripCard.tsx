@@ -73,7 +73,7 @@ export default function TripCard({ tripId }: { tripId: Id<"trip"> }) {
                   hour: "2-digit",
                   minute: "2-digit",
                   hour12: false,
-                }).format(new Date(trip?.departureDate))
+                }).format(new Date(trip?.arrivalDate))
               : "No Date"}
           </p>
         </div>
@@ -83,37 +83,39 @@ export default function TripCard({ tripId }: { tripId: Id<"trip"> }) {
 
       <div className="flex flex-row justify-between items-center gap-6 w-full">
         {/* Truck Info Card */}
-        <div className="bg-base-200 rounded-lg p-4 flex flex-col gap-3 min-w-[260px] w-fit">
-          {/* Top row: Type & Payload */}
-          <div className="flex flex-row gap-8 justify-start">
-            <div className="flex items-center gap-2">
-              <BsTruck className="text-primary" />
-              <span className="font-medium text-base-content">Type:</span>
-              <span className="text-sm">{truck?.truckType}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <BsBoxSeam className="text-primary" />
-              <span className="font-medium text-base-content">Payload:</span>
-              <span className="text-sm">{truck?.maxLoadCapacity} KG</span>
-            </div>
+        <div className="bg-base-200 rounded-lg p-4 flex flex-row justify-between gap-6 w-full">
+          <div className="flex flex-col items-center gap-1 flex-1 min-w-0">
+            <BsTruck className="text-primary" />
+            <span className="font-medium text-base-content text-xs">Type</span>
+            <span className="text-sm break-words">{truck?.truckType}</span>
           </div>
-          {/* Bottom row: Dimensions */}
-          <div className="flex flex-row gap-6 justify-start mt-2">
-            <div className="flex items-center gap-2">
-              <CiRuler className="text-primary" />
-              <span className="font-medium text-base-content">W:</span>
-              <span className="text-sm">{truck?.width} m</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <CiRuler className="text-primary" />
-              <span className="font-medium text-base-content">L:</span>
-              <span className="text-sm">{truck?.length} m</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <CiRuler className="text-primary" />
-              <span className="font-medium text-base-content">H:</span>
-              <span className="text-sm">{truck?.height} m</span>
-            </div>
+          <div className="flex flex-col items-center gap-1 flex-1 min-w-0">
+            <BsBoxSeam className="text-primary" />
+            <span className="font-medium text-base-content text-xs">
+              Payload
+            </span>
+            <span className="text-sm break-words">
+              {truck?.maxLoadCapacity} KG
+            </span>
+          </div>
+          <div className="flex flex-col items-center gap-1 flex-1 min-w-0">
+            <CiRuler className="text-primary" />
+            <span className="font-medium text-base-content text-xs">Width</span>
+            <span className="text-sm break-words">{truck?.width} m</span>
+          </div>
+          <div className="flex flex-col items-center gap-1 flex-1 min-w-0">
+            <CiRuler className="text-primary" />
+            <span className="font-medium text-base-content text-xs">
+              Length
+            </span>
+            <span className="text-sm break-words">{truck?.length} m</span>
+          </div>
+          <div className="flex flex-col items-center gap-1 flex-1 min-w-0">
+            <CiRuler className="text-primary" />
+            <span className="font-medium text-base-content text-xs">
+              Height
+            </span>
+            <span className="text-sm break-words">{truck?.height} m</span>
           </div>
         </div>
 
@@ -126,7 +128,7 @@ export default function TripCard({ tripId }: { tripId: Id<"trip"> }) {
             },
           }}
         >
-          <button className="pointer-events-auto btn btn-primary">
+          <button className="pointer-events-auto btn btn-primary text-sm">
             View Trip
           </button>
         </Link>
