@@ -19,9 +19,12 @@ export default function SyncUserWithConvex() {
           userId: user.id,
           name: `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim(),
           email: user.emailAddresses[0]?.emailAddress ?? "",
+          role:
+            (user.publicMetadata?.role as "client" | "transporter") ?? "client", // Get role from user metadata
+          contactNumber: (user.publicMetadata?.contactNumber as string) ?? "", // Get contact from metadata
         });
       } catch (error) {
-        console.error("Error syncing user:", error);
+        console.error("Error syncing user with Convex:", error);
       }
     };
 
