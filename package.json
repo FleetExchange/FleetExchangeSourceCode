@@ -3,11 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "build": "next build",
+    "dev": "convex dev --run 'next dev'",
+    "convex:dev": "convex dev",
+    "convex:deploy": "convex deploy",
     "dev:http": "next dev --port 3000",
     "dev:https": "next dev --experimental-https",
-    "build": "next build",
-    "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
