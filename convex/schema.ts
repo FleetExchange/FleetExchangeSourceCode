@@ -87,4 +87,14 @@ export default defineSchema({
     length: v.number(), // Length of the cargo area
     height: v.number(), // Height of cargo area
   }),
+
+  files: defineTable({
+    userId: v.id("users"),
+    fileName: v.string(),
+    fileId: v.id("_storage"),
+    fileType: v.string(),
+    fileSize: v.number(),
+    uploadedAt: v.number(),
+    category: v.optional(v.string()),
+  }).index("by_user", ["userId"]),
 });

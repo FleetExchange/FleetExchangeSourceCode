@@ -15,7 +15,6 @@ import type {
 } from "convex/server";
 import type * as crons from "../crons.js";
 import type * as fleet from "../fleet.js";
-import type * as freight from "../freight.js";
 import type * as purchasetrip from "../purchasetrip.js";
 import type * as trip from "../trip.js";
 import type * as truck from "../truck.js";
@@ -32,7 +31,6 @@ import type * as users from "../users.js";
 declare const fullApi: ApiFromModules<{
   crons: typeof crons;
   fleet: typeof fleet;
-  freight: typeof freight;
   purchasetrip: typeof purchasetrip;
   trip: typeof trip;
   truck: typeof truck;
