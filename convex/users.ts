@@ -1,5 +1,6 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
+import { internal } from "./_generated/api";
 
 // Serverside Queries
 // Methods to handle interfacing with the DB in terms of actions
@@ -143,5 +144,33 @@ export const updateUserRating = mutation({
       averageRating: newAverageRating,
       ratingCount: (user.ratingCount || 0) + 1,
     });
+  },
+});
+
+// convex/users.ts
+export const updateTransporterProfile = mutation({
+  args: {
+    userId: v.id("users"),
+    address: v.optional(v.string()),
+    about: v.optional(v.string()),
+    profileImage: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const { userId, ...updates } = args;
+
+    // Get the user to get their Clerk ID
+    const user = await ctx.db.get(userId);
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    // Update Convex database
+    const cleanUpdates = Object.fromEntries(
+      Object.entries(updates).filter(([_, value]) => value !== undefined)
+    );
+
+    await ctx.db.patch(userId, cleanUpdates);
+
+    return await ctx.db.get(userId);
   },
 });

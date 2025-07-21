@@ -68,6 +68,9 @@ export default defineSchema({
     createdAt: v.optional(v.number()), // Make this optional
     averageRating: v.optional(v.number()), // Average rating of the user
     ratingCount: v.optional(v.number()), // Number of ratings received by the user
+    about: v.optional(v.string()), // About section for the user
+    profileImage: v.optional(v.string()), // URL of the profile image
+    address: v.optional(v.string()), // Address of the user
   }).index("by_clerk_id", ["clerkId"]),
 
   fleet: defineTable({
