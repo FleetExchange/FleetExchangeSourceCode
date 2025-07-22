@@ -148,7 +148,7 @@ export const updateUserRating = mutation({
 });
 
 // convex/users.ts
-export const updateTransporterProfile = mutation({
+export const updateUserProfile = mutation({
   args: {
     userId: v.id("users"),
     address: v.optional(v.string()),

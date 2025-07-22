@@ -13,17 +13,16 @@ import { IoCloseOutline } from "react-icons/io5";
 import { AddressAutocomplete } from "@/components/AddressAutocomplete";
 import { usePlacesWithRestrictions } from "@/hooks/usePlacesWithRestrictions";
 import ProfileImage from "@/components/ProfileImage";
+import { Client } from "@clerk/nextjs/server";
 
-interface TransporterProfileProps {
-  transporterId: string; // The transporter whose profile we're viewing
+interface ClientProfileProps {
+  clientId: string; // The client whose profile we're viewing
 }
 
-const TransporterProfileInfo: React.FC<TransporterProfileProps> = ({
-  transporterId,
-}) => {
-  // Get the transporter's profile data
-  const transporter = useQuery(api.users.getUserById, {
-    userId: transporterId as Id<"users">,
+const ClientProfileInfo: React.FC<ClientProfileProps> = ({ clientId }) => {
+  // Get the client's profile data
+  const client = useQuery(api.users.getUserById, {
+    userId: clientId as Id<"users">,
   });
 
   // Get the current user based on Clerk ID
@@ -32,8 +31,8 @@ const TransporterProfileInfo: React.FC<TransporterProfileProps> = ({
     clerkId: user?.id || "",
   });
 
-  // Check if the current user is the transporter to enable editing
-  const isOwner = currentUser?._id === transporterId;
+  // Check if the current user is the client to enable editing
+  const isOwner = currentUser?._id === clientId;
 
   // Edit states
   const [isEditing, setIsEditing] = useState(false);
@@ -44,41 +43,41 @@ const TransporterProfileInfo: React.FC<TransporterProfileProps> = ({
 
   const profileImageUrl = useQuery(
     api.users.getProfileImageUrl,
-    transporter?.profileImageFileId
-      ? { profileImageFileId: transporter.profileImageFileId }
+    client?.profileImageFileId
+      ? { profileImageFileId: client.profileImageFileId }
       : "skip"
   );
 
-  // Load edit data when transporter data is available
+  // Load edit data when client data is available
   React.useEffect(() => {
-    if (transporter) {
+    if (client) {
       setEditData({
-        address: transporter.address || "",
-        about: transporter.about || "",
+        address: client.address || "",
+        about: client.about || "",
       });
     }
-  }, [transporter]);
+  }, [client]);
 
   // For AddressAutocomplete
   const [addressInput, setAddressInput] = useState("");
   const places = usePlacesWithRestrictions({
-    cityName: transporter?.address || "",
+    cityName: client?.address || "",
     citiesOnly: false,
   });
 
   React.useEffect(() => {
-    if (transporter && !isEditing) {
-      setAddressInput(transporter.address || "");
-      places.setValue(transporter.address || "");
+    if (client && !isEditing) {
+      setAddressInput(client.address || "");
+      places.setValue(client.address || "");
     }
     if (isEditing) {
       setAddressInput(editData.address || "");
       places.setValue(editData.address || "");
     }
     // eslint-disable-next-line
-  }, [transporter, isEditing, editData.address]);
+  }, [client, isEditing, editData.address]);
 
-  //Load the mutation to update the transporter profile
+  //Load the mutation to update the client profile
   const updateProfile = useMutation(api.users.updateUserProfile);
   const updateProfileImage = useMutation(api.users.updateProfileImage);
   const generateUploadUrl = useMutation(api.users.generateUploadUrl);
@@ -97,7 +96,7 @@ const TransporterProfileInfo: React.FC<TransporterProfileProps> = ({
 
     // 3. Update user profile with new file ID
     await updateProfileImage({
-      userId: transporterId as Id<"users">,
+      userId: clientId as Id<"users">,
       profileImageFileId: storageId,
     });
   };
@@ -105,7 +104,7 @@ const TransporterProfileInfo: React.FC<TransporterProfileProps> = ({
   const handleSave = async () => {
     try {
       await updateProfile({
-        userId: transporterId as Id<"users">,
+        userId: clientId as Id<"users">,
         ...editData,
       });
       setIsEditing(false);
@@ -115,23 +114,21 @@ const TransporterProfileInfo: React.FC<TransporterProfileProps> = ({
   };
 
   const handleCancel = () => {
-    if (transporter) {
+    if (client) {
       setEditData({
-        address: transporter.address || "",
-        about: transporter.about || "",
+        address: client.address || "",
+        about: client.about || "",
       });
     }
     setIsEditing(false);
   };
 
-  // If no transporter data is available, show loading state
-  if (!transporter) return <div>Loading...</div>;
+  // If no client data is available, show loading state
+  if (!client) return <div>Loading...</div>;
 
   return (
     <div className="bg-base-100 rounded-2xl shadow-xl p-8 mb-6 max-w-2xl mx-auto">
-      <h2 className="text-2xl font-bold mb-6">
-        Transporter Profile Information
-      </h2>
+      <h2 className="text-2xl font-bold mb-6">Client Profile Information</h2>
       <div className="flex flex-col md:flex-row gap-8 items-start">
         {/* Profile Image */}
         <div>
@@ -147,25 +144,17 @@ const TransporterProfileInfo: React.FC<TransporterProfileProps> = ({
         <div className="flex-1 space-y-4">
           <div>
             <span className="font-semibold">Name:</span>
-            <span className="ml-2">{transporter.name}</span>
+            <span className="ml-2">{client.name}</span>
           </div>
           <div>
             <span className="font-semibold">Email:</span>
-            <span className="ml-2">{transporter.email}</span>
+            <span className="ml-2">{client.email}</span>
           </div>
           <div>
             <span className="font-semibold">Phone:</span>
-            <span className="ml-2">{transporter.contactNumber}</span>
+            <span className="ml-2">{client.contactNumber}</span>
           </div>
-          <div>
-            <span className="font-semibold">Rating:</span>
-            <span className="ml-2">
-              {transporter.averageRating?.toFixed(1) ?? "No ratings"}{" "}
-              <span className="text-base-content/60">
-                ({transporter.ratingCount || 0} reviews)
-              </span>
-            </span>
-          </div>
+
           {/* Editable About */}
           <div>
             <span className="font-semibold">About:</span>
@@ -179,7 +168,7 @@ const TransporterProfileInfo: React.FC<TransporterProfileProps> = ({
               />
             ) : (
               <p className="ml-2">
-                {transporter.about || "No description provided."}
+                {client.about || "No description provided."}
               </p>
             )}
           </div>
@@ -205,7 +194,7 @@ const TransporterProfileInfo: React.FC<TransporterProfileProps> = ({
               </div>
             ) : (
               <span className="ml-2">
-                {transporter.address || "No address provided."}
+                {client.address || "No address provided."}
               </span>
             )}
           </div>
@@ -240,4 +229,4 @@ const TransporterProfileInfo: React.FC<TransporterProfileProps> = ({
   );
 };
 
-export default TransporterProfileInfo;
+export default ClientProfileInfo;
