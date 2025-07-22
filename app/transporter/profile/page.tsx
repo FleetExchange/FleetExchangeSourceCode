@@ -4,6 +4,7 @@ import TransporterProfileInfo from "@/components/TransporterProfileInfo";
 import { useUser } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import TransporterProfileFiles from "@/components/TransporterProfileFiles";
 
 const Page = () => {
   const { user } = useUser();
@@ -16,6 +17,7 @@ const Page = () => {
   return (
     <div>
       <TransporterProfileInfo transporterId={currentUser._id} />
+      <TransporterProfileFiles transporterId={currentUser._id} />
     </div>
   );
 };
