@@ -172,7 +172,7 @@ const TransporterProfileInfo: React.FC<TransporterProfileProps> = ({
             <span className="font-semibold">About:</span>
             {isEditing ? (
               <textarea
-                className="textarea textarea-bordered w-full mt-1"
+                className="textarea textarea-bordered w-full mt-1  focus:ring-0 focus:outline-none"
                 value={editData.about}
                 onChange={(e) =>
                   setEditData({ ...editData, about: e.target.value })
