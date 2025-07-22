@@ -13,7 +13,6 @@ import type {
   FilterApi,
   FunctionReference,
 } from "convex/server";
-import type * as clerkSync from "../clerkSync.js";
 import type * as crons from "../crons.js";
 import type * as files from "../files.js";
 import type * as fleet from "../fleet.js";
@@ -31,7 +30,6 @@ import type * as users from "../users.js";
  * ```
  */
 declare const fullApi: ApiFromModules<{
-  clerkSync: typeof clerkSync;
   crons: typeof crons;
   files: typeof files;
   fleet: typeof fleet;

@@ -4,11 +4,15 @@ import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useUser } from "@clerk/nextjs";
 import { useMutation, useQuery } from "convex/react";
+import { useConvex } from "convex/react";
 import React from "react";
 import { useState } from "react";
 import { CiEdit } from "react-icons/ci";
 import { IoCheckmark } from "react-icons/io5";
 import { IoCloseOutline } from "react-icons/io5";
+import { AddressAutocomplete } from "@/components/AddressAutocomplete";
+import { usePlacesWithRestrictions } from "@/hooks/usePlacesWithRestrictions";
+import ProfileImage from "@/components/ProfileImage";
 
 interface TransporterProfileProps {
   transporterId: string; // The transporter whose profile we're viewing
@@ -36,22 +40,68 @@ const TransporterProfileInfo: React.FC<TransporterProfileProps> = ({
   const [editData, setEditData] = useState({
     address: "",
     about: "",
-    profileImage: "",
   });
+
+  const profileImageUrl = useQuery(
+    api.users.getProfileImageUrl,
+    transporter?.profileImageFileId
+      ? { profileImageFileId: transporter.profileImageFileId }
+      : "skip"
+  );
 
   // Load edit data when transporter data is available
   React.useEffect(() => {
     if (transporter) {
       setEditData({
         address: transporter.address || "",
-        profileImage: transporter.profileImage || "",
         about: transporter.about || "",
       });
     }
   }, [transporter]);
 
+  // For AddressAutocomplete
+  const [addressInput, setAddressInput] = useState("");
+  const places = usePlacesWithRestrictions({
+    cityName: transporter?.address || "",
+    citiesOnly: false,
+  });
+
+  React.useEffect(() => {
+    if (transporter && !isEditing) {
+      setAddressInput(transporter.address || "");
+      places.setValue(transporter.address || "");
+    }
+    if (isEditing) {
+      setAddressInput(editData.address || "");
+      places.setValue(editData.address || "");
+    }
+    // eslint-disable-next-line
+  }, [transporter, isEditing, editData.address]);
+
   //Load the mutation to update the transporter profile
   const updateProfile = useMutation(api.users.updateTransporterProfile);
+  const updateProfileImage = useMutation(api.users.updateProfileImage);
+  const convex = useConvex();
+  const generateUploadUrl = useMutation(api.users.generateUploadUrl);
+
+  const handleProfileImageUpload = async (file: File) => {
+    // 1. Get upload URL from Convex
+    const uploadUrl = await generateUploadUrl();
+
+    // 2. Upload file to Convex storage
+    const result = await fetch(uploadUrl, {
+      method: "POST",
+      headers: { "Content-Type": file.type },
+      body: file,
+    });
+    const { storageId } = await result.json();
+
+    // 3. Update user profile with new file ID
+    await updateProfileImage({
+      userId: transporterId as Id<"users">,
+      profileImageFileId: storageId,
+    });
+  };
 
   const handleSave = async () => {
     try {
@@ -69,7 +119,6 @@ const TransporterProfileInfo: React.FC<TransporterProfileProps> = ({
     if (transporter) {
       setEditData({
         address: transporter.address || "",
-        profileImage: transporter.profileImage || "",
         about: transporter.about || "",
       });
     }
@@ -87,44 +136,12 @@ const TransporterProfileInfo: React.FC<TransporterProfileProps> = ({
       <div className="flex flex-col md:flex-row gap-8 items-start">
         {/* Profile Image */}
         <div>
-          {isEditing ? (
-            <div className="flex flex-col items-center gap-2">
-              {editData.profileImage ? (
-                <img
-                  src={editData.profileImage}
-                  alt="Profile"
-                  className="w-24 h-24 rounded-full object-cover border"
-                />
-              ) : (
-                <div className="w-24 h-24 rounded-full bg-base-300 flex items-center justify-center text-3xl">
-                  {transporter.name?.charAt(0).toUpperCase()}
-                </div>
-              )}
-              <input
-                type="text"
-                className="input input-bordered w-full mt-2"
-                placeholder="Profile Image URL"
-                value={editData.profileImage}
-                onChange={(e) =>
-                  setEditData({ ...editData, profileImage: e.target.value })
-                }
-              />
-            </div>
-          ) : (
-            <div className="flex flex-col items-center">
-              {transporter.profileImage ? (
-                <img
-                  src={transporter.profileImage}
-                  alt="Profile"
-                  className="w-24 h-24 rounded-full object-cover border"
-                />
-              ) : (
-                <div className="w-24 h-24 rounded-full bg-base-300 flex items-center justify-center text-3xl">
-                  {transporter.name?.charAt(0).toUpperCase()}
-                </div>
-              )}
-            </div>
-          )}
+          <ProfileImage
+            fileUrl={profileImageUrl || undefined}
+            size={120}
+            onUpload={handleProfileImageUpload}
+            editable={isOwner && isEditing}
+          />
         </div>
 
         {/* Info Section */}
@@ -171,14 +188,22 @@ const TransporterProfileInfo: React.FC<TransporterProfileProps> = ({
           <div>
             <span className="font-semibold">Address:</span>
             {isEditing ? (
-              <input
-                type="text"
-                className="input input-bordered w-full mt-1"
-                value={editData.address}
-                onChange={(e) =>
-                  setEditData({ ...editData, address: e.target.value })
-                }
-              />
+              <div className="mt-1">
+                <AddressAutocomplete
+                  value={addressInput}
+                  onChange={(val) => {
+                    setAddressInput(val);
+                    setEditData({ ...editData, address: val });
+                  }}
+                  label="Address"
+                  ready={places.ready}
+                  inputValue={places.value}
+                  onInputChange={places.setValue}
+                  suggestions={places.suggestions}
+                  status={places.status}
+                  clearSuggestions={places.clearSuggestions}
+                />
+              </div>
             ) : (
               <span className="ml-2">
                 {transporter.address || "No address provided."}

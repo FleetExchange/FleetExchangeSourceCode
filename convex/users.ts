@@ -153,7 +153,6 @@ export const updateTransporterProfile = mutation({
     userId: v.id("users"),
     address: v.optional(v.string()),
     about: v.optional(v.string()),
-    profileImage: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const { userId, ...updates } = args;
@@ -172,5 +171,28 @@ export const updateTransporterProfile = mutation({
     await ctx.db.patch(userId, cleanUpdates);
 
     return await ctx.db.get(userId);
+  },
+});
+
+export const updateProfileImage = mutation({
+  args: {
+    userId: v.id("users"),
+    profileImageFileId: v.id("_storage"),
+  },
+  handler: async (ctx, { userId, profileImageFileId }) => {
+    await ctx.db.patch(userId, { profileImageFileId });
+  },
+});
+
+export const getProfileImageUrl = query({
+  args: { profileImageFileId: v.id("_storage") },
+  handler: async (ctx, { profileImageFileId }) => {
+    return await ctx.storage.getUrl(profileImageFileId);
+  },
+});
+
+export const generateUploadUrl = mutation({
+  handler: async (ctx) => {
+    return await ctx.storage.generateUploadUrl();
   },
 });

@@ -101,12 +101,12 @@ const TransporterSidebar = () => {
             </li>
             <li>
               <Link
-                href="/account"
+                href="/transporter/profile"
                 className="flex items-center justify-center group-hover:justify-start gap-3 p-3 hover:bg-secondary rounded-lg transition-all duration-300"
               >
                 <CiUser className="w-6 h-6 text-primary-content flex-shrink-0" />
                 <span className="hidden group-hover:block whitespace-nowrap text-primary-content">
-                  Account
+                  Profile
                 </span>
               </Link>
             </li>
