@@ -10,7 +10,9 @@ export type TripStatus =
   | "Awaiting Confirmation"
   | "Booked"
   | "Dispatched"
-  | "Delivered";
+  | "Delivered"
+  | "Cancelled"
+  | "Refunded";
 
 interface StatusAdvanceButtonProps {
   currentStatus: TripStatus;
@@ -68,6 +70,20 @@ const StatusAdvanceButton = ({
     return null;
   }
 
+  if (status === "Cancelled") {
+    return (
+      <div className="py-2 px-4 rounded bg-red-100 text-red-700 text-center font-semibold">
+        This trip has been <span className="font-bold">Cancelled</span>.
+      </div>
+    );
+  }
+  if (status === "Refunded") {
+    return (
+      <div className="py-2 px-4 rounded bg-yellow-100 text-yellow-700 text-center font-semibold">
+        This trip has been <span className="font-bold">Refunded</span>.
+      </div>
+    );
+  }
   return (
     <button
       onClick={handleAdvanceStatus}

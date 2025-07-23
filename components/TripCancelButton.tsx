@@ -34,7 +34,7 @@ const TripCancelButton = ({
         newStatus: "Cancelled",
       });
 
-      // Optionally: Add a success message or redirect
+      // success message
       alert(
         "Booking cancelled successfully - Refund will be processed shortly."
       );

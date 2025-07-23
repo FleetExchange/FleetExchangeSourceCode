@@ -314,6 +314,7 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
                       setPickupAddress(address || "");
                       pickup.setValue(address || "");
                     }}
+                    disabled={booked}
                     ready={pickup.ready}
                     inputValue={pickup.value || ""}
                     onInputChange={(value) => pickup.setValue(value || "")}
@@ -345,6 +346,7 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
                     placeholder="Enter pickup instructions"
                     value={pickupInstructions}
                     onChange={(e) => setPickupInstructions(e.target.value)}
+                    disabled={booked}
                   />
                 </fieldset>
               </div>
@@ -373,6 +375,7 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
                       setDeliveryAddress(address || "");
                       delivery.setValue(address || "");
                     }}
+                    disabled={booked}
                     ready={delivery.ready}
                     inputValue={delivery.value || ""}
                     onInputChange={(value) => delivery.setValue(value || "")}
@@ -404,6 +407,7 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
                     placeholder="Enter delivery instructions"
                     value={deliveryInstructions}
                     onChange={(e) => setDeliveryInstructions(e.target.value)}
+                    disabled={booked}
                   />
                 </fieldset>
               </div>
@@ -438,6 +442,7 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
                   placeholder="Enter cargo weight"
                   value={cargoWeight}
                   onChange={(e) => setCargoWeight(Number(e.target.value))}
+                  disabled={booked}
                 />
               </div>
               <div>
@@ -453,6 +458,7 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
                   placeholder="Describe your cargo"
                   value={cargoDescription}
                   onChange={(e) => setCargoDescription(e.target.value)}
+                  disabled={booked}
                 />
               </div>
             </div>

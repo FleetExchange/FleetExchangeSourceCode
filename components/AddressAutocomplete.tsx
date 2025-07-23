@@ -12,6 +12,7 @@ interface AddressAutocompleteProps {
   status: string;
   clearSuggestions: () => void;
   label: string;
+  disabled?: boolean; // Optional prop to disable the input
 }
 
 export const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
@@ -25,6 +26,7 @@ export const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
   status,
   clearSuggestions,
   label,
+  disabled = false, // Default to false if not provided
 }) => {
   const handleSelect = (address: string) => {
     onChange(address || ""); // Ensure we never pass null
@@ -41,7 +43,7 @@ export const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
             value={inputValue || ""}
             onChange={(e) => onInputChange(e.target.value)}
             onBlur={onBlur}
-            disabled={!ready}
+            disabled={!ready || disabled}
           />
           {suggestions.length > 0 && (
             <Combobox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-base-100 py-1 shadow-lg">
