@@ -48,13 +48,6 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
     purchaseTrip?.userId ? { userId: purchaseTrip.userId } : "skip"
   );
 
-  const clientProfileImageUrl = useQuery(
-    api.users.getProfileImageUrl,
-    tripClient?.profileImageFileId
-      ? { profileImageFileId: tripClient.profileImageFileId }
-      : "skip"
-  );
-
   // Format date and time
   const formatDateTime = (dateInput: string | number) => {
     const date = new Date(dateInput);
@@ -285,12 +278,8 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <ProfileImage
-                    fileUrl={clientProfileImageUrl || undefined}
+                    fileUrl={tripClient?.profileImageUrl}
                     size={40}
-                    editable={false}
-                    onUpload={function (file: File): Promise<void> {
-                      throw new Error("Function not implemented.");
-                    }}
                   />
                   <div>
                     <p className="font-medium">{tripClient?.name}</p>

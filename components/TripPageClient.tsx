@@ -50,14 +50,6 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
     trip?.userId ? { userId: trip.userId as Id<"users"> } : "skip"
   );
 
-  // URL for photo
-  const profileImageUrl = useQuery(
-    api.users.getProfileImageUrl,
-    tripIssuer?.profileImageFileId
-      ? { profileImageFileId: tripIssuer.profileImageFileId }
-      : "skip"
-  );
-
   // Only query purchase details if we have a tripId
   const purchaseTripDetails = useQuery(
     api.purchasetrip.getPurchaseTripByTripId,
@@ -502,12 +494,8 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <ProfileImage
-                    fileUrl={profileImageUrl || undefined}
+                    fileUrl={tripIssuer?.profileImageUrl}
                     size={40}
-                    editable={false}
-                    onUpload={function (file: File): Promise<void> {
-                      throw new Error("Function not implemented.");
-                    }}
                   />
                   <div>
                     <p className="font-medium">{tripIssuer?.name}</p>

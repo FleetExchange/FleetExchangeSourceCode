@@ -174,16 +174,6 @@ export const updateUserProfile = mutation({
   },
 });
 
-export const updateProfileImage = mutation({
-  args: {
-    userId: v.id("users"),
-    profileImageFileId: v.id("_storage"),
-  },
-  handler: async (ctx, { userId, profileImageFileId }) => {
-    await ctx.db.patch(userId, { profileImageFileId });
-  },
-});
-
 export const getProfileImageUrl = query({
   args: { profileImageFileId: v.id("_storage") },
   handler: async (ctx, { profileImageFileId }) => {
@@ -194,5 +184,23 @@ export const getProfileImageUrl = query({
 export const generateUploadUrl = mutation({
   handler: async (ctx) => {
     return await ctx.storage.generateUploadUrl();
+  },
+});
+
+export const updateUserFromClerk = mutation({
+  args: {
+    userId: v.string(),
+    email: v.optional(v.string()),
+    profileImageUrl: v.optional(v.string()),
+    name: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const { userId, ...updates } = args;
+    const user = await ctx.db
+      .query("users")
+      .filter((q) => q.eq(q.field("clerkId"), userId))
+      .first();
+    if (!user) throw new Error("User not found");
+    await ctx.db.patch(user._id, updates);
   },
 });

@@ -65,12 +65,12 @@ export default defineSchema({
     email: v.string(),
     name: v.string(),
     contactNumber: v.string(),
-    createdAt: v.optional(v.number()), // Make this optional
-    averageRating: v.optional(v.number()), // Average rating of the user
-    ratingCount: v.optional(v.number()), // Number of ratings received by the user
-    about: v.optional(v.string()), // About section for the user
-    profileImageFileId: v.optional(v.id("_storage")), // profile image
-    address: v.optional(v.string()), // Address of the user
+    createdAt: v.optional(v.number()),
+    averageRating: v.optional(v.number()),
+    ratingCount: v.optional(v.number()),
+    about: v.optional(v.string()),
+    profileImageUrl: v.optional(v.string()), // Clerk profile image URL
+    address: v.optional(v.string()),
   }).index("by_clerk_id", ["clerkId"]),
 
   fleet: defineTable({

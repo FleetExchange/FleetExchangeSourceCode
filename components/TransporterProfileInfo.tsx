@@ -42,13 +42,6 @@ const TransporterProfileInfo: React.FC<TransporterProfileProps> = ({
     about: "",
   });
 
-  const profileImageUrl = useQuery(
-    api.users.getProfileImageUrl,
-    transporter?.profileImageFileId
-      ? { profileImageFileId: transporter.profileImageFileId }
-      : "skip"
-  );
-
   // Load edit data when transporter data is available
   React.useEffect(() => {
     if (transporter) {
@@ -80,27 +73,6 @@ const TransporterProfileInfo: React.FC<TransporterProfileProps> = ({
 
   //Load the mutation to update the transporter profile
   const updateProfile = useMutation(api.users.updateUserProfile);
-  const updateProfileImage = useMutation(api.users.updateProfileImage);
-  const generateUploadUrl = useMutation(api.users.generateUploadUrl);
-
-  const handleProfileImageUpload = async (file: File) => {
-    // 1. Get upload URL from Convex
-    const uploadUrl = await generateUploadUrl();
-
-    // 2. Upload file to Convex storage
-    const result = await fetch(uploadUrl, {
-      method: "POST",
-      headers: { "Content-Type": file.type },
-      body: file,
-    });
-    const { storageId } = await result.json();
-
-    // 3. Update user profile with new file ID
-    await updateProfileImage({
-      userId: transporterId as Id<"users">,
-      profileImageFileId: storageId,
-    });
-  };
 
   const handleSave = async () => {
     try {
@@ -135,12 +107,7 @@ const TransporterProfileInfo: React.FC<TransporterProfileProps> = ({
       <div className="flex flex-col md:flex-row gap-8 items-start">
         {/* Profile Image */}
         <div>
-          <ProfileImage
-            fileUrl={profileImageUrl || undefined}
-            size={120}
-            onUpload={handleProfileImageUpload}
-            editable={isOwner && isEditing}
-          />
+          <ProfileImage fileUrl={transporter.profileImageUrl} size={120} />
         </div>
 
         {/* Info Section */}

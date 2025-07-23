@@ -22,14 +22,6 @@ export default function TripCard({ tripId }: { tripId: Id<"trip"> }) {
     trip?.userId ? { userId: trip.userId } : "skip"
   );
 
-  // URL for photo
-  const profileImageUrl = useQuery(
-    api.users.getProfileImageUrl,
-    tripOwner?.profileImageFileId
-      ? { profileImageFileId: tripOwner.profileImageFileId }
-      : "skip"
-  );
-
   const truck = useQuery(
     api.truck.getTruckById,
     trip?.truckId ? { truckId: trip.truckId } : "skip"
@@ -40,14 +32,7 @@ export default function TripCard({ tripId }: { tripId: Id<"trip"> }) {
       {/* Avatar & Name of company & Price */}
       <div className="flex flex-row justify-between gap-2">
         <div className="flex flex-row  items-center avatar avatar-placeholder gap-2">
-          <ProfileImage
-            fileUrl={profileImageUrl || undefined}
-            size={30}
-            editable={false}
-            onUpload={function (file: File): Promise<void> {
-              throw new Error("Function not implemented.");
-            }}
-          />
+          <ProfileImage fileUrl={tripOwner?.profileImageUrl} size={30} />
           <h3 className="text-sm">{tripOwner?.name}</h3>
         </div>
 

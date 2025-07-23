@@ -45,6 +45,34 @@ export async function POST(req: Request) {
           message: "Profile not completed, user creation skipped",
         });
       }
+    } else if (body.type === "user.updated") {
+      const data = body.data;
+      const metadata = data.unsafe_metadata || {};
+
+      try {
+        await convex.mutation(api.users.updateUserFromClerk, {
+          userId: data.id,
+          email: data.email_addresses[0]?.email_address ?? "",
+          profileImageUrl: data.image_url ?? "",
+          name:
+            metadata.business_name ||
+            `${data.first_name || ""} ${data.last_name || ""}`.trim(),
+        });
+
+        return NextResponse.json({
+          success: true,
+          message: "User updated successfully",
+        });
+      } catch (error) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: "Failed to update user in database",
+            details: error instanceof Error ? error.message : String(error),
+          },
+          { status: 500 }
+        );
+      }
     }
 
     return NextResponse.json({
