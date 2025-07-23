@@ -302,7 +302,7 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
                 <button
                   className="btn btn-outline btn-sm"
                   onClick={() =>
-                    (window.location.href = `/profiles/client/${tripClient?._id}`)
+                    (window.location.href = `/profiles/${tripClient?._id}`)
                   }
                 >
                   View Profile
