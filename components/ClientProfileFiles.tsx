@@ -54,10 +54,12 @@ const ClientProfileFiles: React.FC<ClientProfileFilesProps> = ({
           </div>
         ))}
       </div>
-      <p className="text-base-content/60 mt-6 text-sm">
-        Please upload your most recent and valid documents. These files help
-        clients trust your business.
-      </p>
+      {isOwner && (
+        <p className="text-base-content/60 mt-6 text-sm">
+          Please upload your most recent and valid documents. These files help
+          clients trust your business.
+        </p>
+      )}
     </div>
   );
 };

@@ -18,6 +18,7 @@ import { TripStatus } from "./StatusAdvanceButton";
 import TripRejectButton from "./TripRejectButton";
 import TripCancelButton from "./TripCancelButton";
 import TripRatingComponent from "./TripRatingComponent";
+import ProfileImage from "./ProfileImage";
 
 interface TripPageClientProps {
   tripId: string;
@@ -40,6 +41,18 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
   const truck = useQuery(
     api.truck.getTruckById,
     trip?.truckId ? { truckId: trip.truckId as Id<"truck"> } : "skip"
+  );
+
+  const tripClient = useQuery(
+    api.users.getUserById,
+    purchaseTrip?.userId ? { userId: purchaseTrip.userId } : "skip"
+  );
+
+  const clientProfileImageUrl = useQuery(
+    api.users.getProfileImageUrl,
+    tripClient?.profileImageFileId
+      ? { profileImageFileId: tripClient.profileImageFileId }
+      : "skip"
   );
 
   // Format date and time
@@ -262,6 +275,41 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
               </div>
             </div>
           </div>
+
+          {/* Trip Client Section - only show if trip is booked */}
+          {trip?.isBooked === true && purchaseTrip && (
+            <div className="bg-base-100 p-6 rounded-2xl shadow flex flex-col gap-4 md:col-span-2">
+              <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
+                Trip Client
+              </h3>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <ProfileImage
+                    fileUrl={clientProfileImageUrl || undefined}
+                    size={40}
+                    editable={false}
+                    onUpload={function (file: File): Promise<void> {
+                      throw new Error("Function not implemented.");
+                    }}
+                  />
+                  <div>
+                    <p className="font-medium">{tripClient?.name}</p>
+                    <p className="text-sm text-base-content/70">
+                      {tripClient?.email}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  className="btn btn-outline btn-sm"
+                  onClick={() =>
+                    (window.location.href = `/profiles/client/${tripClient?._id}`)
+                  }
+                >
+                  View Profile
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Map & Price/Action */}
