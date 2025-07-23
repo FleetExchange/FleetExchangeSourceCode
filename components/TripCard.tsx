@@ -10,6 +10,7 @@ import { BsTruck } from "react-icons/bs";
 import { BsBoxSeam } from "react-icons/bs";
 import Link from "next/link";
 import { IoPersonOutline } from "react-icons/io5";
+import ProfileImage from "@/components/ProfileImage";
 
 export default function TripCard({ tripId }: { tripId: Id<"trip"> }) {
   const router = useRouter();
@@ -20,6 +21,15 @@ export default function TripCard({ tripId }: { tripId: Id<"trip"> }) {
     api.users.getUserById,
     trip?.userId ? { userId: trip.userId } : "skip"
   );
+
+  // URL for photo
+  const profileImageUrl = useQuery(
+    api.users.getProfileImageUrl,
+    tripOwner?.profileImageFileId
+      ? { profileImageFileId: tripOwner.profileImageFileId }
+      : "skip"
+  );
+
   const truck = useQuery(
     api.truck.getTruckById,
     trip?.truckId ? { truckId: trip.truckId } : "skip"
@@ -30,11 +40,14 @@ export default function TripCard({ tripId }: { tripId: Id<"trip"> }) {
       {/* Avatar & Name of company & Price */}
       <div className="flex flex-row justify-between gap-2">
         <div className="flex flex-row  items-center avatar avatar-placeholder gap-2">
-          <div className="bg-neutral text-neutral-content w-8 rounded-full">
-            <span className="text-xs">
-              <IoPersonOutline />
-            </span>
-          </div>
+          <ProfileImage
+            fileUrl={profileImageUrl || undefined}
+            size={30}
+            editable={false}
+            onUpload={function (file: File): Promise<void> {
+              throw new Error("Function not implemented.");
+            }}
+          />
           <h3 className="text-sm">{tripOwner?.name}</h3>
         </div>
 

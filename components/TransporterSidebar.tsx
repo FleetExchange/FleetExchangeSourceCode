@@ -106,7 +106,7 @@ const TransporterSidebar = () => {
               >
                 <CiUser className="w-6 h-6 text-primary-content flex-shrink-0" />
                 <span className="hidden group-hover:block whitespace-nowrap text-primary-content">
-                  Profile
+                  Account
                 </span>
               </Link>
             </li>

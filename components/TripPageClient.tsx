@@ -17,6 +17,7 @@ import { useUser } from "@clerk/nextjs";
 import TripCancelButton from "./TripCancelButton";
 import { isAddressWithinRange } from "@/utils/geocoding";
 import TripRatingComponent from "./TripRatingComponent";
+import ProfileImage from "./ProfileImage";
 type DirectionsResult = google.maps.DirectionsResult;
 
 interface TripPageClientProps {
@@ -47,6 +48,14 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
   const tripIssuer = useQuery(
     api.users.getUserById,
     trip?.userId ? { userId: trip.userId as Id<"users"> } : "skip"
+  );
+
+  // URL for photo
+  const profileImageUrl = useQuery(
+    api.users.getProfileImageUrl,
+    tripIssuer?.profileImageFileId
+      ? { profileImageFileId: tripIssuer.profileImageFileId }
+      : "skip"
   );
 
   // Only query purchase details if we have a tripId
@@ -483,9 +492,33 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
             </div>
             <div className="divider my-2" />
             <div>
-              <h4 className="text-base font-semibold mb-1">Trip Issuer</h4>
-              <p className="mb-1">Transporter: {tripIssuer?.name}</p>
-              <p className="text-base-content/80">Email: {tripIssuer?.email}</p>
+              <h4 className="text-base font-semibold mb-3">Trip Issuer</h4>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <ProfileImage
+                    fileUrl={profileImageUrl || undefined}
+                    size={40}
+                    editable={false}
+                    onUpload={function (file: File): Promise<void> {
+                      throw new Error("Function not implemented.");
+                    }}
+                  />
+                  <div>
+                    <p className="font-medium">{tripIssuer?.name}</p>
+                    <p className="text-sm text-base-content/70">
+                      {tripIssuer?.email}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  className="btn btn-outline btn-sm"
+                  onClick={() =>
+                    (window.location.href = `/transporter/profile/${tripIssuer?._id}`)
+                  }
+                >
+                  View Profile
+                </button>
+              </div>
             </div>
           </div>
         </div>
