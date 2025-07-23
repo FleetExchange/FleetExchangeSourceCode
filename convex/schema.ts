@@ -100,4 +100,14 @@ export default defineSchema({
     uploadedAt: v.number(),
     category: v.optional(v.string()),
   }).index("by_user", ["userId"]),
+
+  payoutAccount: defineTable({
+    userId: v.id("users"), // Reference to the user who owns this payout account
+    accountName: v.string(), // Account holder's name
+    accountNumber: v.string(), // Bank account number
+    bankCode: v.string(), // Bank code (from Paystack bank list)
+    email: v.optional(v.string()), // Optional email for notifications
+    phone: v.optional(v.string()), // Optional phone for contact
+    createdAt: v.optional(v.number()), // Timestamp for audit/history
+  }).index("by_user", ["userId"]),
 });
