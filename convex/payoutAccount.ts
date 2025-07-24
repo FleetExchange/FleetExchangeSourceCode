@@ -1,6 +1,7 @@
-import { mutation } from "./_generated/server";
+import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 
+// Create payout account
 export const createPayoutAccount = mutation({
   args: {
     userId: v.id("users"),
@@ -20,5 +21,30 @@ export const createPayoutAccount = mutation({
       phone: args.phone,
       createdAt: Date.now(),
     });
+  },
+});
+
+// Get payout account by user
+export const getByUser = query({
+  args: { userId: v.id("users") },
+  handler: async (ctx, { userId }) => {
+    return await ctx.db
+      .query("payoutAccount")
+      .filter((q) => q.eq(q.field("userId"), userId))
+      .first();
+  },
+});
+
+// Delete payout account by user
+export const deleteByUser = mutation({
+  args: { userId: v.id("users") },
+  handler: async (ctx, { userId }) => {
+    const account = await ctx.db
+      .query("payoutAccount")
+      .filter((q) => q.eq(q.field("userId"), userId))
+      .first();
+    if (account) {
+      await ctx.db.delete(account._id);
+    }
   },
 });
