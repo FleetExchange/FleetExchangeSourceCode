@@ -20,6 +20,7 @@ import type * as payoutAccount from "../payoutAccount.js";
 import type * as purchasetrip from "../purchasetrip.js";
 import type * as trip from "../trip.js";
 import type * as truck from "../truck.js";
+import type * as userQueries from "../userQueries.js";
 import type * as users from "../users.js";
 
 /**
@@ -38,6 +39,7 @@ declare const fullApi: ApiFromModules<{
   purchasetrip: typeof purchasetrip;
   trip: typeof trip;
   truck: typeof truck;
+  userQueries: typeof userQueries;
   users: typeof users;
 }>;
 export declare const api: FilterApi<

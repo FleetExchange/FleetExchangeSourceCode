@@ -1,6 +1,7 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 import { TRUCK_TYPES } from "../shared/truckTypes";
+import { create } from "domain";
 
 // How the database looks
 // All entries have automatic _id fields
@@ -109,5 +110,11 @@ export default defineSchema({
     email: v.optional(v.string()), // Optional email for notifications
     phone: v.optional(v.string()), // Optional phone for contact
     createdAt: v.optional(v.number()), // Timestamp for audit/history
+  }).index("by_user", ["userId"]),
+
+  userQueries: defineTable({
+    userId: v.id("users"), // Reference to the user who made the query
+    queryText: v.string(), // The text of the user's query
+    createdAt: v.number(), // Timestamp when the query was created
   }).index("by_user", ["userId"]),
 });

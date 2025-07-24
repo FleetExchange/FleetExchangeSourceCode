@@ -1,25 +1,13 @@
 "use client";
 
-import BAManagementPage from "@/components/BAManagementPage";
 import HelpPage from "@/components/HelpPage";
 import React from "react";
 
-const TransporterSettings = () => {
+const ClientSettings = () => {
   return (
     <div className="flex items-center justify-center min-h-screen bg-base-200">
       <div className="w-full max-w-2xl mx-auto">
         <div className="tabs tabs-lift">
-          <input
-            type="radio"
-            name="my_tabs_3"
-            className="tab"
-            aria-label="Bank Accounts"
-            defaultChecked
-          />
-          <div className="tab-content bg-base-100 border-base-300 p-6">
-            <BAManagementPage />
-          </div>
-
           <input
             type="radio"
             name="my_tabs_3"
@@ -45,4 +33,4 @@ const TransporterSettings = () => {
   );
 };
 
-export default TransporterSettings;
+export default ClientSettings;
