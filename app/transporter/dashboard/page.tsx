@@ -28,7 +28,6 @@ const TransporterDashPage = () => {
           <MyBookingsWidget />
         </div>
         <div className="mb-8">
-          {" "}
           {/* Trips in Progress - Takes 2 columns on large screens */}
           <TripsInProgressWidget />
         </div>

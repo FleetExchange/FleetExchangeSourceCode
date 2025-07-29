@@ -45,16 +45,6 @@ export default defineSchema({
     tripRatingComment: v.optional(v.string()), // Comment for the rating
   }),
 
-  freightRequest: defineTable({
-    originCity: v.string(), // Origin city of departure
-    destinationCity: v.string(), // Destination of arrival
-    freightDescription: v.string(), // Description of what needs to be shipped
-    departureDate: v.number(), // Departure Date
-    arrivalDate: v.number(), // Arrival Date
-    loadWeight: v.number(), // Total weight of the items to be shipped
-    userId: v.id("users"), // Creator of freight request
-  }),
-
   users: defineTable({
     clerkId: v.string(),
     role: v.union(
@@ -116,5 +106,20 @@ export default defineSchema({
     userId: v.id("users"), // Reference to the user who made the query
     queryText: v.string(), // The text of the user's query
     createdAt: v.number(), // Timestamp when the query was created
+  }).index("by_user", ["userId"]),
+
+  notifications: defineTable({
+    userId: v.id("users"),
+    type: v.union(
+      v.literal("trip"),
+      v.literal("booking"),
+      v.literal("payout"),
+      v.literal("system"),
+      v.literal("account")
+    ), // Only these types allowed
+    message: v.string(),
+    createdAt: v.number(),
+    read: v.boolean(),
+    meta: v.optional(v.any()),
   }).index("by_user", ["userId"]),
 });

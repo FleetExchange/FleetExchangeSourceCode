@@ -16,6 +16,7 @@ import type {
 import type * as crons from "../crons.js";
 import type * as files from "../files.js";
 import type * as fleet from "../fleet.js";
+import type * as notifications from "../notifications.js";
 import type * as payoutAccount from "../payoutAccount.js";
 import type * as purchasetrip from "../purchasetrip.js";
 import type * as trip from "../trip.js";
@@ -35,6 +36,7 @@ declare const fullApi: ApiFromModules<{
   crons: typeof crons;
   files: typeof files;
   fleet: typeof fleet;
+  notifications: typeof notifications;
   payoutAccount: typeof payoutAccount;
   purchasetrip: typeof purchasetrip;
   trip: typeof trip;
