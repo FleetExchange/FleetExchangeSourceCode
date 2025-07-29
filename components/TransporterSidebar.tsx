@@ -8,6 +8,7 @@ import {
   CiShoppingCart,
   CiSettings,
   CiUser,
+  CiCalendar,
 } from "react-icons/ci";
 import Link from "next/link";
 
@@ -80,6 +81,17 @@ const TransporterSidebar = () => {
                 <CiShoppingCart className="w-6 h-6 text-primary-content flex-shrink-0" />
                 <span className="hidden group-hover:block whitespace-nowrap text-primary-content">
                   My Bookings
+                </span>
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/transporter/calendar"
+                className="flex items-center justify-center group-hover:justify-start gap-3 p-3 hover:bg-secondary rounded-lg transition-all duration-300"
+              >
+                <CiCalendar className="w-6 h-6 text-primary-content flex-shrink-0" />
+                <span className="hidden group-hover:block whitespace-nowrap text-primary-content">
+                  Calendar
                 </span>
               </Link>
             </li>

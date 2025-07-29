@@ -13,13 +13,13 @@ interface CalendarEvent {
 }
 
 interface TransporterFullCalendarProps {
-  trips: CalendarEvent[];
-  bookings: CalendarEvent[];
+  trips?: CalendarEvent[];
+  bookings?: CalendarEvent[];
 }
 
 const TransporterFullCalendar: React.FC<TransporterFullCalendarProps> = ({
-  trips,
-  bookings,
+  trips = [],
+  bookings = [],
 }) => {
   // Combine trips and bookings, set colors for distinction
   const events = [

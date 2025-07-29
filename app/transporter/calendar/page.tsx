@@ -8,14 +8,19 @@ import { useQuery } from "convex/react";
 
 const TransporterCalendarPage = () => {
   const { user } = useUser();
-  const transporterId = useQuery(api.users.getUserByClerkId, {
-    clerkId: user?.id as Id<"users">,
-  })?._id;
+
+  const userData = useQuery(
+    api.users.getUserByClerkId,
+    user?.id ? { clerkId: user.id } : { clerkId: "skip" }
+  );
+
+  const transporterId = userData?._id;
 
   // Trips for the transporter
-  const trips = useQuery(api.trip.getTripsByIssuerId, {
-    issuerId: transporterId as Id<"users">,
-  });
+  const trips = useQuery(
+    api.trip.getTripsByIssuerId,
+    transporterId ? { issuerId: transporterId } : "skip"
+  );
 
   const transporterBookedTrips = useQuery(
     api.purchasetrip.getPurchaseTripByIdArray,
@@ -46,13 +51,16 @@ const TransporterCalendarPage = () => {
   // Bookings for the transporter
   const transporterPurchaseTrips = useQuery(
     api.purchasetrip.getPurchaseTripByUserId,
-    {
-      userId: transporterId as Id<"users">,
-    }
+    transporterId ? { userId: transporterId } : "skip"
   );
 
+  const filteredTransporterPurchaseTrips =
+    transporterPurchaseTrips?.filter(
+      (trip) => trip.status != "Cancelled" && trip.status !== "Refunded"
+    ) ?? [];
+
   const transporterBookings = useQuery(api.trip.getTripByIdArray, {
-    tripIds: transporterPurchaseTrips?.map((trip) => trip.tripId) ?? [],
+    tripIds: filteredTransporterPurchaseTrips?.map((trip) => trip.tripId) ?? [],
   });
 
   const tripEvents =
@@ -77,6 +85,26 @@ const TransporterCalendarPage = () => {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-base-200 p-4">
       <div className="w-full max-w-6xl bg-base-100 rounded-2xl shadow-xl p-6">
+        <h1 className="text-3xl font-bold mb-2 text-primary">Calendar</h1>
+        <p className="mb-6 text-base-content/70 text-center">
+          View all your upcoming trips and bookings in one place.
+        </p>
+        <div className="flex items-center justify-center gap-6 mb-6">
+          <div className="flex items-center gap-2">
+            <span className="inline-block w-4 h-4 rounded bg-blue-500 border border-blue-700"></span>
+            <span className="text-sm text-base-content">
+              Trips are{" "}
+              <span className="font-semibold text-blue-600">blue</span>
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="inline-block w-4 h-4 rounded bg-green-500 border border-green-700"></span>
+            <span className="text-sm text-base-content">
+              Bookings are{" "}
+              <span className="font-semibold text-green-600">green</span>
+            </span>
+          </div>
+        </div>
         <FullCalendar trips={tripEvents} bookings={bookingEvents} />
       </div>
     </div>
