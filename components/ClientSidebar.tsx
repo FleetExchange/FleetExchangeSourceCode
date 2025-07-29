@@ -66,7 +66,7 @@ const ClientSidebar = () => {
           <ul className="space-y-2">
             <li>
               <Link
-                href="/settings"
+                href="/client/settings"
                 className="flex items-center justify-center group-hover:justify-start gap-3 p-3 hover:bg-secondary rounded-lg transition-all duration-300"
               >
                 <CiSettings className="w-6 h-6 text-primary-content flex-shrink-0" />
