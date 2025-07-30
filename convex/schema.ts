@@ -113,7 +113,7 @@ export default defineSchema({
     type: v.union(
       v.literal("trip"),
       v.literal("booking"),
-      v.literal("payout"),
+      v.literal("payment"),
       v.literal("system"),
       v.literal("account")
     ), // Only these types allowed
@@ -122,4 +122,36 @@ export default defineSchema({
     read: v.boolean(),
     meta: v.optional(v.any()),
   }).index("by_user", ["userId"]),
+
+  payments: defineTable({
+    userId: v.id("users"), // Client who made payment
+    transporterId: v.id("users"), // Transporter receiving payment
+    tripId: v.id("trip"),
+    purchaseTripId: v.id("purchasetrip"),
+
+    // Paystack fields
+    paystackAuthCode: v.string(), // For authorized transactions
+    paystackTransactionRef: v.string(),
+    paystackCustomerCode: v.optional(v.string()),
+
+    // Payment amounts
+    totalAmount: v.number(), // Full amount client pays
+    commissionAmount: v.number(), // Your platform commission
+    transporterAmount: v.number(), // Amount transporter receives
+
+    // Payment status
+    status: v.union(
+      v.literal("authorized"), // Payment authorized but not charged
+      v.literal("charged"), // Payment taken from client
+      v.literal("released"), // Payment sent to transporter
+      v.literal("failed"),
+      v.literal("refunded")
+    ),
+
+    authorizedAt: v.optional(v.number()),
+    chargedAt: v.optional(v.number()),
+    releasedAt: v.optional(v.number()),
+
+    createdAt: v.number(),
+  }).index("by_trip", ["tripId"]),
 });

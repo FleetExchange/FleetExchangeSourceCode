@@ -10,7 +10,7 @@ export const createNotification = mutation({
     type: v.union(
       v.literal("trip"),
       v.literal("booking"),
-      v.literal("payout"),
+      v.literal("payment"),
       v.literal("system"),
       v.literal("account")
     ),
@@ -71,14 +71,14 @@ export const checkTransporterAccountSetup = mutation({
       const existingPayoutNotif = await ctx.db
         .query("notifications")
         .filter((q) => q.eq(q.field("userId"), userId))
-        .filter((q) => q.eq(q.field("type"), "payout"))
+        .filter((q) => q.eq(q.field("type"), "payment"))
         .filter((q) => q.eq(q.field("read"), false))
         .first();
 
       if (!existingPayoutNotif) {
         await ctx.runMutation(api.notifications.createNotification, {
           userId,
-          type: "payout",
+          type: "payment",
           message: "Please set up your payout account to receive payments.",
           meta: { action: "setup_payout" },
         });
@@ -88,7 +88,7 @@ export const checkTransporterAccountSetup = mutation({
       const payoutNotifications = await ctx.db
         .query("notifications")
         .filter((q) => q.eq(q.field("userId"), userId))
-        .filter((q) => q.eq(q.field("type"), "payout"))
+        .filter((q) => q.eq(q.field("type"), "payment"))
         .filter((q) => q.eq(q.field("read"), false))
         .collect();
 
