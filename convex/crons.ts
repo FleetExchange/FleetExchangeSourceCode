@@ -11,18 +11,25 @@ crons.interval(
   internal.crons.markExpiredTrips
 );
 
-// New cron job for trip reminders in the next 24 hours
+// Cron job for trip reminders in the next 24 hours
 crons.interval(
   "sendTripReminders",
   { hours: 6 }, // Runs every 6 hours to catch trips
   internal.crons.sendTripReminders
 );
 
-// New cron job for trip confirm delivery in the last 3 hours
+// Cron job for trip confirm delivery in the last 3 hours
 crons.interval(
   "confirmDeliveryReminders",
   { hours: 1 }, // Runs every 1 hours to catch trips
   internal.crons.confirmDeliveryReminders
+);
+
+// Cron job to delete notifications older than 10 days
+crons.interval(
+  "deleteOldNotifications",
+  { hours: 24 }, // Runs 24 hours to delete old notifications
+  internal.crons.deleteOldNotifications
 );
 
 export const markExpiredTrips = internalMutation({
@@ -216,6 +223,25 @@ export const confirmDeliveryReminders = internalMutation({
     console.log(
       `Sent ${filteredPurchaseTrips.length} trip confirm delivery reminders`
     );
+  },
+});
+
+export const deleteOldNotifications = internalMutation({
+  handler: async (ctx) => {
+    const currentDate = new Date().getTime();
+    const tenDaysAgo = currentDate - 10 * 24 * 60 * 60 * 1000; // 10 days ago
+
+    // Query for notifications older than 10 days
+    const oldNotifications = await ctx.db
+      .query("notifications")
+      .filter((q) => q.lt(q.field("createdAt"), tenDaysAgo))
+      .collect();
+
+    // Delete each old notification
+    for (const notification of oldNotifications) {
+      await ctx.db.delete(notification._id);
+    }
+    console.log(`Deleted ${oldNotifications.length} old notifications`);
   },
 });
 
