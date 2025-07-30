@@ -2,7 +2,7 @@
 
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import React from "react";
 
 interface TripCancelButtonProps {
@@ -20,6 +20,12 @@ const TripCancelButton = ({
   const cancellPurchaseTrip = useMutation(
     api.purchasetrip.updatePurchaseTripStatus
   );
+  const cancelNotification = useMutation(api.notifications.createNotification);
+
+  const trip = useQuery(api.trip.getById, { tripId });
+  const purchTrip = useQuery(api.purchasetrip.getPurchaseTripByTripId, {
+    tripId,
+  });
 
   const handleCancelBooking = async () => {
     try {
@@ -38,6 +44,22 @@ const TripCancelButton = ({
       alert(
         "Booking cancelled successfully - Refund will be processed shortly."
       );
+
+      // Send Notifications to both Parties
+      await cancelNotification({
+        type: "booking",
+        userId: purchTrip?.userId as Id<"users">,
+        message: `Your booking from ${trip?.originCity} to ${trip?.destinationCity} has been cancelled.`,
+        meta: { tripId: tripId, action: "cancel_booking" },
+      });
+
+      await cancelNotification({
+        type: "trip",
+        userId: trip?.userId as Id<"users">,
+        message: `Your trip from ${trip?.originCity} to ${trip?.destinationCity} has been cancelled.`,
+        meta: { tripId: tripId, action: "cancel_booking" },
+      });
+
       // Redirect to myTrips page
       window.location.href = "/myTrips";
     } catch (error) {

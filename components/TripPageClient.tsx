@@ -174,6 +174,10 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
     return true;
   };
 
+  const bookedTripNotification = useMutation(
+    api.notifications.createNotification
+  );
+
   const handleBookTrip = async () => {
     // Check if truck data is loaded
     if (!truck) {
@@ -239,6 +243,18 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
       });
 
       alert("Trip booked successfully!");
+
+      // Send a notification to the trip issuer
+      await bookedTripNotification({
+        userId: trip?.userId as Id<"users">,
+        type: "trip",
+        message: `Your trip from ${trip?.originCity} to ${trip?.destinationCity} is awaiting your confirmation.`,
+        meta: {
+          tripId: trip?._id as Id<"trip">,
+          action: "waitingConfirmation_trip",
+        },
+      });
+
       // Redirect to fleet manager page
       window.location.href = "/discover";
     } catch (error) {

@@ -18,6 +18,13 @@ crons.interval(
   internal.crons.sendTripReminders
 );
 
+// New cron job for trip confirm delivery in the last 3 hours
+crons.interval(
+  "confirmDeliveryReminders",
+  { hours: 1 }, // Runs every 1 hours to catch trips
+  internal.crons.confirmDeliveryReminders
+);
+
 export const markExpiredTrips = internalMutation({
   handler: async (ctx) => {
     const currentDate = new Date().getTime();
@@ -138,6 +145,77 @@ export const sendTripReminders = internalMutation({
         });
       }
     }
+    console.log(`Sent ${upcomingTrips.length} trip reminders`);
+  },
+});
+
+// New function for trip confirm delivery reminders
+export const confirmDeliveryReminders = internalMutation({
+  handler: async (ctx) => {
+    const now = Date.now();
+    const threeHoursAgo = now - 3 * 60 * 60 * 1000; // 3 hours ago
+
+    // Find trips delivered in past 3 hours
+    const deliveredTrips = await ctx.db
+      .query("trip")
+      .filter((q) =>
+        q.and(
+          q.eq(q.field("isBooked"), true), // Only booked trips
+          q.gte(q.field("departureDate"), threeHoursAgo),
+          q.lt(q.field("departureDate"), now)
+        )
+      )
+      .collect();
+
+    // get the purchaseTrip objec that coincides with the trip
+    const tripIds = deliveredTrips.map((trip) => trip._id as Id<"trip">);
+    const purchasedTrips = useQuery(api.purchasetrip.getPurchaseTripByIdArray, {
+      tripIds: tripIds.length > 0 ? tripIds : [],
+    });
+
+    const filteredPurchaseTrips =
+      purchasedTrips?.filter(
+        (trip) => trip.status !== "Cancelled" && trip.status !== "Refunded"
+      ) ?? [];
+
+    // for each purch trip ddelivered in the last 3 hours
+    for (const purchTrip of filteredPurchaseTrips) {
+      // Check if reminder already sent to transporter
+      const trip = deliveredTrips.find((t) => t._id === purchTrip.tripId);
+
+      if (!trip) continue; // Skip if trip not found
+
+      const existingReminder = await ctx.db
+        .query("notifications")
+        .filter((q) =>
+          q.and(
+            q.eq(q.field("userId"), trip.userId),
+            q.eq(q.field("type"), "trip"),
+            q.eq(q.field("meta"), {
+              tripId: purchTrip._id,
+              action: "confirmDelivery_reminder",
+            })
+          )
+        )
+        .first();
+
+      // if reminder not sent, create a new reminder
+      if (!existingReminder) {
+        // Create reminder notification
+        await ctx.runMutation(api.notifications.createNotification, {
+          userId: trip.userId,
+          type: "trip",
+          message: `Reminder: Confirm delivery of trip to ${trip.destinationCity} that arrived at ${new Date(trip.arrivalDate).toLocaleString()}. Trips have to be confirmed for payment to be released.`,
+          meta: {
+            tripId: trip._id,
+            action: "confirmDelivery_reminder",
+          },
+        });
+      }
+    }
+    console.log(
+      `Sent ${filteredPurchaseTrips.length} trip confirm delivery reminders`
+    );
   },
 });
 
