@@ -1,7 +1,7 @@
 // Create a component: components/RoleBasedRedirect.tsx
 "use client";
 import { useUser } from "@clerk/nextjs";
-import { useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -16,10 +16,28 @@ export default function RoleBasedRedirect() {
     user?.id ? { clerkId: user.id } : "skip"
   );
 
+  // if a transporter then run the transporter check account setup mutation
+  const transporterSetupCheck = useMutation(
+    api.notifications.checkTransporterAccountSetup
+  );
+
   useEffect(() => {
     if (user && convexUser) {
       if (convexUser.isApproved) {
         setStatus("Account approved! Redirecting to dashboard...");
+
+        // if a transporter then run the transporter check account setup mutation
+        if (convexUser.role === "transporter") {
+          console.log(
+            "Triggering transporter setup check for user:",
+            convexUser._id
+          );
+          transporterSetupCheck({ userId: convexUser._id });
+        }
+
+        // if a client then run the client check account setup mutation
+
+        //Redirect based on role
         router.push(`/${convexUser.role}/dashboard`);
       } else {
         setStatus("Account pending approval. Redirecting...");
@@ -29,7 +47,7 @@ export default function RoleBasedRedirect() {
       setStatus("Account not found. Redirecting...");
       router.push("/unauthorized");
     }
-  }, [user, convexUser, router]);
+  }, [user, convexUser, router, transporterSetupCheck]);
 
   return (
     <div className="min-h-screen bg-base-200 flex items-center justify-center">

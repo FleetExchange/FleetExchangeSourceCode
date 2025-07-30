@@ -1,5 +1,7 @@
+import { useQuery } from "convex/react";
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+import { api } from "./_generated/api";
 
 // Create a notification
 export const createNotification = mutation({
@@ -9,7 +11,8 @@ export const createNotification = mutation({
       v.literal("trip"),
       v.literal("booking"),
       v.literal("payout"),
-      v.literal("system")
+      v.literal("system"),
+      v.literal("account")
     ),
     message: v.string(),
     meta: v.optional(v.any()),
@@ -51,5 +54,104 @@ export const deleteNotification = mutation({
   args: { notificationId: v.id("notifications") },
   handler: async (ctx, { notificationId }) => {
     await ctx.db.delete(notificationId);
+  },
+});
+
+// Check Transporter Account for account setup
+export const checkTransporterAccountSetup = mutation({
+  args: { userId: v.id("users") },
+  handler: async (ctx, { userId }) => {
+    // Check if the transporter has a payout account
+    const validPayout = await ctx.runQuery(api.payoutAccount.getByUser, {
+      userId,
+    });
+
+    if (!validPayout) {
+      // Check if payout notification already exists and is unread
+      const existingPayoutNotif = await ctx.db
+        .query("notifications")
+        .filter((q) => q.eq(q.field("userId"), userId))
+        .filter((q) => q.eq(q.field("type"), "payout"))
+        .filter((q) => q.eq(q.field("read"), false))
+        .first();
+
+      if (!existingPayoutNotif) {
+        await ctx.runMutation(api.notifications.createNotification, {
+          userId,
+          type: "payout",
+          message: "Please set up your payout account to receive payments.",
+          meta: { action: "setup_payout" },
+        });
+      }
+    } else {
+      // If payout account exists, mark any existing payout notifications as read
+      const payoutNotifications = await ctx.db
+        .query("notifications")
+        .filter((q) => q.eq(q.field("userId"), userId))
+        .filter((q) => q.eq(q.field("type"), "payout"))
+        .filter((q) => q.eq(q.field("read"), false))
+        .collect();
+
+      for (const notif of payoutNotifications) {
+        await ctx.db.patch(notif._id, { read: true });
+      }
+    }
+
+    // Check documents
+    const terms = await ctx.runQuery(api.files.getFilesByCategory, {
+      userId,
+      category: "terms",
+    });
+    const insurance = await ctx.runQuery(api.files.getFilesByCategory, {
+      userId,
+      category: "insurance",
+    });
+    const companyReg = await ctx.runQuery(api.files.getFilesByCategory, {
+      userId,
+      category: "companyReg",
+    });
+    const roadworthy = await ctx.runQuery(api.files.getFilesByCategory, {
+      userId,
+      category: "roadworthy",
+    });
+
+    if (
+      !(
+        terms?.length > 0 &&
+        insurance?.length > 0 &&
+        companyReg?.length > 0 &&
+        roadworthy?.length > 0
+      )
+    ) {
+      // Check if document notification already exists and is unread
+      const existingDocNotif = await ctx.db
+        .query("notifications")
+        .filter((q) => q.eq(q.field("userId"), userId))
+        .filter((q) => q.eq(q.field("type"), "account"))
+        .filter((q) => q.eq(q.field("read"), false))
+        .first();
+
+      if (!existingDocNotif) {
+        await ctx.runMutation(api.notifications.createNotification, {
+          userId,
+          type: "account",
+          message:
+            "Please ensure all required documents are uploaded under the account page.",
+          meta: { action: "upload_documents" },
+        });
+      }
+    } else {
+      // If all documents exist, mark any existing document notifications as read
+      const docNotifications = await ctx.db
+        .query("notifications")
+        .filter((q) => q.eq(q.field("userId"), userId))
+        .filter((q) => q.eq(q.field("type"), "account"))
+        .filter((q) => q.eq(q.field("read"), false))
+        .collect();
+
+      for (const notif of docNotifications) {
+        await ctx.db.patch(notif._id, { read: true });
+      }
+    }
   },
 });
