@@ -31,6 +31,14 @@ const StatusAdvanceButton = ({
     purchaseTripId,
   });
 
+  // get trip oject
+  const trip = useQuery(api.trip.getById, {
+    tripId: purchaseTrip?.tripId as Id<"trip">,
+  });
+
+  // create notification mutation
+  const createNotification = useMutation(api.notifications.createNotification);
+
   // Update local state when database changes
   React.useEffect(() => {
     if (purchaseTrip?.status) {
@@ -60,6 +68,40 @@ const StatusAdvanceButton = ({
         newStatus: nextStatus,
       });
       setStatus(nextStatus); // Update local state immediately
+
+      // Get date and format it
+      const tripdepartureDate = new Date(trip?.departureDate || 0);
+      const formattedDate = tripdepartureDate
+        ? tripdepartureDate.toLocaleDateString("en-ZA", {
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+          })
+        : "TBD";
+
+      // Send the notification of status change
+      await createNotification({
+        userId: purchaseTrip?.userId as Id<"users">,
+        type: "booking",
+        message: `Booking Status Update: ${formattedDate} ${trip?.originCity} - ${trip?.destinationCity}: ${nextStatus}.`,
+        meta: {
+          tripId: trip?._id as Id<"trip">,
+          action: "status_update",
+        },
+      });
+
+      // If the status is Delivered, create rating notification
+      if (nextStatus === "Delivered") {
+        await createNotification({
+          userId: purchaseTrip?.userId as Id<"users">,
+          type: "booking",
+          message: `Your trip from ${trip?.originCity} to ${trip?.destinationCity} has been delivered. Please rate your experience.`,
+          meta: {
+            tripId: trip?._id as Id<"trip">,
+            action: "rating_request",
+          },
+        });
+      }
     } catch (error) {
       console.error("Failed to advance status:", error);
     }

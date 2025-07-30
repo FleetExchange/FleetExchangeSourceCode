@@ -81,6 +81,11 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({
           ))
         )}
       </div>
+      <div className="flex justify-center items-center m-1 mt-2">
+        <p className="font-light text-sm">
+          Notifications are saved for a 10 day period!
+        </p>
+      </div>
     </div>
   );
 };

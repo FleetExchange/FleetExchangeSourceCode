@@ -11,11 +11,7 @@ interface TripRejectButtonProps {
   currentStatus: string;
 }
 
-const TripRejectButton = ({
-  purchaseTripId,
-  tripId,
-  currentStatus,
-}: TripRejectButtonProps) => {
+const TripRejectButton = ({ tripId, currentStatus }: TripRejectButtonProps) => {
   const cancelTrip = useMutation(api.trip.setTripCancelled);
   const deletePurchaseTrip = useMutation(api.purchasetrip.deletePurchaseTrip);
 
