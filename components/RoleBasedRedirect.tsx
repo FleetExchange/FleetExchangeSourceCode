@@ -20,6 +20,10 @@ export default function RoleBasedRedirect() {
   const transporterSetupCheck = useMutation(
     api.notifications.checkTransporterAccountSetup
   );
+  // if a client then run the client check account setup mutation
+  const clientSetupCheck = useMutation(
+    api.notifications.checkClientAccountSetup
+  );
 
   useEffect(() => {
     if (user && convexUser) {
@@ -28,14 +32,13 @@ export default function RoleBasedRedirect() {
 
         // if a transporter then run the transporter check account setup mutation
         if (convexUser.role === "transporter") {
-          console.log(
-            "Triggering transporter setup check for user:",
-            convexUser._id
-          );
           transporterSetupCheck({ userId: convexUser._id });
         }
 
         // if a client then run the client check account setup mutation
+        if (convexUser.role === "client") {
+          clientSetupCheck({ userId: convexUser._id });
+        }
 
         //Redirect based on role
         router.push(`/${convexUser.role}/dashboard`);

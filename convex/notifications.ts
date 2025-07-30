@@ -155,3 +155,52 @@ export const checkTransporterAccountSetup = mutation({
     }
   },
 });
+
+// Check Client Account for account setup
+export const checkClientAccountSetup = mutation({
+  args: { userId: v.id("users") },
+  handler: async (ctx, { userId }) => {
+    // Check documents
+    const terms = await ctx.runQuery(api.files.getFilesByCategory, {
+      userId,
+      category: "terms",
+    });
+
+    const companyReg = await ctx.runQuery(api.files.getFilesByCategory, {
+      userId,
+      category: "companyReg",
+    });
+
+    if (!(terms?.length > 0 && companyReg?.length > 0)) {
+      // Check if document notification already exists and is unread
+      const existingDocNotif = await ctx.db
+        .query("notifications")
+        .filter((q) => q.eq(q.field("userId"), userId))
+        .filter((q) => q.eq(q.field("type"), "account"))
+        .filter((q) => q.eq(q.field("read"), false))
+        .first();
+
+      if (!existingDocNotif) {
+        await ctx.runMutation(api.notifications.createNotification, {
+          userId,
+          type: "account",
+          message:
+            "Please ensure all required documents are uploaded under the account page.",
+          meta: { action: "upload_documents" },
+        });
+      }
+    } else {
+      // If all documents exist, mark any existing document notifications as read
+      const docNotifications = await ctx.db
+        .query("notifications")
+        .filter((q) => q.eq(q.field("userId"), userId))
+        .filter((q) => q.eq(q.field("type"), "account"))
+        .filter((q) => q.eq(q.field("read"), false))
+        .collect();
+
+      for (const notif of docNotifications) {
+        await ctx.db.patch(notif._id, { read: true });
+      }
+    }
+  },
+});
