@@ -127,7 +127,7 @@ export default defineSchema({
     userId: v.id("users"), // Client who made payment
     transporterId: v.id("users"), // Transporter receiving payment
     tripId: v.id("trip"),
-    purchaseTripId: v.id("purchasetrip"),
+    purchaseTripId: v.id("purchaseTrip"),
 
     // Paystack fields
     paystackAuthCode: v.string(), // For authorized transactions

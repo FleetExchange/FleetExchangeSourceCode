@@ -9,7 +9,7 @@ export const authorizePayment = mutation({
     userId: v.id("users"),
     transporterId: v.id("users"),
     tripId: v.id("trip"),
-    purchaseTripId: v.id("purchasetrip"),
+    purchaseTripId: v.id("purchaseTrip"),
     amount: v.number(),
     paystackAuthCode: v.string(),
     paystackTransactionRef: v.string(),

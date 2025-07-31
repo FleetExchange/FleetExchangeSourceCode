@@ -14,7 +14,8 @@ export const initializePaystackPayment = async (
       callback_url: `${window.location.origin}/payment/callback?tripId=${tripId}`,
       metadata: {
         tripId,
-        // Add any other data you need in the callback
+        transporterId,
+        userId: "user_id_here", // Add user ID for webhook
       },
     }),
   });
