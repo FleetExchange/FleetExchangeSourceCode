@@ -2,6 +2,7 @@
 
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
+import { chargeAuthorization } from "@/utils/paystack";
 import { useMutation, useQuery } from "convex/react";
 import React from "react";
 import { useState } from "react";
@@ -31,13 +32,21 @@ const StatusAdvanceButton = ({
     purchaseTripId,
   });
 
+  // Get the user
+  const client = useQuery(api.users.getUserById, {
+    userId: purchaseTrip?.userId as Id<"users">,
+  });
+
   // get trip oject
   const trip = useQuery(api.trip.getById, {
     tripId: purchaseTrip?.tripId as Id<"trip">,
   });
 
-  // create notification mutation
+  // create mutation
   const createNotification = useMutation(api.notifications.createNotification);
+  const chargeAuthorizedPayment = useMutation(
+    api.payments.chargeAuthorizedPayment
+  );
 
   // Update local state when database changes
   React.useEffect(() => {
@@ -67,6 +76,32 @@ const StatusAdvanceButton = ({
         purchaseTripId,
         newStatus: nextStatus,
       });
+
+      // If the trip goes from awaiting confirmation to booked, run the authorised payment
+      if (nextStatus == "Booked") {
+        // Find the authorized payment
+        const payment = useQuery(api.payments.getPaymentByTrip, {
+          tripId: purchaseTrip?.tripId as Id<"trip">,
+        });
+
+        if (payment) {
+          // Charge the authorized payment
+          const chargeResult = await chargeAuthorization(
+            payment.paystackAuthCode,
+            payment.totalAmount * 100, // Back to cents
+            client?.email || ""
+          );
+
+          await chargeResult;
+
+          // Update the payment status to charged
+          await chargeAuthorizedPayment({
+            paymentId: payment._id,
+            paystackChargeRef: payment.paystackTransactionRef,
+          });
+        }
+      }
+
       setStatus(nextStatus); // Update local state immediately
 
       // Get date and format it

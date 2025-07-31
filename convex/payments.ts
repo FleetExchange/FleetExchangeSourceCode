@@ -69,6 +69,9 @@ export const releasePayment = mutation({
     paystackTransferRef: v.string(),
   },
   handler: async (ctx, args) => {
+    // Release payment to transporter
+
+    // Update payment status to released
     await ctx.db.patch(args.paymentId, {
       status: "released",
       releasedAt: Date.now(),
@@ -84,5 +87,18 @@ export const releasePayment = mutation({
         meta: { paymentId: args.paymentId, action: "payment_released" },
       });
     }
+  },
+});
+
+// Get payment by trip ID
+export const getPaymentByTrip = query({
+  args: {
+    tripId: v.id("trip"),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("payments")
+      .filter((q) => q.eq(q.field("tripId"), args.tripId))
+      .first();
   },
 });

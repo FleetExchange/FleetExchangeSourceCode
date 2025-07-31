@@ -1,7 +1,8 @@
 export const initializePaystackPayment = async (
   email: string,
   amount: number, // in cents (multiply by 100)
-  tripId: string
+  tripId: string,
+  transporterId: string
 ) => {
   const response = await fetch("/api/paystack/initialize", {
     method: "POST",
@@ -10,8 +11,11 @@ export const initializePaystackPayment = async (
       email,
       amount,
       currency: "ZAR",
-      callback_url: `${window.location.origin}/payment/callback`,
-      metadata: { tripId },
+      callback_url: `${window.location.origin}/payment/callback?tripId=${tripId}`,
+      metadata: {
+        tripId,
+        // Add any other data you need in the callback
+      },
     }),
   });
 

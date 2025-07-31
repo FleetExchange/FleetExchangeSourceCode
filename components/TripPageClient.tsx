@@ -18,6 +18,7 @@ import TripCancelButton from "./TripCancelButton";
 import { isAddressWithinRange } from "@/utils/geocoding";
 import TripRatingComponent from "./TripRatingComponent";
 import ProfileImage from "./ProfileImage";
+import BookTripButton from "./BookTripButton";
 type DirectionsResult = google.maps.DirectionsResult;
 
 interface TripPageClientProps {
@@ -632,13 +633,14 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
                   />
                 )
               ) : (
-                <button
-                  className="btn btn-primary btn-wide"
-                  onClick={handleBookTrip}
-                  disabled={!trip}
-                >
-                  Book Trip
-                </button>
+                <BookTripButton
+                  trip={trip}
+                  user={{
+                    _id: userId,
+                    email: user?.emailAddresses[0]?.emailAddress,
+                  }}
+                  onBookTrip={handleBookTrip} // Pass the handler
+                />
               )}
             </div>
           </div>
