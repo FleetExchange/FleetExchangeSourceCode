@@ -243,8 +243,7 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
         cargoWeight: cargoWeight,
       });
 
-      alert("Trip booked successfully!");
-
+      // MOVE TO WEBHOOK
       // Send a notification to the trip issuer
       await bookedTripNotification({
         userId: trip?.userId as Id<"users">,
@@ -255,9 +254,6 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
           action: "waitingConfirmation_trip",
         },
       });
-
-      // Redirect to fleet manager page
-      window.location.href = "/discover";
     } catch (error) {
       alert("Failed to book trip. Please try again.");
     }
@@ -634,11 +630,16 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
                 )
               ) : (
                 <BookTripButton
-                  trip={trip}
+                  trip={{
+                    tripId: trip?._id as Id<"trip">,
+                    price: tripPrice,
+                    transporterId: trip?.userId,
+                  }}
                   user={{
                     _id: userId,
                     email: user?.emailAddresses[0]?.emailAddress,
                   }}
+                  purchTrip={{ _id: purchaseTripDetails?._id }}
                   onBookTrip={handleBookTrip} // Pass the handler
                 />
               )}

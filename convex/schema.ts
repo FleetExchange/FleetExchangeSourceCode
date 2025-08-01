@@ -1,7 +1,6 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 import { TRUCK_TYPES } from "../shared/truckTypes";
-import { create } from "domain";
 
 // How the database looks
 // All entries have automatic _id fields
@@ -130,17 +129,18 @@ export default defineSchema({
     purchaseTripId: v.id("purchaseTrip"),
 
     // Paystack fields
-    paystackAuthCode: v.string(), // For authorized transactions
-    paystackTransactionRef: v.string(),
+    paystackReference: v.string(), // Transaction reference
+    paystackAuthCode: v.optional(v.string()), // For future charges
     paystackCustomerCode: v.optional(v.string()),
 
-    // Payment amounts
+    // Payment amounts (in ZAR)
     totalAmount: v.number(), // Full amount client pays
     commissionAmount: v.number(), // Your platform commission
     transporterAmount: v.number(), // Amount transporter receives
 
     // Payment status
     status: v.union(
+      v.literal("pending"), // Payment initiated
       v.literal("authorized"), // Payment authorized but not charged
       v.literal("charged"), // Payment taken from client
       v.literal("released"), // Payment sent to transporter
@@ -148,10 +148,12 @@ export default defineSchema({
       v.literal("refunded")
     ),
 
+    createdAt: v.number(),
     authorizedAt: v.optional(v.number()),
     chargedAt: v.optional(v.number()),
     releasedAt: v.optional(v.number()),
-
-    createdAt: v.number(),
-  }).index("by_trip", ["tripId"]),
+  })
+    .index("by_trip", ["tripId"])
+    .index("by_purchase_trip", ["purchaseTripId"])
+    .index("by_reference", ["paystackReference"]),
 });

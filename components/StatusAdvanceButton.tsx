@@ -2,7 +2,6 @@
 
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
-import { chargeAuthorization } from "@/utils/paystack";
 import { useMutation, useQuery } from "convex/react";
 import React from "react";
 import { useState } from "react";
@@ -44,9 +43,11 @@ const StatusAdvanceButton = ({
 
   // create mutation
   const createNotification = useMutation(api.notifications.createNotification);
-  const chargeAuthorizedPayment = useMutation(
-    api.payments.chargeAuthorizedPayment
+  const getPaymentByTrip = useQuery(
+    api.payments.getPaymentByTrip,
+    trip?._id ? { tripId: trip._id } : "skip"
   );
+  const chargePayment = useMutation(api.payments.chargePayment);
 
   // Update local state when database changes
   React.useEffect(() => {
@@ -72,6 +73,8 @@ const StatusAdvanceButton = ({
   const handleAdvanceStatus = async () => {
     try {
       const nextStatus = getNextStatus(status);
+
+      // 1. Update status in database
       await updateStatus({
         purchaseTripId,
         newStatus: nextStatus,
@@ -79,26 +82,31 @@ const StatusAdvanceButton = ({
 
       // If the trip goes from awaiting confirmation to booked, run the authorised payment
       if (nextStatus == "Booked") {
-        // Find the authorized payment
-        const payment = useQuery(api.payments.getPaymentByTrip, {
-          tripId: purchaseTrip?.tripId as Id<"trip">,
-        });
+        try {
+          // 2. Get payment (Database Query)
+          const payment = getPaymentByTrip;
 
-        if (payment) {
-          // Charge the authorized payment
-          const chargeResult = await chargeAuthorization(
-            payment.paystackAuthCode,
-            payment.totalAmount * 100, // Back to cents
-            client?.email || ""
-          );
+          if (payment && payment.status === "authorized") {
+            // 3. Charge the payment
+            const chargeData = await chargePayment({ paymentId: payment._id });
 
-          await chargeResult;
+            // 4. Make API call to actually charge
+            const response = await fetch("/api/paystack/charge", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                authorization_code: chargeData.authCode,
+                amount: chargeData.amount * 100, // Convert to cents
+                email: client?.email,
+              }),
+            });
 
-          // Update the payment status to charged
-          await chargeAuthorizedPayment({
-            paymentId: payment._id,
-            paystackChargeRef: payment.paystackTransactionRef,
-          });
+            if (response.ok) {
+              console.log("Payment charged successfully!");
+            }
+          }
+        } catch (error) {
+          console.error("Failed to confirm trip:", error);
         }
       }
 

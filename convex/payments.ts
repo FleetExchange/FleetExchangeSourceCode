@@ -1,104 +1,139 @@
 // convex/payments.ts
-import { api } from "./_generated/api";
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+import { api } from "./_generated/api";
 
-// Step 1: Authorize payment when booking
-export const authorizePayment = mutation({
+// Create initial payment record
+export const createPayment = mutation({
   args: {
     userId: v.id("users"),
     transporterId: v.id("users"),
     tripId: v.id("trip"),
     purchaseTripId: v.id("purchaseTrip"),
-    amount: v.number(),
-    paystackAuthCode: v.string(),
-    paystackTransactionRef: v.string(),
+    totalAmount: v.number(),
+    paystackReference: v.string(),
   },
   handler: async (ctx, args) => {
-    const commissionRate = 0.02; // 2% commission
-    const commissionAmount = args.amount * commissionRate;
-    const transporterAmount = args.amount - commissionAmount;
+    const commissionRate = 0.1; // 10% commission
+    const commissionAmount = args.totalAmount * commissionRate;
+    const transporterAmount = args.totalAmount - commissionAmount;
 
     return await ctx.db.insert("payments", {
       userId: args.userId,
       transporterId: args.transporterId,
       tripId: args.tripId,
       purchaseTripId: args.purchaseTripId,
-      paystackAuthCode: args.paystackAuthCode,
-      paystackTransactionRef: args.paystackTransactionRef,
-      totalAmount: args.amount,
+      paystackReference: args.paystackReference,
+      totalAmount: args.totalAmount,
       commissionAmount,
       transporterAmount,
-      status: "authorized",
-      authorizedAt: Date.now(),
+      status: "pending",
       createdAt: Date.now(),
     });
   },
 });
 
-// Step 2: Charge payment when trip is confirmed
-export const chargeAuthorizedPayment = mutation({
+// Authorize payment (webhook calls this)
+export const authorizePayment = mutation({
   args: {
-    paymentId: v.id("payments"),
-    paystackChargeRef: v.string(),
+    paystackReference: v.string(),
+    paystackAuthCode: v.string(),
+    paystackCustomerCode: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    await ctx.db.patch(args.paymentId, {
-      status: "charged",
-      chargedAt: Date.now(),
-      paystackTransactionRef: args.paystackChargeRef,
+    // Find payment by reference
+    const payment = await ctx.db
+      .query("payments")
+      .withIndex("by_reference", (q) =>
+        q.eq("paystackReference", args.paystackReference)
+      )
+      .first();
+
+    if (!payment) {
+      throw new Error("Payment not found");
+    }
+
+    // Update payment with authorization details
+    await ctx.db.patch(payment._id, {
+      paystackAuthCode: args.paystackAuthCode,
+      paystackCustomerCode: args.paystackCustomerCode,
+      status: "authorized",
+      authorizedAt: Date.now(),
     });
 
-    // Create notification for client
-    const payment = await ctx.db.get(args.paymentId);
-    if (payment) {
-      await ctx.runMutation(api.notifications.createNotification, {
-        userId: payment.userId,
-        type: "payment",
-        message: `Payment of $${payment.totalAmount} has been charged for your trip booking.`,
-        meta: { paymentId: args.paymentId, action: "payment_charged" },
-      });
-    }
+    // Notify transporter
+    await ctx.runMutation(api.notifications.createNotification, {
+      userId: payment.transporterId,
+      type: "trip",
+      message: `New trip booking authorized. Please confirm if you can take this trip.`,
+      meta: {
+        tripId: payment.tripId,
+        action: "trip_awaiting_confirmation",
+      },
+    });
+
+    return payment._id;
   },
 });
 
-// Step 3: Release payment to transporter after delivery
+// Charge authorized payment
+export const chargePayment = mutation({
+  args: {
+    paymentId: v.id("payments"),
+  },
+  handler: async (ctx, args) => {
+    const payment = await ctx.db.get(args.paymentId);
+    if (!payment || payment.status !== "authorized") {
+      throw new Error("Payment not found or not authorized");
+    }
+
+    // Update status to charged (actual charging happens via API)
+    await ctx.db.patch(args.paymentId, {
+      status: "charged",
+      chargedAt: Date.now(),
+    });
+
+    // Return auth code for API call
+    return {
+      authCode: payment.paystackAuthCode,
+      amount: payment.totalAmount,
+    };
+  },
+});
+
+// Release payment to transporter
 export const releasePayment = mutation({
   args: {
     paymentId: v.id("payments"),
-    paystackTransferRef: v.string(),
   },
   handler: async (ctx, args) => {
-    // Release payment to transporter
-
-    // Update payment status to released
     await ctx.db.patch(args.paymentId, {
       status: "released",
       releasedAt: Date.now(),
     });
 
-    // Create notification for transporter
     const payment = await ctx.db.get(args.paymentId);
     if (payment) {
       await ctx.runMutation(api.notifications.createNotification, {
         userId: payment.transporterId,
         type: "payment",
-        message: `Payment of $${payment.transporterAmount} has been released to your account.`,
-        meta: { paymentId: args.paymentId, action: "payment_released" },
+        message: `Payment of R${payment.transporterAmount} has been released to your account.`,
+        meta: {
+          paymentId: args.paymentId,
+          action: "payment_released",
+        },
       });
     }
   },
 });
 
-// Get payment by trip ID
+// Get payment by trip
 export const getPaymentByTrip = query({
-  args: {
-    tripId: v.id("trip"),
-  },
+  args: { tripId: v.id("trip") },
   handler: async (ctx, args) => {
     return await ctx.db
       .query("payments")
-      .filter((q) => q.eq(q.field("tripId"), args.tripId))
+      .withIndex("by_trip", (q) => q.eq("tripId", args.tripId))
       .first();
   },
 });
