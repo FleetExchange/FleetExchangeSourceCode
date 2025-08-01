@@ -175,15 +175,11 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
     return true;
   };
 
-  const bookedTripNotification = useMutation(
-    api.notifications.createNotification
-  );
-
-  const handleBookTrip = async () => {
+  const handleBookTrip = async (): Promise<string> => {
     // Check if truck data is loaded
     if (!truck) {
       alert("Truck information is not available. Please try again.");
-      return;
+      return "";
     }
 
     // Validate all required fields
@@ -196,14 +192,14 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
       (!cargoWeight && cargoWeight >= 0)
     ) {
       alert("Please fill all fields");
-      return;
+      return "";
     }
 
     // Make sure cargo weight is below the max load capacity
     // Now TypeScript knows truck is defined
     if (cargoWeight > truck.maxLoadCapacity) {
       alert("The cargo weight exceeds the truck's maximum load capacity.");
-      return;
+      return "";
     }
 
     // Validate addresses are within range
@@ -219,7 +215,7 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
     );
 
     if (!isPickupValid || !isDeliveryValid) {
-      return;
+      return "";
     }
 
     try {
@@ -233,7 +229,7 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
         destinationAddress: deliveryAddress,
       });
       // Create trip purchase object
-      await purchaseTrip({
+      const PurchaseTripId = await purchaseTrip({
         tripId: trip?._id as Id<"trip">,
         userId: userId as Id<"users">,
         amount: tripPrice,
@@ -243,19 +239,11 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
         cargoWeight: cargoWeight,
       });
 
-      // MOVE TO WEBHOOK
-      // Send a notification to the trip issuer
-      await bookedTripNotification({
-        userId: trip?.userId as Id<"users">,
-        type: "trip",
-        message: `Your trip from ${trip?.originCity} to ${trip?.destinationCity} is awaiting your confirmation.`,
-        meta: {
-          tripId: trip?._id as Id<"trip">,
-          action: "waitingConfirmation_trip",
-        },
-      });
+      // If all went well, purch trip Id will be returned
+      return PurchaseTripId || "";
     } catch (error) {
       alert("Failed to book trip. Please try again.");
+      return "";
     }
   };
 
@@ -639,7 +627,6 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
                     _id: userId,
                     email: user?.emailAddresses[0]?.emailAddress,
                   }}
-                  purchTrip={{ _id: purchaseTripDetails?._id }}
                   onBookTrip={handleBookTrip} // Pass the handler
                 />
               )}

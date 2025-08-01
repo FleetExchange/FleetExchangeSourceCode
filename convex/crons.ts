@@ -78,9 +78,12 @@ export const sendTripReminders = internalMutation({
 
     // get the purchaseTrip objec that coincides with the trip
     const tripIds = upcomingTrips.map((trip) => trip._id as Id<"trip">);
-    const purchasedTrips = useQuery(api.purchasetrip.getPurchaseTripByIdArray, {
-      tripIds: tripIds.length > 0 ? tripIds : [],
-    });
+
+    // Get all purchaseTrips and filter in memory since we can't use arrays in eq()
+    const allPurchaseTrips = await ctx.db.query("purchaseTrip").collect();
+    const purchasedTrips = allPurchaseTrips.filter((trip) =>
+      tripIds.includes(trip.tripId)
+    );
 
     const filteredPurchaseTrips =
       purchasedTrips?.filter(
@@ -176,9 +179,12 @@ export const confirmDeliveryReminders = internalMutation({
 
     // get the purchaseTrip objec that coincides with the trip
     const tripIds = deliveredTrips.map((trip) => trip._id as Id<"trip">);
-    const purchasedTrips = useQuery(api.purchasetrip.getPurchaseTripByIdArray, {
-      tripIds: tripIds.length > 0 ? tripIds : [],
-    });
+
+    // Get all purchaseTrips and filter in memory since we can't use arrays in eq()
+    const allPurchaseTrips = await ctx.db.query("purchaseTrip").collect();
+    const purchasedTrips = allPurchaseTrips.filter((trip) =>
+      tripIds.includes(trip.tripId)
+    );
 
     const filteredPurchaseTrips =
       purchasedTrips?.filter(
