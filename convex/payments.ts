@@ -137,3 +137,31 @@ export const getPaymentByTrip = query({
       .first();
   },
 });
+
+// Update payment status
+export const updatePaymentStatus = mutation({
+  args: {
+    paymentId: v.id("payments"),
+    status: v.union(
+      v.literal("pending"),
+      v.literal("authorized"),
+      v.literal("charged"),
+      v.literal("released"),
+      v.literal("failed"),
+      v.literal("refunded")
+    ),
+  },
+  handler: async (ctx, args) => {
+    const payment = await ctx.db.get(args.paymentId);
+    if (!payment) {
+      throw new Error("Payment not found");
+    }
+
+    // Update payment status
+    await ctx.db.patch(args.paymentId, {
+      status: args.status,
+    });
+
+    return payment;
+  },
+});

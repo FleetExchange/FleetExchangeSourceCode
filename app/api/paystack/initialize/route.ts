@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
         },
         body: JSON.stringify({
           email: body.email,
-          amount: body.amount, // Amount in kobo (cents)
+          amount: body.amount,
           currency: "ZAR",
           reference: body.reference,
           callback_url: body.callback_url,
@@ -31,7 +31,6 @@ export async function POST(req: NextRequest) {
     const data = await response.json();
     return NextResponse.json(data);
   } catch (error) {
-    console.error("Paystack initialization error:", error);
     return NextResponse.json(
       { error: "Failed to initialize payment" },
       { status: 500 }

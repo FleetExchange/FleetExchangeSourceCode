@@ -3,6 +3,7 @@
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
+import { release } from "os";
 import React from "react";
 import { useState } from "react";
 
@@ -87,23 +88,8 @@ const StatusAdvanceButton = ({
           const payment = getPaymentByTrip;
 
           if (payment && payment.status === "authorized") {
-            // 3. Charge the payment
+            // 3. Charge the payment in DB
             const chargeData = await chargePayment({ paymentId: payment._id });
-
-            // 4. Make API call to actually charge
-            const response = await fetch("/api/paystack/charge", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                authorization_code: chargeData.authCode,
-                amount: chargeData.amount * 100, // Convert to cents
-                email: client?.email,
-              }),
-            });
-
-            if (response.ok) {
-              console.log("Payment charged successfully!");
-            }
           }
         } catch (error) {
           console.error("Failed to confirm trip:", error);
@@ -144,6 +130,7 @@ const StatusAdvanceButton = ({
             action: "rating_request",
           },
         });
+        //await releasePayementToTransporter();
       }
     } catch (error) {
       console.error("Failed to advance status:", error);

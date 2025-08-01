@@ -16,8 +16,14 @@ const TripRejectButton = ({ tripId, currentStatus }: TripRejectButtonProps) => {
   const deletePurchaseTrip = useMutation(api.purchasetrip.deletePurchaseTrip);
   const rejectionAlert = useMutation(api.notifications.createNotification);
 
+  const updatePaymentStatus = useMutation(api.payments.updatePaymentStatus);
+
   const trip = useQuery(api.trip.getById, { tripId });
   const purchTrip = useQuery(api.purchasetrip.getPurchaseTripByTripId, {
+    tripId,
+  });
+
+  const payment = useQuery(api.payments.getPaymentByTrip, {
     tripId,
   });
 
@@ -27,12 +33,42 @@ const TripRejectButton = ({ tripId, currentStatus }: TripRejectButtonProps) => {
       if (currentStatus !== "Awaiting Confirmation") {
         return;
       }
-
+      // 1. Cancel the trip
       // Set trip to not booked
       await cancelTrip({ tripId });
 
       // Delete the purchase trip object
       await deletePurchaseTrip({ tripId });
+
+      if (payment && payment.paystackReference) {
+        // 3. Refund the payment
+        const refundResponse = await fetch("/api/paystack/refund", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            reference: payment.paystackReference,
+          }),
+        });
+
+        if (refundResponse.ok) {
+          // 4. Update payment status
+          await updatePaymentStatus({
+            paymentId: payment._id,
+            status: "refunded",
+          });
+
+          // 5. Notify client
+          await rejectionAlert({
+            userId: payment.userId,
+            type: "payment",
+            message:
+              "Your payment has been refunded as the trip was not confirmed.",
+            meta: { tripId, action: "payment_refunded" },
+          });
+
+          console.log("Trip rejected and payment refunded successfully");
+        }
+      }
 
       // Optionally: Add a success message or redirect
       alert("Booking rejected successfully");
