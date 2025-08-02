@@ -158,17 +158,8 @@ export default defineSchema({
 
     // Transfer tracking
     transferReference: v.optional(v.string()),
-    transferRecipientCode: v.optional(v.string()),
-    transferStatus: v.optional(
-      v.union(
-        v.literal("pending"),
-        v.literal("success"),
-        v.literal("failed"),
-        v.literal("reversed")
-      )
-    ),
-    transferredAt: v.optional(v.number()),
     transferAmount: v.optional(v.number()),
+    transferredAt: v.optional(v.number()),
 
     createdAt: v.number(),
     authorizedAt: v.optional(v.number()),

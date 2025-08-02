@@ -150,6 +150,8 @@ export const updatePaymentStatus = mutation({
       v.literal("failed"),
       v.literal("refunded")
     ),
+    transferReference: v.optional(v.string()),
+    transferAmount: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const payment = await ctx.db.get(args.paymentId);
@@ -160,6 +162,9 @@ export const updatePaymentStatus = mutation({
     // Update payment status
     await ctx.db.patch(args.paymentId, {
       status: args.status,
+      transferReference: args.transferReference,
+      transferAmount: args.transferAmount,
+      transferredAt: args.transferReference ? Date.now() : undefined,
     });
 
     return payment;

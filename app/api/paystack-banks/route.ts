@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
   try {
-    const response = await fetch("https://api.paystack.co/bank", {
+    const response = await fetch("https://api.paystack.co/bank?currency=NGN", {
       method: "GET",
       headers: {
         Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
@@ -13,12 +13,7 @@ export async function GET(req: NextRequest) {
     const data = await response.json();
 
     if (data.status) {
-      // Return only South African banks or filter as needed
-      const southAfricanBanks = data.data.filter(
-        (bank: any) =>
-          bank.country === "South Africa" || bank.currency === "ZAR"
-      );
-      return NextResponse.json(southAfricanBanks);
+      return NextResponse.json(data.data); // Return Nigerian banks
     } else {
       return NextResponse.json([]);
     }

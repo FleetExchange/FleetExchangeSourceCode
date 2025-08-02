@@ -65,6 +65,8 @@ const PayoutAccountForm: React.FC<PayoutAccountFormProps> = ({
       }
 
       // 1. Verify account with Paystack
+      console.log("Verifying account...", { accountNumber, bankCode });
+
       const verifyResponse = await fetch("/api/paystack/verify-account", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -75,6 +77,7 @@ const PayoutAccountForm: React.FC<PayoutAccountFormProps> = ({
       });
 
       const verifyData = await verifyResponse.json();
+      console.log("Verify response:", verifyData);
 
       if (!verifyData.status) {
         throw new Error(verifyData.message || "Account verification failed");
@@ -84,11 +87,17 @@ const PayoutAccountForm: React.FC<PayoutAccountFormProps> = ({
       const verifiedAccountName = verifyData.data.account_name;
 
       // 2. Create recipient in Paystack
+      console.log("Creating recipient...", {
+        name: verifiedAccountName,
+        accountNumber,
+        bankCode,
+      });
+
       const recipientResponse = await fetch("/api/paystack/create-recipient", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: verifiedAccountName, // Use verified name
+          name: verifiedAccountName,
           accountNumber,
           bankCode,
           email: email || undefined,
@@ -96,6 +105,7 @@ const PayoutAccountForm: React.FC<PayoutAccountFormProps> = ({
       });
 
       const recipientData = await recipientResponse.json();
+      console.log("Recipient response:", recipientData);
 
       if (!recipientData.status) {
         throw new Error(recipientData.message || "Failed to create recipient");
@@ -105,13 +115,13 @@ const PayoutAccountForm: React.FC<PayoutAccountFormProps> = ({
       const selectedBank = banks.find((bank) => bank.code === bankCode);
       const bankName = selectedBank?.name || "Unknown Bank";
 
-      // 3. Save to database with all required fields
+      // 3. Save to database
       await createPayoutAccount({
         userId,
-        accountName: verifiedAccountName, // Use verified name
+        accountName: verifiedAccountName,
         accountNumber,
         bankCode,
-        bankName, // Add bank name
+        bankName,
         email: email || undefined,
         phone: phone || undefined,
         paystackRecipientCode: recipientData.data.recipient_code,

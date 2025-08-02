@@ -30,6 +30,12 @@ export async function POST(req: NextRequest) {
       case "transfer.success":
         await handleTransferSuccess(event.data);
         break;
+      case "transfer.failed":
+        console.log("Transfer failed:", event.data);
+        break;
+      case "transfer.reversed":
+        console.log("Transfer reversed:", event.data);
+        break;
       default:
         console.log("Unhandled webhook event:", event.event);
     }

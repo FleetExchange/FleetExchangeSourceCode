@@ -50,6 +50,14 @@ const StatusAdvanceButton = ({
   );
   const chargePayment = useMutation(api.payments.chargePayment);
 
+  // Add these new queries/mutations
+  const getPayoutAccount = useQuery(
+    api.payoutAccount.getByUser,
+    trip?.userId ? { userId: trip.userId } : "skip"
+  );
+
+  const updatePaymentStatus = useMutation(api.payments.updatePaymentStatus);
+
   // Update local state when database changes
   React.useEffect(() => {
     if (purchaseTrip?.status) {
@@ -81,8 +89,8 @@ const StatusAdvanceButton = ({
         newStatus: nextStatus,
       });
 
-      // If the trip goes from awaiting confirmation to booked, run the authorised payment
-      if (nextStatus == "Booked") {
+      // 2. Handle payment charging for "Booked" status
+      if (nextStatus === "Booked") {
         try {
           // 2. Get payment (Database Query)
           const payment = getPaymentByTrip;
@@ -94,6 +102,20 @@ const StatusAdvanceButton = ({
         } catch (error) {
           console.error("Failed to confirm trip:", error);
         }
+      }
+
+      // 3. Handle payment release for "Delivered" status
+      if (nextStatus === "Delivered") {
+        await releasePaymentToTransporter();
+        await createNotification({
+          userId: purchaseTrip?.userId as Id<"users">,
+          type: "booking",
+          message: `Your trip from ${trip?.originCity} to ${trip?.destinationCity} has been delivered. Please rate your experience.`,
+          meta: {
+            tripId: trip?._id as Id<"trip">,
+            action: "rating_request",
+          },
+        });
       }
 
       setStatus(nextStatus); // Update local state immediately
@@ -118,22 +140,92 @@ const StatusAdvanceButton = ({
           action: "status_update",
         },
       });
-
-      // If the status is Delivered, create rating notification
-      if (nextStatus === "Delivered") {
-        await createNotification({
-          userId: purchaseTrip?.userId as Id<"users">,
-          type: "booking",
-          message: `Your trip from ${trip?.originCity} to ${trip?.destinationCity} has been delivered. Please rate your experience.`,
-          meta: {
-            tripId: trip?._id as Id<"trip">,
-            action: "rating_request",
-          },
-        });
-        //await releasePayementToTransporter();
-      }
     } catch (error) {
       console.error("Failed to advance status:", error);
+    }
+  };
+
+  const releasePaymentToTransporter = async () => {
+    try {
+      console.log("Starting payment release process...");
+
+      // 1. Get payment details
+      const payment = getPaymentByTrip;
+      if (!payment) {
+        throw new Error("Payment not found");
+      }
+
+      // 2. Get transporter's payout account
+      const payoutAccount = getPayoutAccount;
+      if (!payoutAccount?.paystackRecipientCode) {
+        throw new Error(
+          "Transporter bank details not found. Please ask transporter to add bank details."
+        );
+      }
+
+      // 3. Calculate transfer amount (minus your commission)
+      const commissionRate = 0.1; // 10% commission
+      const transferAmount = Math.round(
+        payment.totalAmount * (1 - commissionRate)
+      );
+
+      // 4. Create transfer via API
+      const transferResponse = await fetch("/api/paystack/transfer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          amount: transferAmount,
+          recipientCode: payoutAccount.paystackRecipientCode,
+          reason: `Payment for trip from ${trip?.originCity} to ${trip?.destinationCity}`,
+          reference: `transfer-${payment._id}-${Date.now()}`,
+          metadata: {
+            tripId: trip?._id,
+            purchaseTripId: purchaseTripId,
+            paymentId: payment._id,
+          },
+        }),
+      });
+
+      const transferData = await transferResponse.json();
+
+      if (transferData.status) {
+        // 5. Update payment status in database
+        await updatePaymentStatus({
+          paymentId: payment._id,
+          status: "released",
+          transferReference: transferData.data.reference,
+          transferAmount: transferAmount,
+        });
+
+        // 6. Notify transporter
+        await createNotification({
+          userId: trip?.userId as Id<"users">,
+          type: "payment",
+          message: `Payment of R${transferAmount} has been released to your bank account for the completed trip.`,
+          meta: {
+            tripId: trip?._id as Id<"trip">,
+            action: "payment_released",
+            amount: transferAmount,
+          },
+        });
+
+        console.log("Payment released successfully!");
+      } else {
+        throw new Error(transferData.message || "Transfer failed");
+      }
+    } catch (error) {
+      console.error("Payment release failed:", error);
+
+      // Notify about the error
+      await createNotification({
+        userId: trip?.userId as Id<"users">,
+        type: "payment",
+        message: `Payment release failed: ${error instanceof Error ? error.message : "Unknown error"}. Please contact support.`,
+        meta: {
+          tripId: trip?._id as Id<"trip">,
+          action: "payment_release_failed",
+        },
+      });
     }
   };
 

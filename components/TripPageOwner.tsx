@@ -32,7 +32,10 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
   const [distance, setDistance] = useState<number>(0);
 
   // Get the trip object
-  const trip = useQuery(api.trip.getById, { tripId: tripId as Id<"trip"> });
+  const trip = useQuery(
+    api.trip.getById,
+    tripId ? { tripId: tripId as Id<"trip"> } : "skip"
+  );
   // Get the purchaseTrip object
   const purchaseTrip = useQuery(api.purchasetrip.getPurchaseTripByTripId, {
     tripId: tripId as Id<"trip">,
