@@ -1,20 +1,32 @@
-import { NextResponse } from "next/server";
-import axios from "axios";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function GET() {
-  const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
-  if (!PAYSTACK_SECRET_KEY) {
+export async function GET(req: NextRequest) {
+  try {
+    const response = await fetch("https://api.paystack.co/bank", {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    const data = await response.json();
+
+    if (data.status) {
+      // Return only South African banks or filter as needed
+      const southAfricanBanks = data.data.filter(
+        (bank: any) =>
+          bank.country === "South Africa" || bank.currency === "ZAR"
+      );
+      return NextResponse.json(southAfricanBanks);
+    } else {
+      return NextResponse.json([]);
+    }
+  } catch (error) {
+    console.error("Error fetching banks:", error);
     return NextResponse.json(
-      { error: "Missing Paystack secret key" },
+      { error: "Failed to fetch banks" },
       { status: 500 }
     );
-  }
-  try {
-    const response = await axios.get("https://api.paystack.co/bank", {
-      headers: { Authorization: `Bearer ${PAYSTACK_SECRET_KEY}` },
-    });
-    return NextResponse.json(response.data.data);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

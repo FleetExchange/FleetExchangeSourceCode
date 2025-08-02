@@ -58,21 +58,114 @@ const PayoutAccountForm: React.FC<PayoutAccountFormProps> = ({
     e.preventDefault();
     setLocalLoading(true);
     setLocalError(undefined);
+
     try {
+      if (!userId) {
+        throw new Error("User not found. Please log in and try again.");
+      }
+
+      // 1. Verify account with Paystack
+      const verifyResponse = await fetch("/api/paystack/verify-account", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          accountNumber,
+          bankCode,
+        }),
+      });
+
+      const verifyData = await verifyResponse.json();
+
+      if (!verifyData.status) {
+        throw new Error(verifyData.message || "Account verification failed");
+      }
+
+      // Use verified account name from Paystack
+      const verifiedAccountName = verifyData.data.account_name;
+
+      // 2. Create recipient in Paystack
+      const recipientResponse = await fetch("/api/paystack/create-recipient", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: verifiedAccountName, // Use verified name
+          accountNumber,
+          bankCode,
+          email: email || undefined,
+        }),
+      });
+
+      const recipientData = await recipientResponse.json();
+
+      if (!recipientData.status) {
+        throw new Error(recipientData.message || "Failed to create recipient");
+      }
+
+      // Get bank name from banks array
+      const selectedBank = banks.find((bank) => bank.code === bankCode);
+      const bankName = selectedBank?.name || "Unknown Bank";
+
+      // 3. Save to database with all required fields
       await createPayoutAccount({
-        userId: userId as Id<"users">,
-        accountName,
+        userId,
+        accountName: verifiedAccountName, // Use verified name
+        accountNumber,
+        bankCode,
+        bankName, // Add bank name
+        email: email || undefined,
+        phone: phone || undefined,
+        paystackRecipientCode: recipientData.data.recipient_code,
+        recipientId: recipientData.data.id?.toString(),
+        isVerified: true,
+      });
+
+      onSave({
+        accountName: verifiedAccountName,
         accountNumber,
         bankCode,
         email,
         phone,
       });
-      if (onSave)
-        onSave({ accountName, accountNumber, bankCode, email, phone });
-    } catch (err: any) {
-      setLocalError(err.message || "Failed to save payout account.");
+
+      alert("Bank account added successfully!");
+    } catch (error: any) {
+      console.error("Error saving payout account:", error);
+      setLocalError(error.message || "Failed to save payout account.");
     }
     setLocalLoading(false);
+  };
+
+  const [verifying, setVerifying] = useState(false);
+  const verifyAccount = async () => {
+    if (!accountNumber || !bankCode) {
+      alert("Please enter account number and select bank");
+      return;
+    }
+
+    setVerifying(true);
+    try {
+      const response = await fetch("/api/paystack/verify-account", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          accountNumber,
+          bankCode,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.status) {
+        setAccountName(data.data.account_name);
+        alert(`Account verified: ${data.data.account_name}`);
+      } else {
+        alert("Account verification failed. Please check your details.");
+      }
+    } catch (error) {
+      alert("Error verifying account. Please try again.");
+    } finally {
+      setVerifying(false);
+    }
   };
 
   return (
@@ -87,27 +180,27 @@ const PayoutAccountForm: React.FC<PayoutAccountFormProps> = ({
         <span className="font-semibold">We never share your data.</span>
       </p>
       <div>
-        <label className="block font-medium mb-1">Account Holder Name</label>
-        <input
-          type="text"
-          className="input input-bordered w-full"
-          value={accountName}
-          onChange={(e) => setAccountName(e.target.value)}
-          required
-        />
-      </div>
-      <div>
         <label className="block font-medium mb-1">Account Number</label>
-        <input
-          type="text"
-          className="input input-bordered w-full"
-          value={accountNumber}
-          onChange={(e) => setAccountNumber(e.target.value)}
-          required
-          pattern="\d{10,}"
-          maxLength={12}
-        />
+        <div className="flex gap-2">
+          <input
+            type="text"
+            className="input input-bordered flex-1"
+            value={accountNumber}
+            onChange={(e) => setAccountNumber(e.target.value)}
+            placeholder="Enter account number"
+            required
+          />
+          <button
+            type="button"
+            onClick={verifyAccount}
+            className="btn btn-outline"
+            disabled={verifying}
+          >
+            {verifying ? "Verifying..." : "Verify"}
+          </button>
+        </div>
       </div>
+
       <div>
         <label className="block font-medium mb-1">Bank</label>
         <select
@@ -125,12 +218,25 @@ const PayoutAccountForm: React.FC<PayoutAccountFormProps> = ({
         </select>
       </div>
       <div>
+        <label className="block font-medium mb-1">Account Holder Name</label>
+        <input
+          type="text"
+          className="input input-bordered w-full"
+          value={accountName}
+          onChange={(e) => setAccountName(e.target.value)}
+          placeholder="Account holder name"
+          required
+        />
+      </div>
+
+      <div>
         <label className="block font-medium mb-1">Email (optional)</label>
         <input
           type="email"
           className="input input-bordered w-full"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          placeholder="your@email.com"
         />
       </div>
       <div>
@@ -140,6 +246,7 @@ const PayoutAccountForm: React.FC<PayoutAccountFormProps> = ({
           className="input input-bordered w-full"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
+          placeholder="+27 123 456 789"
         />
       </div>
       {(error || localError) && (

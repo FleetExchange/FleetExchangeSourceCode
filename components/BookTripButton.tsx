@@ -60,6 +60,7 @@ const BookTripButton = ({
           tripId: trip.tripId,
           transporterId: trip.transporterId,
           purchaseTripId: purchaseTripId,
+          userId: user._id,
         }),
       });
 

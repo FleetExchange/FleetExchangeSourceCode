@@ -31,22 +31,28 @@ const BAManagementPage = () => {
   useEffect(() => {
     async function fetchBanks() {
       setLoadingBanks(true);
-      const res = await fetch("/api/paystack-banks");
-      const data = await res.json();
-      const uniqueBanks = Array.from(
-        new Map(data.map((bank: any) => [bank.code, bank])).values()
-      ) as { code: string; name: string }[];
-      setBanks(uniqueBanks);
-      setLoadingBanks(false);
+      try {
+        const res = await fetch("/api/paystack-banks");
+        const data = await res.json();
+        const uniqueBanks = Array.from(
+          new Map(data.map((bank: any) => [bank.code, bank])).values()
+        ) as { code: string; name: string }[];
+        setBanks(uniqueBanks);
+      } catch (error) {
+        console.error("Error fetching banks:", error);
+        setBanks([]);
+      } finally {
+        setLoadingBanks(false);
+      }
     }
+
     fetchBanks();
   }, []);
 
   // Handler for adding payout account
   const handleSave = async (data: any) => {
-    // You may want to add a mutation here to create the payout account
-    // This is just a placeholder for your logic
     console.log("Payout account saved:", data);
+    // The PayoutAccountForm now handles the save logic
   };
 
   // Handler for deleting payout account

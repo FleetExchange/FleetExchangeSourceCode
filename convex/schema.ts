@@ -92,13 +92,21 @@ export default defineSchema({
   }).index("by_user", ["userId"]),
 
   payoutAccount: defineTable({
-    userId: v.id("users"), // Reference to the user who owns this payout account
-    accountName: v.string(), // Account holder's name
-    accountNumber: v.string(), // Bank account number
-    bankCode: v.string(), // Bank code (from Paystack bank list)
-    email: v.optional(v.string()), // Optional email for notifications
-    phone: v.optional(v.string()), // Optional phone for contact
-    createdAt: v.optional(v.number()), // Timestamp for audit/history
+    userId: v.id("users"),
+    accountName: v.string(),
+    accountNumber: v.string(),
+    bankCode: v.string(),
+    bankName: v.string(), // Add this
+    email: v.optional(v.string()),
+    phone: v.optional(v.string()),
+
+    // Paystack integration fields
+    paystackRecipientCode: v.string(), // Make required
+    recipientId: v.optional(v.string()),
+    isVerified: v.boolean(), // Make required
+
+    createdAt: v.number(),
+    updatedAt: v.number(),
   }).index("by_user", ["userId"]),
 
   userQueries: defineTable({
@@ -147,6 +155,20 @@ export default defineSchema({
       v.literal("failed"),
       v.literal("refunded")
     ),
+
+    // Transfer tracking
+    transferReference: v.optional(v.string()),
+    transferRecipientCode: v.optional(v.string()),
+    transferStatus: v.optional(
+      v.union(
+        v.literal("pending"),
+        v.literal("success"),
+        v.literal("failed"),
+        v.literal("reversed")
+      )
+    ),
+    transferredAt: v.optional(v.number()),
+    transferAmount: v.optional(v.number()),
 
     createdAt: v.number(),
     authorizedAt: v.optional(v.number()),

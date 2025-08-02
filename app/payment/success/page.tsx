@@ -7,13 +7,12 @@ import { useSearchParams, useRouter } from "next/navigation";
 export default function PaymentSuccess() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const [status, setStatus] = useState("Processing payment...");
+  const [status, setStatus] = useState("Verifying payment...");
 
   useEffect(() => {
     const reference = searchParams.get("reference");
 
     if (reference) {
-      // Verify payment
       verifyPayment(reference);
     } else {
       setStatus("Invalid payment reference");
@@ -25,9 +24,9 @@ export default function PaymentSuccess() {
       const response = await fetch(`/api/paystack/verify/${reference}`);
       const data = await response.json();
 
-      if (data.status === "success") {
+      if (data.status === "success" && data.data?.status === "success") {
         setStatus(
-          "Payment successful! You'll be notified when the transporter confirms."
+          "Payment successful! You'll be notified when the transporter confirms your trip."
         );
         setTimeout(() => {
           router.push("/discover");
@@ -36,6 +35,7 @@ export default function PaymentSuccess() {
         setStatus("Payment verification failed. Please contact support.");
       }
     } catch (error) {
+      console.error("Verification error:", error);
       setStatus("Error verifying payment. Please contact support.");
     }
   };
