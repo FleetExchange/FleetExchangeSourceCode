@@ -285,7 +285,7 @@ export const cleanupAbandonedBookings = internalMutation({
 
         if (purchaseTrip) {
           // Set trip as not booked (available again)
-          await ctx.runMutation(api.trip.setTripNotBooked, {
+          await ctx.runMutation(api.trip.setTripCancelled, {
             tripId: purchaseTrip.tripId,
           });
 

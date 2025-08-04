@@ -6,7 +6,7 @@ export async function GET(
   { params }: { params: { reference: string } }
 ) {
   try {
-    const { reference } = params;
+    const { reference } = await params;
 
     const response = await fetch(
       `https://api.paystack.co/transaction/verify/${reference}`,

@@ -71,7 +71,9 @@ const TripRejectButton = ({ tripId, currentStatus }: TripRejectButtonProps) => {
       }
 
       // Optionally: Add a success message or redirect
-      alert("Booking rejected successfully");
+      alert(
+        "Booking rejected successfully, trip will be made available for others."
+      );
 
       // Send notification to client
       await rejectionAlert({

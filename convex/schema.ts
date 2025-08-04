@@ -56,7 +56,7 @@ export default defineSchema({
     name: v.string(),
     contactNumber: v.string(),
     createdAt: v.optional(v.number()),
-    averageRating: v.optional(v.number()),
+    averageRating: v.optional(v.number()), // Average rating out of 5
     ratingCount: v.optional(v.number()),
     about: v.optional(v.string()),
     profileImageUrl: v.optional(v.string()), // Clerk profile image URL

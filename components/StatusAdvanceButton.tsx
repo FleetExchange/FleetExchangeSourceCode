@@ -120,7 +120,7 @@ const StatusAdvanceButton = ({
         await createNotification({
           userId: purchaseTrip?.userId as Id<"users">,
           type: "booking",
-          message: `Your trip from ${trip?.originCity} to ${trip?.destinationCity} has been delivered. Please rate your experience.`,
+          message: `Please rate your experience for your booking from ${trip?.originCity} to ${trip?.destinationCity}.`,
           meta: {
             tripId: trip?._id as Id<"trip">,
             action: "rating_request",

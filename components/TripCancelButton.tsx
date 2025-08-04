@@ -21,24 +21,65 @@ const TripCancelButton = ({
     api.purchasetrip.updatePurchaseTripStatus
   );
   const cancelNotification = useMutation(api.notifications.createNotification);
+  const updatePaymentStatus = useMutation(api.payments.updatePaymentStatus);
 
   const trip = useQuery(api.trip.getById, { tripId });
   const purchTrip = useQuery(api.purchasetrip.getPurchaseTripByTripId, {
     tripId,
   });
 
+  const payment = useQuery(api.payments.getPaymentByTrip, {
+    tripId,
+  });
+
   const handleCancelBooking = async () => {
     try {
-      // Cant cancel if already cancelled or refunded
-      if (currentStatus === "Cancelled" || currentStatus === "Refunded") {
+      // Cant cancel if: cancelled,refunded,dispatched,delivered
+      if (
+        currentStatus === "Cancelled" ||
+        currentStatus === "Refunded" ||
+        currentStatus === "Dispatched" ||
+        currentStatus === "Delivered" ||
+        currentStatus === "Booked"
+      ) {
         return;
       }
 
-      // Delete the purchase trip object
+      // Update the purchase trip object
       await cancellPurchaseTrip({
         purchaseTripId: purchaseTripId,
         newStatus: "Cancelled",
       });
+
+      // Refund the payment
+      if (payment && payment.paystackReference) {
+        // 3. Refund the payment
+        const refundResponse = await fetch("/api/paystack/refund", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            reference: payment.paystackReference,
+          }),
+        });
+
+        if (refundResponse.ok) {
+          // 4. Update payment status
+          await updatePaymentStatus({
+            paymentId: payment._id,
+            status: "refunded",
+          });
+
+          // 5. Notify client
+          await cancelNotification({
+            userId: payment.userId,
+            type: "payment",
+            message: "Your payment has been refunded for your cancelled trip.",
+            meta: { tripId, action: "payment_refunded" },
+          });
+
+          console.log("Trip cancelled and payment refunded successfully");
+        }
+      }
 
       // success message
       alert(
@@ -56,7 +97,7 @@ const TripCancelButton = ({
       await cancelNotification({
         type: "trip",
         userId: trip?.userId as Id<"users">,
-        message: `Your trip from ${trip?.originCity} to ${trip?.destinationCity} has been cancelled.`,
+        message: `Your trip from ${trip?.originCity} to ${trip?.destinationCity} has been cancelled. This trip will not be available for booking anymore.`,
         meta: { tripId: tripId, action: "cancel_booking" },
       });
 
@@ -69,7 +110,13 @@ const TripCancelButton = ({
   };
 
   // Only show button if trip is booked and not cancelled or refunded
-  if (currentStatus == "Cancelled" || currentStatus == "Refunded") {
+  if (
+    currentStatus == "Cancelled" ||
+    currentStatus == "Refunded" ||
+    currentStatus === "Dispatched" ||
+    currentStatus === "Delivered" ||
+    currentStatus === "Booked"
+  ) {
     return null;
   }
 

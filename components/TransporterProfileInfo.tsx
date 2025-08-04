@@ -127,9 +127,9 @@ const TransporterProfileInfo: React.FC<TransporterProfileProps> = ({
           <div>
             <span className="font-semibold">Rating:</span>
             <span className="ml-2">
-              {transporter.averageRating?.toFixed(1) ?? "No ratings"}{" "}
+              {transporter.averageRating ?? "No ratings"}
               <span className="text-base-content/60">
-                ({transporter.ratingCount || 0} reviews)
+                ( {transporter.ratingCount || 0} reviews)
               </span>
             </span>
           </div>

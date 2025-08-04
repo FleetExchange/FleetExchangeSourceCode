@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
 
         if (trip) {
           // Set trip as not booked (available again)
-          await convex.mutation(api.trip.setTripNotBooked, {
+          await convex.mutation(api.trip.setTripCancelled, {
             tripId: trip._id as Id<"trip">,
           });
           console.log("✅ Trip set to not booked:", trip._id);

@@ -58,7 +58,7 @@ const BookTripButton = ({
           email: user.email,
           amount: trip.price * 100, // Convert to kobo
           reference: reference,
-          callback_url: `${window.location.origin}/payment/success`,
+          callback_url: `${window.location.origin}/payment/callback`,
           tripId: trip.tripId,
           transporterId: trip.transporterId,
           purchaseTripId: purchaseTripId,

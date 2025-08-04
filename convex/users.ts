@@ -133,12 +133,15 @@ export const updateUserRating = mutation({
     const user = await ctx.db.get(userId);
     if (!user) throw new Error("User not found");
 
-    const ratingCount = user.ratingCount || 0;
+    const ratingCount = (user.ratingCount || 0) + 1;
 
     // Calculate new average rating
-    const newAverageRating =
-      ((user.averageRating || 0) * (user.ratingCount || 0) + rating) /
-      (ratingCount || 1);
+    const newAverageRating = parseFloat(
+      (
+        ((user.averageRating || 0) * (user.ratingCount || 0) + rating) /
+        (ratingCount || 1)
+      ).toFixed(2)
+    );
 
     return await ctx.db.patch(userId, {
       averageRating: newAverageRating,

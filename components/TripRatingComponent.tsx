@@ -22,6 +22,14 @@ const TripRatingComponent = ({
     purchaseTripId,
   });
 
+  // get trip object
+  const trip = useQuery(
+    api.trip.getById,
+    purchaseTrip?.tripId
+      ? { tripId: purchaseTrip.tripId as Id<"trip"> }
+      : "skip"
+  );
+
   // Mutation to submit rating
   const submitRating = useMutation(api.purchasetrip.addTripRating);
   const updateUserRating = useMutation(api.users.updateUserRating);
@@ -44,7 +52,7 @@ const TripRatingComponent = ({
         comment: comment.trim(),
       });
       await updateUserRating({
-        userId: purchaseTrip.userId,
+        userId: trip?.userId as Id<"users">,
         rating,
       });
       // Reset form after successful submission
