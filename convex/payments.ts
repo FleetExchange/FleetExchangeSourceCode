@@ -138,6 +138,19 @@ export const getPaymentByTrip = query({
   },
 });
 
+// Get payment by reference
+export const getPaymentByReference = query({
+  args: { paystackReference: v.string() },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("payments")
+      .withIndex("by_reference", (q) =>
+        q.eq("paystackReference", args.paystackReference)
+      )
+      .first();
+  },
+});
+
 // Update payment status
 export const updatePaymentStatus = mutation({
   args: {
@@ -168,5 +181,21 @@ export const updatePaymentStatus = mutation({
     });
 
     return payment;
+  },
+});
+
+// Delete payment
+export const deletePayment = mutation({
+  args: { paymentId: v.id("payments") },
+  handler: async (ctx, args) => {
+    const payment = await ctx.db.get(args.paymentId);
+    if (!payment) {
+      throw new Error("Payment not found");
+    }
+
+    // Delete the payment record
+    await ctx.db.delete(args.paymentId);
+
+    return true;
   },
 });

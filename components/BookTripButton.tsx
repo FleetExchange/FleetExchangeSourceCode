@@ -1,6 +1,7 @@
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { use, useState } from "react";
+import toast from "react-hot-toast";
 import { Id } from "@/convex/_generated/dataModel";
 
 interface BookTripButtonProps {
@@ -16,6 +17,8 @@ const BookTripButton = ({
   onBookTrip,
   disabled = false,
 }: BookTripButtonProps) => {
+  let paymentReference = null;
+  let purchaseTripId: string | null = null;
   const [loading, setLoading] = useState(false);
   const createPayment = useMutation(api.payments.createPayment);
 
@@ -26,7 +29,6 @@ const BookTripButton = ({
       setLoading(true);
 
       // 1. Create booking and get the ID back
-      let purchaseTripId;
       if (onBookTrip) {
         purchaseTripId = await onBookTrip();
       }
@@ -74,6 +76,30 @@ const BookTripButton = ({
       }
     } catch (error) {
       console.error("Booking failed:", error);
+
+      if (purchaseTripId || paymentReference) {
+        try {
+          const cleanupResponse = await fetch("/api/booking/cleanup", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              paystackReference: paymentReference,
+              purchaseTripId: purchaseTripId,
+              reason: "booking_initialization_failed",
+            }),
+          });
+
+          const cleanupResult = await cleanupResponse.json();
+          console.log("Cleanup result:", cleanupResult);
+        } catch (cleanupError) {
+          console.error("Cleanup API failed:", cleanupError);
+        }
+      }
+      toast.error(`Booking failed: Please try again`);
+
+      // Redirect user
+      window.location.href = "/discover";
+
       alert(
         `Failed to initiate booking: ${error instanceof Error ? error.message : "Unknown error"}`
       );

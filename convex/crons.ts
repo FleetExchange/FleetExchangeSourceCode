@@ -32,6 +32,13 @@ crons.interval(
   internal.crons.deleteOldNotifications
 );
 
+// Cleanup abandoned bookings
+crons.interval(
+  "cleanupAbandonedBookings",
+  { minutes: 10 }, // Every 10 minutes
+  internal.crons.cleanupAbandonedBookings
+);
+
 export const markExpiredTrips = internalMutation({
   handler: async (ctx) => {
     const currentDate = new Date().getTime();
@@ -248,6 +255,54 @@ export const deleteOldNotifications = internalMutation({
       await ctx.db.delete(notification._id);
     }
     console.log(`Deleted ${oldNotifications.length} old notifications`);
+  },
+});
+
+export const cleanupAbandonedBookings = internalMutation({
+  handler: async (ctx) => {
+    const cutoffTime = Date.now() - 10 * 60 * 1000; // 10 minutes ago
+    let cleanupCount = 0;
+
+    // Find payments with pending status older than 15 minutes
+    const abandonedPayments = await ctx.db
+      .query("payments")
+      .filter((q) =>
+        q.and(
+          q.eq(q.field("status"), "pending"),
+          q.lt(q.field("createdAt"), cutoffTime)
+        )
+      )
+      .collect();
+
+    // Cleanup each abandoned payment and its related records
+    for (const payment of abandonedPayments) {
+      try {
+        // Find related purchase trip
+        const purchaseTrip = await ctx.db
+          .query("purchaseTrip")
+          .filter((q) => q.eq(q.field("_id"), payment.purchaseTripId))
+          .first();
+
+        if (purchaseTrip) {
+          // Set trip as not booked (available again)
+          await ctx.runMutation(api.trip.setTripNotBooked, {
+            tripId: purchaseTrip.tripId,
+          });
+
+          // Delete purchase trip
+          await ctx.db.delete(purchaseTrip._id);
+        }
+
+        // Delete payment
+        await ctx.db.delete(payment._id);
+        cleanupCount++;
+      } catch (error) {
+        console.error("Failed to cleanup abandoned booking:", error);
+      }
+    }
+
+    console.log(`✅ Cleaned up ${cleanupCount} abandoned bookings`);
+    return cleanupCount;
   },
 });
 

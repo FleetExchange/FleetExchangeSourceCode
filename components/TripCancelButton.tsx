@@ -29,7 +29,7 @@ const TripCancelButton = ({
 
   const handleCancelBooking = async () => {
     try {
-      // Only proceed if status is "Awaiting Confirmation"
+      // Cant cancel if already cancelled or refunded
       if (currentStatus === "Cancelled" || currentStatus === "Refunded") {
         return;
       }

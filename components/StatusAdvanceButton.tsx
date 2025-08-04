@@ -33,14 +33,24 @@ const StatusAdvanceButton = ({
   });
 
   // Get the user
-  const client = useQuery(api.users.getUserById, {
-    userId: purchaseTrip?.userId as Id<"users">,
-  });
+  const client = useQuery(
+    api.users.getUserById,
+    purchaseTrip?.userId
+      ? {
+          userId: purchaseTrip?.userId as Id<"users">,
+        }
+      : "skip"
+  );
 
   // get trip oject
-  const trip = useQuery(api.trip.getById, {
-    tripId: purchaseTrip?.tripId as Id<"trip">,
-  });
+  const trip = useQuery(
+    api.trip.getById,
+    purchaseTrip?.tripId
+      ? {
+          tripId: purchaseTrip?.tripId as Id<"trip">,
+        }
+      : "skip"
+  );
 
   // create mutation
   const createNotification = useMutation(api.notifications.createNotification);

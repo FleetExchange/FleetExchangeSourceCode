@@ -27,17 +27,12 @@ export async function POST(req: NextRequest) {
       case "charge.success":
         await handleChargeSuccess(event.data);
         break;
-      case "transfer.success":
-        await handleTransferSuccess(event.data);
+
+      case "charge.failed":
+        // LAYER 2: Payment failed - cleanup booking
+        console.log("Payment failed, cleaning up:", event.data.reference);
+        await cleanupFailedBooking(event.data.reference, "payment_failed");
         break;
-      case "transfer.failed":
-        console.log("Transfer failed:", event.data);
-        break;
-      case "transfer.reversed":
-        console.log("Transfer reversed:", event.data);
-        break;
-      default:
-        console.log("Unhandled webhook event:", event.event);
     }
 
     return NextResponse.json({ status: "success" });
@@ -64,17 +59,17 @@ async function handleChargeSuccess(data: any) {
   }
 }
 
-async function handleTransferSuccess(data: any) {
+async function cleanupFailedBooking(reference: string, reason: string) {
   try {
-    // Extract payment ID from transfer reason
-    const paymentId = data.reason.match(/payment-(\w+)/)?.[1];
-
-    if (paymentId) {
-      await convex.mutation(api.payments.releasePayment, {
-        paymentId: paymentId as any, // Cast to ID type
-      });
-    }
+    await fetch("/api/booking/cleanup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        paystackReference: reference,
+        reason,
+      }),
+    });
   } catch (error) {
-    console.error("Error handling transfer success:", error);
+    console.error("Webhook cleanup failed:", error);
   }
 }

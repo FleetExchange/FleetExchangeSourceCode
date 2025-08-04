@@ -57,6 +57,21 @@ export const deletePurchaseTrip = mutation({
   },
 });
 
+export const deletePurchaseTripByPurchaseTripId = mutation({
+  args: { purchaseTripId: v.id("purchaseTrip") },
+  handler: async (ctx, { purchaseTripId }) => {
+    const existingPurchase = await ctx.db.get(purchaseTripId);
+    if (!existingPurchase) {
+      throw new Error("Purchase trip not found");
+    }
+
+    // Delete the purchase trip
+    await ctx.db.delete(existingPurchase._id);
+
+    return true;
+  },
+});
+
 export const getPurchaseTripById = query({
   args: { userId: v.id("users") },
   handler: async (ctx, { userId }) => {

@@ -209,6 +209,21 @@ export const setTripBooked = mutation({
   },
 });
 
+//set trip booked to false
+export const setTripNotBooked = mutation({
+  args: { tripId: v.id("trip") },
+  handler: async (ctx, { tripId }) => {
+    const trip = await ctx.db.get(tripId);
+    if (!trip) {
+      throw new Error("Trip not found");
+    }
+    await ctx.db.patch(tripId, {
+      isBooked: false,
+    });
+    return trip._id;
+  },
+});
+
 // Set trip adresses
 export const setTripAddresses = mutation({
   args: {
