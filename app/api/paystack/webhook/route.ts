@@ -46,7 +46,7 @@ async function handleChargeSuccess(data: any) {
   try {
     const { reference, authorization, customer } = data;
 
-    // Authorize payment in database
+    // Charge payment in database
     await convex.mutation(api.payments.authorizePayment, {
       paystackReference: reference,
       paystackAuthCode: authorization.authorization_code,
