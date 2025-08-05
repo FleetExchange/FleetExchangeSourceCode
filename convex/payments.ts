@@ -10,14 +10,12 @@ export const createPayment = mutation({
     transporterId: v.id("users"),
     tripId: v.id("trip"),
     purchaseTripId: v.id("purchaseTrip"),
-    totalAmount: v.number(),
+    totalAmount: v.number(), // Total amount for the trip including service fees
+    transporterAmount: v.number(), // Amount transporter receives
+    commissionAmount: v.number(), // Your platform commission
     paystackReference: v.string(),
   },
   handler: async (ctx, args) => {
-    const commissionRate = 0.1; // 10% commission
-    const commissionAmount = args.totalAmount * commissionRate;
-    const transporterAmount = args.totalAmount - commissionAmount;
-
     return await ctx.db.insert("payments", {
       userId: args.userId,
       transporterId: args.transporterId,
@@ -25,8 +23,8 @@ export const createPayment = mutation({
       purchaseTripId: args.purchaseTripId,
       paystackReference: args.paystackReference,
       totalAmount: args.totalAmount,
-      commissionAmount,
-      transporterAmount,
+      commissionAmount: args.commissionAmount,
+      transporterAmount: args.transporterAmount,
       status: "pending",
       createdAt: Date.now(),
     });
@@ -164,7 +162,6 @@ export const updatePaymentStatus = mutation({
       v.literal("refunded")
     ),
     transferReference: v.optional(v.string()),
-    transferAmount: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const payment = await ctx.db.get(args.paymentId);
@@ -176,7 +173,6 @@ export const updatePaymentStatus = mutation({
     await ctx.db.patch(args.paymentId, {
       status: args.status,
       transferReference: args.transferReference,
-      transferAmount: args.transferAmount,
       transferredAt: args.transferReference ? Date.now() : undefined,
     });
 

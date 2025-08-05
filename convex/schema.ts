@@ -158,7 +158,6 @@ export default defineSchema({
 
     // Transfer tracking
     transferReference: v.optional(v.string()),
-    transferAmount: v.optional(v.number()),
     transferredAt: v.optional(v.number()),
 
     createdAt: v.number(),

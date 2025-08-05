@@ -173,18 +173,12 @@ const StatusAdvanceButton = ({
         );
       }
 
-      // 3. Calculate transfer amount (minus your commission)
-      const commissionRate = 0.1; // 10% commission
-      const transferAmount = Math.round(
-        payment.totalAmount * (1 - commissionRate)
-      );
-
       // 4. Create transfer via API
       const transferResponse = await fetch("/api/paystack/transfer", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          amount: transferAmount,
+          amount: payment.transporterAmount * 100, // Convert to kobo
           recipientCode: payoutAccount.paystackRecipientCode,
           reason: `Payment for trip from ${trip?.originCity} to ${trip?.destinationCity}`,
           reference: `transfer-${payment._id}-${Date.now()}`,
@@ -204,18 +198,17 @@ const StatusAdvanceButton = ({
           paymentId: payment._id,
           status: "released",
           transferReference: transferData.data.reference,
-          transferAmount: transferAmount,
         });
 
         // 6. Notify transporter
         await createNotification({
           userId: trip?.userId as Id<"users">,
           type: "payment",
-          message: `Payment of R${transferAmount} has been released to your bank account for the completed trip.`,
+          message: `Payment of R${payment.transporterAmount} has been released to your bank account for the completed trip.`,
           meta: {
             tripId: trip?._id as Id<"trip">,
             action: "payment_released",
-            amount: transferAmount,
+            amount: payment.transporterAmount,
           },
         });
 

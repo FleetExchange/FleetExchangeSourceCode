@@ -41,12 +41,20 @@ const BookTripButton = ({
       const reference = `trip-${trip.tripId}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
       // 3. Create payment record
+
+      // Payable amount is the trip price plus the additional service fee of using platform
+      const payableAmount = trip.price * 1.05; // Assuming a 5% service fee
+      const comsmissionAmount = trip.price * 0.05; // 5% commission
+      const transporterAmount = trip.price * 0.95; // Amount transporter receives
+
       await createPayment({
         userId: user._id,
         transporterId: trip.transporterId,
         tripId: trip.tripId,
         purchaseTripId: purchaseTripId as Id<"purchaseTrip">,
-        totalAmount: trip.price,
+        totalAmount: payableAmount,
+        transporterAmount: transporterAmount, // Amount transporter receives
+        commissionAmount: comsmissionAmount, // Commission amount (5% of
         paystackReference: reference,
       });
 
@@ -56,7 +64,7 @@ const BookTripButton = ({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email: user.email,
-          amount: trip.price * 100, // Convert to kobo
+          amount: payableAmount * 100, // Convert to kobo
           reference: reference,
           callback_url: `${window.location.origin}/payment/callback`,
           tripId: trip.tripId,
