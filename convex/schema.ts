@@ -15,7 +15,8 @@ export default defineSchema({
     arrivalDate: v.number(), // Arrival Date
     truckId: v.id("truck"), // Identification of the truck assigned to the trip
     basePrice: v.number(), // Base price for the trip
-    variablePrice: v.number(), // Variable amount for each kg
+    KGPrice: v.number(), // Variable amount for each kg
+    KMPrice: v.number(), // Variable amount for each km
     userId: v.id("users"), // Company that created trip
     isBooked: v.boolean(), // Has the trip been booked
     isExpired: v.optional(v.boolean()),

@@ -300,7 +300,8 @@ export const createTrip = mutation({
     departureDate: v.string(),
     arrivalDate: v.string(),
     basePrice: v.number(),
-    variablePrice: v.number(),
+    KMPrice: v.number(),
+    KGPrice: v.number(),
     isBooked: v.boolean(),
   },
   handler: async (ctx, args) => {
@@ -314,7 +315,8 @@ export const createTrip = mutation({
       departureDate: Date.parse(args.departureDate),
       arrivalDate: Date.parse(args.arrivalDate),
       basePrice: args.basePrice,
-      variablePrice: args.variablePrice,
+      KMPrice: args.KMPrice,
+      KGPrice: args.KGPrice,
       isBooked: args.isBooked,
     });
   },

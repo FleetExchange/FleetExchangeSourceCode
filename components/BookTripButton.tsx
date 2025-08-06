@@ -124,7 +124,7 @@ const BookTripButton = ({
         disabled || loading ? "btn-disabled opacity-50" : ""
       }`}
     >
-      {loading ? "Processing..." : `Book Trip - R${trip.price}`}
+      {loading ? "Processing..." : `Book Trip`}
     </button>
   );
 };

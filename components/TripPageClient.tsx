@@ -69,8 +69,16 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
   const [cargoDescription, setCargoDescription] = useState("");
   const [directions, setDirections] = useState<DirectionsResult | null>(null);
   const [distance, setDistance] = useState<number>(0);
-  const tripPrice =
-    (trip?.basePrice ?? 0) + (trip?.variablePrice ?? 0) * cargoWeight;
+
+  // Trip pricing calculations
+  // use price without fees in DB as it is added later in api's. this is purely visual to show breakdown
+  const tripPriceWithoutFees =
+    (trip?.basePrice ?? 0) +
+    (trip?.KGPrice ?? 0) * cargoWeight +
+    (trip?.KMPrice ?? 0) * distance;
+
+  const tripFees = tripPriceWithoutFees * 0.05; // Assuming a 5% fee
+  const fullTripPrice = tripPriceWithoutFees + tripFees;
 
   // Get whether the trip is booked or not
   useEffect(() => {
@@ -232,7 +240,7 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
       const PurchaseTripId = await purchaseTrip({
         tripId: trip?._id as Id<"trip">,
         userId: userId as Id<"users">,
-        amount: tripPrice,
+        amount: tripPriceWithoutFees,
         pickupInstructions: pickupInstructions,
         deliveryInstructions: deliveryInstructions,
         freightNotes: cargoDescription,
@@ -590,13 +598,21 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
                 <span className="font-semibold">R{trip?.basePrice}</span>
               </p>
               <p className="flex justify-between">
-                <span>Rate per kg:</span>
-                <span>R{trip?.variablePrice}</span>
+                <span>Rate per KG:</span>
+                <span>R{trip?.KGPrice}</span>
+              </p>
+              <p className="flex justify-between">
+                <span>Rate per KM:</span>
+                <span>R{trip?.KMPrice}</span>
+              </p>
+              <p className="flex justify-between">
+                <span>Service Fees:</span>
+                <span>R{tripFees}</span>
               </p>
               <div className="border-t border-base-300 my-2" />
               <p className="flex justify-between text-lg font-semibold">
                 <span>Total:</span>
-                <span>R{tripPrice.toFixed(2)}</span>
+                <span>R{fullTripPrice.toFixed(2)}</span>
               </p>
             </div>
             <div className="flex justify-center">
@@ -620,7 +636,7 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
                 <BookTripButton
                   trip={{
                     tripId: trip?._id as Id<"trip">,
-                    price: tripPrice,
+                    price: tripPriceWithoutFees,
                     transporterId: trip?.userId,
                   }}
                   user={{

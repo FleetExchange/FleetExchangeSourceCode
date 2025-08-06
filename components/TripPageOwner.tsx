@@ -113,9 +113,13 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
     position: "relative" as const,
   };
 
-  const tripPrice =
+  const tripPriceWithoutFees =
     (trip?.basePrice ?? 0) +
-    (trip?.variablePrice ?? 0) * (purchaseTrip?.cargoWeight ?? 0);
+    (trip?.KGPrice ?? 0) * (purchaseTrip?.cargoWeight ?? 0) +
+    (trip?.KMPrice ?? 0) * distance;
+
+  const tripFees = tripPriceWithoutFees * 0.05; // Assuming a 5% fee
+  const tripPrice = tripPriceWithoutFees + tripFees;
 
   const deleteTrip = useMutation(api.trip.deleteTripById);
   const handleDeleteTrip = async () => {
@@ -374,13 +378,23 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
               </p>
               <p className="flex justify-between">
                 <span>Rate per kg:</span>
-                <span>R{trip?.variablePrice}</span>
+                <span>R{trip?.KGPrice}</span>
+              </p>
+              <p className="flex justify-between">
+                <span>Rate per km:</span>
+                <span>R{trip?.KMPrice}</span>
+              </p>
+              <p className="flex justify-between">
+                <span>Service Fees:</span>
+                <span>R{tripFees}</span>
               </p>
               <div className="border-t border-base-300 my-2" />
               <p className="flex justify-between text-lg font-semibold">
                 <span>Total:</span>
                 {purchaseTrip !== null ? (
-                  <span>R{purchaseTrip?.amount?.toFixed(2)}</span>
+                  <span>
+                    R{purchaseTrip?.amount?.toFixed(2) + tripFees.toFixed(2)}
+                  </span>
                 ) : (
                   <span>R{tripPrice}</span>
                 )}

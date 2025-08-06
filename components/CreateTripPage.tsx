@@ -27,7 +27,8 @@ const CreateTripPage = () => {
   const [departureDate, setDepartureDate] = useState("");
   const [arrivalDate, setArrivalDate] = useState("");
   const [basePrice, setBasePrice] = useState(0);
-  const [variablePrice, setVariablePrice] = useState(0);
+  const [KMPrice, setKMPrice] = useState(0);
+  const [KGPrice, setKGPrice] = useState(0);
   const [selectedFleetId, setSelectedFleetId] = useState<Id<"fleet"> | null>(
     null
   );
@@ -94,9 +95,14 @@ const CreateTripPage = () => {
     setBasePrice(value);
   };
 
-  const handleVariablePrice = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleKMPrice = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value) || 0;
-    setVariablePrice(value);
+    setKMPrice(value);
+  };
+
+  const handleKGPrice = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value) || 0;
+    setKGPrice(value);
   };
 
   const handleCreateTrip = async () => {
@@ -119,7 +125,8 @@ const CreateTripPage = () => {
         departureDate,
         arrivalDate,
         basePrice,
-        variablePrice,
+        KMPrice,
+        KGPrice,
         isBooked: false,
         originAddress: "",
         destinationAddress: "",
@@ -232,7 +239,7 @@ const CreateTripPage = () => {
           </fieldset>
           <fieldset className="space-y-2">
             <legend className="text-base font-medium">
-              Variable Price (R/kg)
+              Amount per KG of Additional Weight (R/kg)
             </legend>
             <label className="input-group">
               <span>R</span>
@@ -242,8 +249,26 @@ const CreateTripPage = () => {
                 min="0"
                 placeholder="0.00"
                 className="input input-bordered w-full focus:outline-none focus:ring-0"
-                value={variablePrice}
-                onChange={handleVariablePrice}
+                value={KGPrice}
+                onChange={handleKGPrice}
+              />
+              <span>/kg</span>
+            </label>
+          </fieldset>
+          <fieldset className="space-y-2">
+            <legend className="text-base font-medium">
+              Amount per KM of Route Distance (R/km)
+            </legend>
+            <label className="input-group">
+              <span>R</span>
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                placeholder="0.00"
+                className="input input-bordered w-full focus:outline-none focus:ring-0"
+                value={KMPrice}
+                onChange={handleKMPrice}
               />
               <span>/kg</span>
             </label>
