@@ -221,6 +221,11 @@ const CreateTripPage = () => {
 
         {/* Price Inputs */}
         <h2 className="font-semibold text-lg mb-2">Pricing</h2>
+        <p className=" text-sm m-1">
+          {" "}
+          Configure your ideal pricing schema with a combination of minimum trip
+          price & variable prices per KM or KG.
+        </p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <fieldset className="space-y-2">
             <legend className="text-base font-medium">Base Price (R)</legend>
@@ -252,7 +257,6 @@ const CreateTripPage = () => {
                 value={KGPrice}
                 onChange={handleKGPrice}
               />
-              <span>/kg</span>
             </label>
           </fieldset>
           <fieldset className="space-y-2">
@@ -270,7 +274,6 @@ const CreateTripPage = () => {
                 value={KMPrice}
                 onChange={handleKMPrice}
               />
-              <span>/kg</span>
             </label>
           </fieldset>
         </div>
