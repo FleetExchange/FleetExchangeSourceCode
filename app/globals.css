@@ -1,2 +1,46 @@
 @import "tailwindcss";
 @plugin "daisyui";
+@plugin "daisyui/theme" {
+  name: "FleetExchangeLight";
+  default: true;
+  prefersdark: false;
+  color-scheme: "light";
+
+  --color-base-100: oklch(98% 0.003 247.858); /* Light base */
+  --color-base-200: oklch(95% 0.003 247.858);
+  --color-base-300: oklch(92% 0.003 247.858);
+  --color-base-content: oklch(16% 0.015 326.261); /* Dark text */
+
+  --color-primary: oklch(55.53% 0.191 264.05); /* #007BFF */
+  --color-primary-content: oklch(98% 0.003 247.858);
+
+  --color-secondary: oklch(38.57% 0.015 260); /* #555555 */
+  --color-secondary-content: oklch(98% 0.003 247.858);
+
+  --color-accent: oklch(55.04% 0.106 196.67); /* Teal #008080 */
+  --color-accent-content: oklch(98% 0.003 247.858);
+
+  --color-neutral: oklch(24% 0.023 329.708);
+  --color-neutral-content: oklch(98% 0.003 247.858);
+
+  --color-info: oklch(79.49% 0.063 184.558);
+  --color-info-content: oklch(15.898% 0.012 184.558);
+
+  --color-success: oklch(74.722% 0.072 131.116);
+  --color-success-content: oklch(14.944% 0.014 131.116);
+
+  --color-warning: oklch(88.15% 0.14 87.722);
+  --color-warning-content: oklch(17.63% 0.028 87.722);
+
+  --color-error: oklch(77.318% 0.128 31.871);
+  --color-error-content: oklch(15.463% 0.025 31.871);
+
+  --radius-selector: 1rem;
+  --radius-field: 0.5rem;
+  --radius-box: 1rem;
+  --size-selector: 0.25rem;
+
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+}

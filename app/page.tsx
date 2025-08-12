@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import Logo from "@/components/Logo";
 
 export default function Home() {
   return (
@@ -7,14 +8,7 @@ export default function Home() {
       {/* Navigation */}
       <nav className="navbar bg-base-100/80 backdrop-blur-sm sticky top-0 z-50 border-b border-base-300">
         <div className="navbar-start">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">FC</span>
-            </div>
-            <span className="text-xl font-bold text-primary">
-              FreightConnect
-            </span>
-          </div>
+          <Logo variant="icon" size="md" href="/" />
         </div>
 
         <div className="navbar-end gap-2">
@@ -34,13 +28,13 @@ export default function Home() {
           <div className="space-y-8">
             <div className="space-y-4">
               <h1 className="text-5xl lg:text-6xl font-bold text-base-content leading-tight">
-                Free Freight
-                <span className="text-primary block">Management</span>
+                Free Fleet
+                <span className="text-primary block">Exchange</span>
               </h1>
               <p className="text-xl text-base-content/70 leading-relaxed max-w-lg">
-                Connect transporters & clients to manage trips, bookings, and
-                fleet operations efficiently. Streamline your logistics workflow
-                with powerful tools.
+                Connect transporters & clients to exchange freight services
+                efficiently. Streamline your logistics workflow with powerful
+                tools.
               </p>
 
               {/* Mission Statement */}
@@ -109,9 +103,9 @@ export default function Home() {
               <div className="bg-primary/5 p-4 border-b border-base-300">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-6 h-6 bg-primary rounded"></div>
+                    <Logo variant="icon" size="sm" href="/" />
                     <span className="font-semibold">
-                      FreightConnect Dashboard
+                      FleetExchange Dashboard
                     </span>
                   </div>
                   <div className="flex gap-2">
