@@ -1,4 +1,5 @@
 import ClientSidebar from "@/components/ClientSidebar";
+import MobileMenuClient from "@/components/MobileMenuClient";
 
 export default function ClientLayout({
   children,
@@ -6,9 +7,17 @@ export default function ClientLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="flex">
-      <ClientSidebar />
-      <main className="flex-1">{children}</main>
+    <div>
+      {/* Desktop Sidebar */}
+      <div className="hidden lg:block">
+        <ClientSidebar />
+      </div>
+
+      {/* Mobile Menu */}
+      <MobileMenuClient />
+
+      {/* Main Content */}
+      <main className="lg:ml-20">{children}</main>
     </div>
   );
 }

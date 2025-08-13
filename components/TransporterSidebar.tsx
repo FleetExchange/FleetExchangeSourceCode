@@ -1,3 +1,4 @@
+"use client";
 import React from "react";
 import { SignedIn, UserButton } from "@clerk/nextjs";
 import {
@@ -11,133 +12,159 @@ import {
   CiCalendar,
 } from "react-icons/ci";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import Logo from "./Logo";
 
 const TransporterSidebar = () => {
+  const pathname = usePathname();
+
+  const navigationItems = [
+    {
+      href: "/transporter/dashboard",
+      icon: CiHome,
+      label: "Dashboard",
+    },
+    {
+      href: "/discover",
+      icon: CiCompass1,
+      label: "Discover",
+    },
+    {
+      href: "/fleetManager",
+      icon: CiDeliveryTruck,
+      label: "Fleet Manager",
+    },
+    {
+      href: "/myTrips",
+      icon: CiBookmark,
+      label: "My Trips",
+    },
+    {
+      href: "/myBookings",
+      icon: CiShoppingCart,
+      label: "My Bookings",
+    },
+    {
+      href: "/transporter/calendar",
+      icon: CiCalendar,
+      label: "Calendar",
+    },
+  ];
+
+  const secondaryItems = [
+    {
+      href: "/transporter/settings",
+      icon: CiSettings,
+      label: "Settings",
+    },
+    {
+      href: "/profiles/transporter",
+      icon: CiUser,
+      label: "Account",
+    },
+  ];
+
   return (
-    <div className="group fixed left-0 top-0 z-50 min-h-screen w-20 hover:w-50 bg-primary transition-all duration-300 ease-in-out overflow-hidden shadow-lg">
+    <div className="group fixed left-0 top-0 z-50 min-h-screen w-20 hover:w-64 bg-primary transition-all duration-300 ease-in-out overflow-hidden shadow-lg">
       <div className="flex flex-col h-full">
         {/* Header */}
-        <div className="flex items-center justify-center group-hover:justify-start gap-3 mb-6 p-3 transition-all duration-300">
-          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-primary-content font-bold">
-            F
+        <div className="flex items-center justify-center group-hover:justify-start gap-3 p-6 border-b border-primary-content/20 transition-all duration-300">
+          <div className="w-10 h-10 bg-base-300 rounded-lg flex items-center justify-center text-primary-content font-bold text-lg flex-shrink-0">
+            <Logo variant="icon" size="md" href="/client/dashboard" />
           </div>
-          <span className="hidden group-hover:block transition-opacity duration-300 whitespace-nowrap text-primary-content font-semibold">
-            FreightConnect
-          </span>
+          <div className="hidden group-hover:block transition-opacity duration-300">
+            <h2 className="text-primary-content font-bold text-lg whitespace-nowrap">
+              FleetExchange
+            </h2>
+            <p className="text-primary-content/70 text-sm whitespace-nowrap">
+              Transporter Portal
+            </p>
+          </div>
         </div>
 
         {/* Main Navigation */}
-        <div className="flex-grow px-2">
-          <ul className="space-y-2">
-            <li>
-              <Link
-                href="/transporter/dashboard"
-                className="flex items-center justify-center group-hover:justify-start gap-3 p-3 hover:bg-secondary rounded-lg transition-all duration-300"
-              >
-                <CiHome className="w-6 h-6 text-primary-content flex-shrink-0" />
-                <span className="hidden group-hover:block whitespace-nowrap text-primary-content">
-                  Dashboard
-                </span>
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/discover"
-                className="flex items-center justify-center group-hover:justify-start gap-3 p-3 hover:bg-secondary rounded-lg transition-all duration-300"
-              >
-                <CiCompass1 className="w-6 h-6 text-primary-content flex-shrink-0" />
-                <span className="hidden group-hover:block whitespace-nowrap text-primary-content">
-                  Discover
-                </span>
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/fleetManager"
-                className="flex items-center justify-center group-hover:justify-start gap-3 p-3 hover:bg-secondary rounded-lg transition-all duration-300"
-              >
-                <CiDeliveryTruck className="w-6 h-6 text-primary-content flex-shrink-0" />
-                <span className="hidden group-hover:block whitespace-nowrap text-primary-content">
-                  Fleet Manager
-                </span>
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/myTrips"
-                className="flex items-center justify-center group-hover:justify-start gap-3 p-3 hover:bg-secondary rounded-lg transition-all duration-300"
-              >
-                <CiBookmark className="w-6 h-6 text-primary-content flex-shrink-0" />
-                <span className="hidden group-hover:block whitespace-nowrap text-primary-content">
-                  My Trips
-                </span>
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/myBookings"
-                className="flex items-center justify-center group-hover:justify-start gap-3 p-3 hover:bg-secondary rounded-lg transition-all duration-300"
-              >
-                <CiShoppingCart className="w-6 h-6 text-primary-content flex-shrink-0" />
-                <span className="hidden group-hover:block whitespace-nowrap text-primary-content">
-                  My Bookings
-                </span>
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/transporter/calendar"
-                className="flex items-center justify-center group-hover:justify-start gap-3 p-3 hover:bg-secondary rounded-lg transition-all duration-300"
-              >
-                <CiCalendar className="w-6 h-6 text-primary-content flex-shrink-0" />
-                <span className="hidden group-hover:block whitespace-nowrap text-primary-content">
-                  Calendar
-                </span>
-              </Link>
-            </li>
-          </ul>
+        <div className="flex-grow px-4 py-6">
+          <nav>
+            <ul className="space-y-2">
+              {navigationItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = pathname === item.href;
 
-          <div className="my-4 border-t border-primary-content border-opacity-20"></div>
+                return (
+                  <li key={item.href}>
+                    <Link
+                      href={item.href}
+                      className={`flex items-center justify-center group-hover:justify-start gap-4 p-4 rounded-lg transition-all duration-300 ${
+                        isActive
+                          ? "bg-primary-content/20 text-primary-content border-l-4 border-primary-content"
+                          : "text-primary-content/80 hover:bg-primary-content/10 hover:text-primary-content"
+                      }`}
+                    >
+                      <Icon className="w-6 h-6 flex-shrink-0" />
+                      <span className="hidden group-hover:block whitespace-nowrap font-medium">
+                        {item.label}
+                      </span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
 
-          <ul className="space-y-2">
-            <li>
-              <Link
-                href="/transporter/settings"
-                className="flex items-center justify-center group-hover:justify-start gap-3 p-3 hover:bg-secondary rounded-lg transition-all duration-300"
-              >
-                <CiSettings className="w-6 h-6 text-primary-content flex-shrink-0" />
-                <span className="hidden group-hover:block whitespace-nowrap text-primary-content">
-                  Settings
-                </span>
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/profiles/transporter"
-                className="flex items-center justify-center group-hover:justify-start gap-3 p-3 hover:bg-secondary rounded-lg transition-all duration-300"
-              >
-                <CiUser className="w-6 h-6 text-primary-content flex-shrink-0" />
-                <span className="hidden group-hover:block whitespace-nowrap text-primary-content">
-                  Account
-                </span>
-              </Link>
-            </li>
-          </ul>
-          <div className="my-4 border-t border-primary-content border-opacity-20"></div>
+            {/* Divider */}
+            <div className="my-6 border-t border-primary-content/20"></div>
+
+            {/* Secondary Navigation */}
+            <ul className="space-y-2">
+              {secondaryItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = pathname === item.href;
+
+                return (
+                  <li key={item.href}>
+                    <Link
+                      href={item.href}
+                      className={`flex items-center justify-center group-hover:justify-start gap-4 p-4 rounded-lg transition-all duration-300 ${
+                        isActive
+                          ? "bg-primary-content/20 text-primary-content border-l-4 border-primary-content"
+                          : "text-primary-content/80 hover:bg-primary-content/10 hover:text-primary-content"
+                      }`}
+                    >
+                      <Icon className="w-6 h-6 flex-shrink-0" />
+                      <span className="hidden group-hover:block whitespace-nowrap font-medium">
+                        {item.label}
+                      </span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </nav>
         </div>
 
         {/* User Section */}
-        <div className="mt-auto p-3 ">
-          <SignedIn>
-            <div className="flex items-center justify-center group-hover:justify-start gap-3 p-2 rounded-lg transition-all duration-300">
-              <div className="w-6 h-6 flex items-center justify-center">
-                <UserButton afterSignOutUrl="/sign-in" />
-              </div>
-              <span className="hidden group-hover:block whitespace-nowrap text-sm font-medium text-primary-content">
-                Profile
-              </span>
+        <div className="p-4 border-t border-primary-content/20">
+          <div className="flex items-center justify-center group-hover:justify-start gap-3 p-3 rounded-lg bg-primary-content/10 transition-all duration-300">
+            <SignedIn>
+              <UserButton
+                afterSignOutUrl="/sign-in"
+                appearance={{
+                  elements: {
+                    avatarBox: "w-10 h-10",
+                    userButtonPopoverCard: "bg-base-100",
+                    userButtonPopoverActionButton: "hover:bg-base-200",
+                  },
+                }}
+              />
+            </SignedIn>
+            <div className="hidden group-hover:block flex-grow">
+              <p className="text-primary-content font-medium text-sm whitespace-nowrap">
+                Account Settings
+              </p>
+              <p className="text-primary-content/70 text-xs whitespace-nowrap">
+                Manage your profile
+              </p>
             </div>
-          </SignedIn>
+          </div>
         </div>
       </div>
     </div>

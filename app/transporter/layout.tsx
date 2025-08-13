@@ -1,3 +1,4 @@
+import MobileMenuTransporter from "@/components/MobileMenuTransporter";
 import TransporterSidebar from "@/components/TransporterSidebar";
 
 export default function TransporterLayout({
@@ -6,13 +7,17 @@ export default function TransporterLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-screen">
-      {/* Sidebar */}
+    <div>
+      {/* Desktop Sidebar */}
+      <div className="hidden lg:block">
+        <TransporterSidebar />
+      </div>
 
-      <TransporterSidebar />
+      {/* Mobile Menu */}
+      <MobileMenuTransporter />
 
-      {/* Main content area - THIS should take remaining space */}
-      <main className="flex-1 overflow-auto">{children}</main>
+      {/* Main Content */}
+      <main className="lg:ml-20">{children}</main>
     </div>
   );
 }
