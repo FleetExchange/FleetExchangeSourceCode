@@ -26,8 +26,10 @@
   --color-info: oklch(79.49% 0.063 184.558);
   --color-info-content: oklch(15.898% 0.012 184.558);
 
-  --color-success: oklch(74.722% 0.072 131.116);
-  --color-success-content: oklch(14.944% 0.014 131.116);
+  --color-success: oklch(55% 0.14 131.116);
+  --color-success-content: oklch(
+    98% 0.003 247.858
+  ); /* Keep white text for contrast */
 
   --color-warning: oklch(88.15% 0.14 87.722);
   --color-warning-content: oklch(17.63% 0.028 87.722);

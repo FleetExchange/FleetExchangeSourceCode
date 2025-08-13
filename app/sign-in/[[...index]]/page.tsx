@@ -4,6 +4,7 @@ import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import RoleBasedRedirect from "@/components/RoleBasedRedirect";
+import Logo from "@/components/Logo";
 
 const Page = () => {
   const { user, isLoaded } = useUser();
@@ -40,13 +41,11 @@ const Page = () => {
             <span className="sm:hidden">Back</span>
           </button>
 
-          {/* Logo */}
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">LL</span>
-            </div>
-            <span className="text-xl font-bold text-primary hidden sm:inline">
-              Linkr Logistics
+          {/* Centered Logo */}
+          <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center gap-2">
+            <Logo variant="icon" size="md" href="/" />
+            <span className="text-xl font-bold text-secondary hidden sm:inline">
+              FleetExchange
             </span>
           </div>
 
@@ -64,7 +63,7 @@ const Page = () => {
               Welcome Back
             </h1>
             <p className="text-base-content/70 text-sm sm:text-base">
-              Sign in to your FreightConnect account
+              Sign in to your FleetExchange account
             </p>
           </div>
 
