@@ -3,7 +3,17 @@ import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useUser } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
-import { Truck, DollarSign, Star, Calendar } from "lucide-react";
+import {
+  TrendingUp,
+  TrendingDown,
+  Calendar,
+  DollarSign,
+  Truck,
+  Star,
+  BarChart3,
+  Users,
+} from "lucide-react";
+import React from "react";
 
 const TransporterStatsWidget = () => {
   const { user } = useUser();
@@ -29,45 +39,105 @@ const TransporterStatsWidget = () => {
     tripIds: bookedTripIds.length > 0 ? bookedTripIds : [],
   });
 
-  // Calculate statistics
+  // Calculate comprehensive statistics
   const calculateStats = () => {
     const now = new Date();
     const currentMonth = now.getMonth();
     const currentYear = now.getFullYear();
 
-    // Filter trips completed this month
+    // Last month calculation
+    const lastMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+    const lastMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+
+    // This month's trips
     const tripsThisMonth =
       purchasedTrips?.filter((trip) => {
         const tripDate = new Date(trip._creationTime);
         return (
           tripDate.getMonth() === currentMonth &&
           tripDate.getFullYear() === currentYear &&
-          (trip.status === "Delivered" ||
-            trip.status === "Dispatched" ||
-            trip.status === "Booked")
+          trip.status === "Delivered"
         );
       }) ?? [];
 
-    // Calculate revenue this month (only from delivered trips)
-    const revenueThisMonth = tripsThisMonth
-      .filter((trip) => trip.status === "Delivered")
-      .reduce((total, trip) => {
-        // The price is directly in the purchaseTrip object
-        return total + (trip.amount || 0);
-      }, 0);
+    // Last month's trips
+    const tripsLastMonth =
+      purchasedTrips?.filter((trip) => {
+        const tripDate = new Date(trip._creationTime);
+        return (
+          tripDate.getMonth() === lastMonth &&
+          tripDate.getFullYear() === lastMonthYear &&
+          trip.status === "Delivered"
+        );
+      }) ?? [];
 
-    // Calculate total completed trips (all time)
+    // Revenue calculations
+    const revenueThisMonth = tripsThisMonth.reduce(
+      (total, trip) => total + (trip.amount || 0),
+      0
+    );
+    const revenueLastMonth = tripsLastMonth.reduce(
+      (total, trip) => total + (trip.amount || 0),
+      0
+    );
+
+    // Growth calculations
+    const tripGrowth =
+      tripsLastMonth.length > 0
+        ? ((tripsThisMonth.length - tripsLastMonth.length) /
+            tripsLastMonth.length) *
+          100
+        : tripsThisMonth.length > 0
+          ? 100
+          : 0;
+
+    const revenueGrowth =
+      revenueLastMonth > 0
+        ? ((revenueThisMonth - revenueLastMonth) / revenueLastMonth) * 100
+        : revenueThisMonth > 0
+          ? 100
+          : 0;
+
+    // Total stats
     const totalCompletedTrips =
       purchasedTrips?.filter((trip) => trip.status === "Delivered").length ?? 0;
+    const totalRevenue =
+      purchasedTrips
+        ?.filter((trip) => trip.status === "Delivered")
+        .reduce((total, trip) => total + (trip.amount || 0), 0) ?? 0;
 
-    // Calculate average rating (mock for now - you can implement actual ratings)
-    const averageRating = convexUser?.averageRating ?? 0;
+    // Year-over-year growth (simplified - last 12 months vs previous 12 months)
+    const twelveMonthsAgo = new Date(now.getFullYear() - 1, now.getMonth(), 1);
+    const recentTrips =
+      purchasedTrips?.filter((trip) => {
+        const tripDate = new Date(trip._creationTime);
+        return tripDate >= twelveMonthsAgo && trip.status === "Delivered";
+      }) ?? [];
+
+    const yearGrowth =
+      totalCompletedTrips > recentTrips.length
+        ? ((recentTrips.length - (totalCompletedTrips - recentTrips.length)) /
+            Math.max(1, totalCompletedTrips - recentTrips.length)) *
+          100
+        : 0;
 
     return {
-      tripsThisMonth: tripsThisMonth.length,
-      revenueThisMonth,
-      totalCompletedTrips,
-      averageRating,
+      thisMonth: {
+        trips: tripsThisMonth.length,
+        revenue: revenueThisMonth,
+        tripGrowth,
+        revenueGrowth,
+      },
+      lastMonth: {
+        trips: tripsLastMonth.length,
+        revenue: revenueLastMonth,
+      },
+      overall: {
+        totalTrips: totalCompletedTrips,
+        totalRevenue,
+        averageRating: convexUser?.averageRating ?? 0,
+        yearGrowth,
+      },
     };
   };
 
@@ -78,124 +148,249 @@ const TransporterStatsWidget = () => {
       style: "currency",
       currency: "ZAR",
       minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
     }).format(amount);
   };
 
-  const formatRating = (rating: number) => {
-    return rating > 0 ? rating.toFixed(1) : "N/A";
+  const formatPercentage = (percentage: number) => {
+    const sign = percentage >= 0 ? "+" : "";
+    return `${sign}${percentage.toFixed(1)}%`;
+  };
+
+  const getGrowthIcon = (growth: number) => {
+    return growth >= 0 ? TrendingUp : TrendingDown;
+  };
+
+  const getGrowthColor = (growth: number) => {
+    return growth >= 0 ? "text-success" : "text-error";
   };
 
   return (
-    <div className="bg-base-100 rounded-lg shadow-lg p-6">
-      <h2 className="text-xl font-semibold mb-6">Statistics</h2>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Trips This Month */}
-        <div className="stat bg-base-200 rounded-lg p-4">
-          <div className="stat-figure text-primary">
-            <Calendar className="w-8 h-8" />
+    <div className="lg:col-span-3 bg-base-100 rounded-2xl shadow-xl border border-base-300 p-6">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-primary/10 rounded-lg border border-primary/20">
+            <BarChart3 className="w-6 h-6 text-primary" />
           </div>
-          <div className="stat-title text-sm">Trips This Month</div>
-          <div className="stat-value text-primary text-2xl">
-            {stats.tripsThisMonth}
-          </div>
-          <div className="stat-desc text-xs">
-            {stats.tripsThisMonth > 0 ? "Active period" : "No trips yet"}
-          </div>
-        </div>
-
-        {/* Revenue This Month */}
-        <div className="stat bg-base-200 rounded-lg p-4">
-          <div className="stat-figure text-success">
-            <DollarSign className="w-8 h-8" />
-          </div>
-          <div className="stat-title text-sm">Revenue This Month</div>
-          <div className="stat-value text-success text-2xl">
-            {formatCurrency(stats.revenueThisMonth)}
-          </div>
-          <div className="stat-desc text-xs">
-            {stats.revenueThisMonth > 0
-              ? "From completed trips"
-              : "No revenue yet"}
-          </div>
-        </div>
-
-        {/* Total Completed Trips */}
-        <div className="stat bg-base-200 rounded-lg p-4">
-          <div className="stat-figure text-info">
-            <Truck className="w-8 h-8" />
-          </div>
-          <div className="stat-title text-sm">Total Completed</div>
-          <div className="stat-value text-info text-2xl">
-            {stats.totalCompletedTrips}
-          </div>
-          <div className="stat-desc text-xs">
-            {stats.totalCompletedTrips > 0 ? "All-time trips" : "Get started"}
-          </div>
-        </div>
-
-        {/* Average Rating */}
-        <div className="stat bg-base-200 rounded-lg p-4">
-          <div className="stat-figure text-warning">
-            <Star className="w-8 h-8" />
-          </div>
-          <div className="stat-title text-sm">Average Rating</div>
-          <div className="stat-value text-warning text-2xl">
-            {formatRating(stats.averageRating)}
-          </div>
-          <div className="stat-desc text-xs">
-            {stats.averageRating > 0 ? "Client feedback" : "No ratings yet"}
+          <div>
+            <h2 className="text-xl sm:text-2xl font-bold text-base-content">
+              Business Analytics
+            </h2>
+            <p className="text-sm text-base-content/60">
+              Performance insights and growth metrics
+            </p>
           </div>
         </div>
       </div>
 
-      {/* Additional Insights */}
-      <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="bg-base-200 rounded-lg p-4">
-          <h3 className="font-semibold text-sm mb-2">
-            This Month's Performance
-          </h3>
-          <div className="text-xs text-base-content/70">
-            {stats.tripsThisMonth > 0 ? (
-              <>
-                You've completed{" "}
-                <span className="font-semibold">{stats.tripsThisMonth}</span>{" "}
-                trips
-                {stats.revenueThisMonth > 0 && (
-                  <>
-                    {" "}
-                    earning{" "}
-                    <span className="font-semibold">
-                      {formatCurrency(stats.revenueThisMonth)}
-                    </span>
-                  </>
-                )}
-              </>
-            ) : (
-              "No trips completed this month yet"
-            )}
-          </div>
-        </div>
+      {/* This Month Section */}
+      <div className="mb-8">
+        <h3 className="text-lg font-semibold text-base-content mb-4 flex items-center gap-2">
+          <Calendar className="w-5 h-5 text-primary" />
+          This Month Performance
+        </h3>
 
-        <div className="bg-base-200 rounded-lg p-4">
-          <h3 className="font-semibold text-sm mb-2">Business Growth</h3>
-          <div className="text-xs text-base-content/70">
-            {stats.totalCompletedTrips > 0 ? (
-              <>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Trips This Month */}
+          <div className="bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20 rounded-xl p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-primary/20 rounded-lg">
+                  <Truck className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm text-base-content/70 font-medium">
+                    Completed Trips
+                  </p>
+                  <p className="text-2xl font-bold text-primary">
+                    {stats.thisMonth.trips}
+                  </p>
+                </div>
+              </div>
+              <div className="text-right">
+                <div
+                  className={`flex items-center gap-1 ${getGrowthColor(stats.thisMonth.tripGrowth)}`}
+                >
+                  {React.createElement(
+                    getGrowthIcon(stats.thisMonth.tripGrowth),
+                    { className: "w-4 h-4" }
+                  )}
+                  <span className="text-sm font-semibold">
+                    {formatPercentage(stats.thisMonth.tripGrowth)}
+                  </span>
+                </div>
+                <p className="text-xs text-base-content/60">vs last month</p>
+              </div>
+            </div>
+            <div className="bg-base-100/50 rounded-lg p-3">
+              <p className="text-xs text-base-content/70">
+                Last month:{" "}
                 <span className="font-semibold">
-                  {stats.totalCompletedTrips}
-                </span>{" "}
-                total completed trips with{" "}
+                  {stats.lastMonth.trips} trips
+                </span>
+              </p>
+            </div>
+          </div>
+
+          {/* Revenue This Month */}
+          <div className="bg-gradient-to-br from-success/5 to-success/10 border border-success/20 rounded-xl p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-success/20 rounded-lg">
+                  <DollarSign className="w-5 h-5 text-success" />
+                </div>
+                <div>
+                  <p className="text-sm text-base-content/70 font-medium">
+                    Revenue Earned
+                  </p>
+                  <p className="text-2xl font-bold text-success">
+                    {formatCurrency(stats.thisMonth.revenue)}
+                  </p>
+                </div>
+              </div>
+              <div className="text-right">
+                <div
+                  className={`flex items-center gap-1 ${getGrowthColor(stats.thisMonth.revenueGrowth)}`}
+                >
+                  {React.createElement(
+                    getGrowthIcon(stats.thisMonth.revenueGrowth),
+                    { className: "w-4 h-4" }
+                  )}
+                  <span className="text-sm font-semibold">
+                    {formatPercentage(stats.thisMonth.revenueGrowth)}
+                  </span>
+                </div>
+                <p className="text-xs text-base-content/60">vs last month</p>
+              </div>
+            </div>
+            <div className="bg-base-100/50 rounded-lg p-3">
+              <p className="text-xs text-base-content/70">
+                Last month:{" "}
                 <span className="font-semibold">
-                  {formatRating(stats.averageRating)}
-                </span>{" "}
-                star rating
-              </>
-            ) : (
-              "Start accepting trips to grow your business"
-            )}
+                  {formatCurrency(stats.lastMonth.revenue)}
+                </span>
+              </p>
+              <p className="text-xs text-warning/80 mt-1 font-medium">
+                * Gross turnover before platform fees
+              </p>
+            </div>
           </div>
         </div>
+      </div>
+
+      {/* Overall Performance Section */}
+      <div>
+        <h3 className="text-lg font-semibold text-base-content mb-4 flex items-center gap-2">
+          <BarChart3 className="w-5 h-5 text-info" />
+          Overall Performance
+        </h3>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Total Trips */}
+          <div className="bg-gradient-to-br from-info/5 to-info/10 border border-info/20 rounded-xl p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-info/20 rounded-lg">
+                <Truck className="w-5 h-5 text-info" />
+              </div>
+              <div>
+                <p className="text-sm text-base-content/70 font-medium">
+                  Total Completed
+                </p>
+                <p className="text-2xl font-bold text-info">
+                  {stats.overall.totalTrips}
+                </p>
+              </div>
+            </div>
+            <div className="bg-base-100/50 rounded-lg p-3">
+              <p className="text-xs text-base-content/70">
+                Lifetime earnings:{" "}
+                <span className="font-semibold">
+                  {formatCurrency(stats.overall.totalRevenue)}
+                </span>
+              </p>
+              <p className="text-xs text-warning/80 mt-1 font-medium">
+                * Before platform fees
+              </p>
+            </div>
+          </div>
+
+          {/* Profile Rating */}
+          <div className="bg-gradient-to-br from-warning/5 to-warning/10 border border-warning/20 rounded-xl p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-warning/20 rounded-lg">
+                <Star className="w-5 h-5 text-warning" />
+              </div>
+              <div>
+                <p className="text-sm text-base-content/70 font-medium">
+                  Profile Rating
+                </p>
+                <p className="text-2xl font-bold text-warning">
+                  {stats.overall.averageRating > 0
+                    ? stats.overall.averageRating.toFixed(1)
+                    : "N/A"}
+                </p>
+              </div>
+            </div>
+            <div className="bg-base-100/50 rounded-lg p-3">
+              <p className="text-xs text-base-content/70">
+                {stats.overall.averageRating > 0
+                  ? "Client feedback score"
+                  : "Complete trips to get rated"}
+              </p>
+            </div>
+          </div>
+
+          {/* Year Growth */}
+          <div className="bg-gradient-to-br from-secondary/5 to-secondary/10 border border-secondary/20 rounded-xl p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-secondary/20 rounded-lg">
+                <TrendingUp className="w-5 h-5 text-secondary" />
+              </div>
+              <div>
+                <p className="text-sm text-base-content/70 font-medium">
+                  Year Growth
+                </p>
+                <p
+                  className={`text-2xl font-bold ${getGrowthColor(stats.overall.yearGrowth)}`}
+                >
+                  {formatPercentage(stats.overall.yearGrowth)}
+                </p>
+              </div>
+            </div>
+            <div className="bg-base-100/50 rounded-lg p-3">
+              <p className="text-xs text-base-content/70">
+                Business growth trend over 12 months
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Business Insights Footer */}
+      <div className="mt-8 bg-base-200/50 border border-base-300 rounded-xl p-4">
+        <div className="flex items-center gap-2 mb-2">
+          <Users className="w-4 h-4 text-base-content/60" />
+          <h4 className="font-semibold text-sm text-base-content">
+            Business Insights
+          </h4>
+        </div>
+        <p className="text-xs text-base-content/70 leading-relaxed">
+          {stats.thisMonth.trips > 0 ? (
+            <>
+              Your business is{" "}
+              {stats.thisMonth.tripGrowth >= 0 ? "growing" : "adjusting"} with{" "}
+              <span className="font-semibold">{stats.thisMonth.trips}</span>{" "}
+              trips completed this month.{" "}
+              {stats.thisMonth.revenueGrowth >= 0
+                ? "Revenue is trending upward"
+                : "Focus on premium routes"}{" "}
+              for continued growth.
+            </>
+          ) : (
+            "Start accepting more trips to build momentum and grow your transportation business."
+          )}
+        </p>
       </div>
     </div>
   );

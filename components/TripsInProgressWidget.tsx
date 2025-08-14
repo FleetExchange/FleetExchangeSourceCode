@@ -4,7 +4,14 @@ import { Id } from "@/convex/_generated/dataModel";
 import { useUser } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
 import { useRouter } from "next/navigation";
-import { MapPin, Calendar, User, ChevronRight, Truck } from "lucide-react";
+import {
+  MapPin,
+  Calendar,
+  User,
+  ChevronRight,
+  Truck,
+  Package,
+} from "lucide-react";
 
 const TripsInProgressWidget = () => {
   const { user } = useUser();
@@ -74,37 +81,67 @@ const TripsInProgressWidget = () => {
   const getStatusBadge = (status: string) => {
     switch (status.toLowerCase()) {
       case "booked":
-        return { className: "badge-info", text: "Booked" };
+        return {
+          className: "badge-info",
+          text: "Confirmed",
+          icon: Package,
+        };
       case "dispatched":
-        return { className: "badge-success", text: "Dispatched" };
+        return {
+          className: "badge-success",
+          text: "In Transit",
+          icon: Truck,
+        };
       default:
-        return { className: "badge-neutral", text: status };
+        return {
+          className: "badge-neutral",
+          text: status,
+          icon: Package,
+        };
     }
   };
 
   return (
-    <div className="bg-base-100 rounded-lg shadow-lg p-6 h-full">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-semibold text-info">Trips in Progress</h2>
-        <div className="badge badge-info">{tripsInProgress.length}</div>
+    <div className="lg:col-span-2 bg-base-100 rounded-2xl shadow-xl border border-base-300 p-6 h-full">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-info/10 rounded-lg border border-info/20">
+            <Truck className="w-5 h-5 text-info" />
+          </div>
+          <div>
+            <h2 className="text-lg sm:text-xl font-bold text-base-content">
+              Trips in Progress
+            </h2>
+            <p className="text-sm text-base-content/60">
+              Active and dispatched trips
+            </p>
+          </div>
+        </div>
+        <div className="badge badge-info font-medium">
+          {tripsInProgress.length}
+        </div>
       </div>
 
       {tripsInProgress.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-8 text-center">
-          <div className="w-16 h-16 bg-base-200 rounded-full flex items-center justify-center mb-4">
-            <Truck className="w-8 h-8 text-base-content/40" />
+        <div className="flex flex-col items-center justify-center py-12 text-center">
+          <div className="p-6 bg-info/10 rounded-full mb-4 border border-info/20">
+            <Truck className="w-12 h-12 text-info" />
           </div>
-          <p className="text-base-content/60">No active trips</p>
-          <p className="text-sm text-base-content/40 mt-1">
-            Active trips will appear here
+          <h3 className="font-semibold text-base-content mb-2">
+            No active trips
+          </h3>
+          <p className="text-sm text-base-content/60">
+            Active trips will appear here when they are booked
           </p>
         </div>
       ) : (
-        <div className="space-y-3 max-h-80 overflow-y-auto">
+        <div className="space-y-4 max-h-80 overflow-y-auto pr-2">
           {tripsInProgress.map((purchasedTrip) => {
             const trip = getTripDetails(purchasedTrip);
             const bookerName = getBookerName(purchasedTrip.userId);
             const statusBadge = getStatusBadge(purchasedTrip.status);
+            const StatusIcon = statusBadge.icon;
 
             if (!trip) return null;
 
@@ -112,53 +149,73 @@ const TripsInProgressWidget = () => {
               <div
                 key={purchasedTrip._id}
                 onClick={() => handleTripClick(purchasedTrip.tripId)}
-                className="border border-base-300 rounded-lg p-4 hover:bg-base-200 cursor-pointer transition-colors duration-200 group"
+                className="bg-base-200/50 border border-base-300 rounded-xl p-4 hover:bg-info/5 hover:border-info/30 cursor-pointer transition-all duration-200 group"
               >
-                {/* Trip Route */}
-                <div className="flex items-center gap-2 mb-3">
-                  <MapPin className="w-4 h-4 text-primary flex-shrink-0" />
-                  <div className="min-w-0 flex-1">
-                    <div className="text-sm font-medium text-base-content truncate">
-                      {trip.originCity}
+                {/* Trip Route Header */}
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <div className="p-2 bg-primary/10 rounded-lg border border-primary/20">
+                      <MapPin className="w-4 h-4 text-primary flex-shrink-0" />
                     </div>
-                    <div className="text-xs text-base-content/60">to</div>
-                    <div className="text-sm font-medium text-base-content truncate">
-                      {trip.destinationCity}
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-base-content truncate">
+                          {trip.originCity}
+                        </span>
+                        <span className="text-xs text-base-content/60">→</span>
+                        <span className="text-sm font-medium text-base-content truncate">
+                          {trip.destinationCity}
+                        </span>
+                      </div>
+                      <div className="text-xs text-base-content/60 mt-1">
+                        Trip Route
+                      </div>
                     </div>
                   </div>
-                  <ChevronRight className="w-4 h-4 text-base-content/40 group-hover:text-base-content/60 transition-colors" />
+                  <ChevronRight className="w-5 h-5 text-base-content/40 group-hover:text-info transition-colors flex-shrink-0" />
                 </div>
 
-                {/* Booking Details */}
-                <div className="grid grid-cols-2 gap-3 text-xs">
-                  <div className="flex items-center gap-2">
-                    <User className="w-3 h-3 text-info flex-shrink-0" />
-                    <div className="min-w-0">
-                      <div className="text-base-content/60">Client</div>
-                      <div className="font-medium text-base-content truncate">
+                {/* Trip Details Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                  {/* Client Info */}
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-secondary/10 rounded-lg border border-secondary/20">
+                      <User className="w-4 h-4 text-secondary flex-shrink-0" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="text-xs text-base-content/60 mb-1">
+                        Client
+                      </div>
+                      <div className="font-medium text-sm text-base-content truncate">
                         {bookerName}
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-3 h-3 text-success flex-shrink-0" />
-                    <div className="min-w-0">
-                      <div className="text-base-content/60">Departure</div>
-                      <div className="font-medium text-base-content">
+                  {/* Departure Date */}
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-success/10 rounded-lg border border-success/20">
+                      <Calendar className="w-4 h-4 text-success flex-shrink-0" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="text-xs text-base-content/60 mb-1">
+                        Departure
+                      </div>
+                      <div className="font-medium text-sm text-base-content">
                         {formatDate(trip.departureDate)}
                       </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Status Badge */}
-                <div className="mt-3 flex justify-between items-center">
-                  <div className={`badge badge-sm ${statusBadge.className}`}>
+                {/* Status and Action */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-base-300">
+                  <div className={`badge ${statusBadge.className} gap-2`}>
+                    <StatusIcon className="w-3 h-3" />
                     {statusBadge.text}
                   </div>
-                  <div className="text-xs text-base-content/40">
-                    Click to manage
+                  <div className="text-xs text-base-content/60 group-hover:text-info transition-colors">
+                    Click to manage trip →
                   </div>
                 </div>
               </div>
@@ -167,12 +224,14 @@ const TripsInProgressWidget = () => {
         </div>
       )}
 
+      {/* View All Button */}
       {tripsInProgress.length > 3 && (
-        <div className="mt-4 text-center">
+        <div className="mt-6 pt-4 border-t border-base-300">
           <button
             onClick={() => router.push("/myTrips")}
-            className="btn btn-ghost btn-sm"
+            className="btn btn-info btn-outline w-full sm:w-auto gap-2 hover:bg-info hover:text-info-content"
           >
+            <ChevronRight className="w-4 h-4" />
             View All Active Trips
           </button>
         </div>
