@@ -2,7 +2,7 @@
 
 import { TRUCK_TYPES } from "@/shared/truckTypes";
 import React, { useState } from "react";
-import { IoFilter } from "react-icons/io5";
+import { Filter, Calendar, Truck, Package, X } from "lucide-react";
 
 const FilterBtn = ({
   onFilter,
@@ -19,6 +19,7 @@ const FilterBtn = ({
     payload: string;
   }) => void;
 }) => {
+  // Local state for form inputs
   const [depDate, setDepDate] = useState("");
   const [depTime, setDepTime] = useState("");
   const [arrDate, setArrDate] = useState("");
@@ -29,9 +30,22 @@ const FilterBtn = ({
   const [height, setHeight] = useState("");
   const [payload, setPayload] = useState("");
 
+  // Applied filters state - tracks what's actually been applied
+  const [appliedFilters, setAppliedFilters] = useState({
+    depDate: "",
+    depTime: "",
+    arrDate: "",
+    arrTime: "",
+    truckType: "",
+    width: "",
+    length: "",
+    height: "",
+    payload: "",
+  });
+
   const applyFilters = (e: React.FormEvent) => {
     e.preventDefault();
-    onFilter({
+    const filters = {
       depDate,
       depTime,
       arrDate,
@@ -41,12 +55,27 @@ const FilterBtn = ({
       length,
       height,
       payload,
-    });
-    // You can now send this data to an API, etc.
+    };
+
+    // Update applied filters state
+    setAppliedFilters(filters);
+
+    // Call the parent function
+    onFilter(filters);
+
+    // Close modal after applying
+    const modal = document.getElementById(
+      "my_modal"
+    ) as HTMLDialogElement | null;
+    if (modal) {
+      modal.close();
+    }
   };
 
   const resetFilters = (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Reset local state
     setDepDate("");
     setDepTime("");
     setArrDate("");
@@ -56,18 +85,24 @@ const FilterBtn = ({
     setHeight("");
     setPayload("");
     setType("");
-    onFilter({
-      depDate,
-      depTime,
-      arrDate,
-      arrTime,
-      truckType,
-      width,
-      length,
-      height,
-      payload,
-    });
+
+    // Reset applied filters
+    const emptyFilters = {
+      depDate: "",
+      depTime: "",
+      arrDate: "",
+      arrTime: "",
+      truckType: "",
+      width: "",
+      length: "",
+      height: "",
+      payload: "",
+    };
+
+    setAppliedFilters(emptyFilters);
+    onFilter(emptyFilters);
   };
+
   const openModal = () => {
     const modal = document.getElementById(
       "my_modal"
@@ -79,167 +114,246 @@ const FilterBtn = ({
     }
   };
 
+  // Check applied filters instead of local state
+  const hasActiveFilters = Object.values(appliedFilters).some(
+    (value) => value !== ""
+  );
+  const activeFilterCount = Object.values(appliedFilters).filter(
+    (value) => value !== ""
+  ).length;
+
   return (
-    <div className="flex flex-row h-18 items-center">
+    <>
       <button
-        className="btn btn-soft bg-base-100 hover:bg-base-200"
+        className={`btn gap-2 transition-all duration-200 ${
+          hasActiveFilters
+            ? "btn-primary shadow-lg"
+            : "btn-outline btn-primary hover:btn-primary"
+        }`}
         onClick={openModal}
       >
-        <IoFilter /> Filters
+        <Filter className="w-4 h-4" />
+        <span className="hidden sm:inline">Advanced Filters</span>
+        <span className="sm:hidden">Filters</span>
+        {hasActiveFilters && (
+          <div className="badge badge-success badge-sm">
+            {activeFilterCount}
+          </div>
+        )}
       </button>
 
       <dialog id="my_modal" className="modal">
-        <div className="modal-box w-full max-w-[500px]">
-          <div>
-            <h1 className="font-bold mb-4">Filters</h1>
-            <h1 className="font-bold">Specific Departure Date & Time</h1>
-            <div className="flex flex-row gap-2">
-              <fieldset className="fieldset">
-                <legend className="fieldset-legend">Date</legend>
-                <input
-                  type="date"
-                  className="input focus:outline-none focus:ring-0"
-                  placeholder="Type here"
-                  value={depDate}
-                  onChange={(e) => setDepDate(e.target.value)}
-                  min={new Date().toISOString().split("T")[0]} // Prevent past dates
-                />
-              </fieldset>
-              <fieldset className="fieldset">
-                <legend className="fieldset-legend">Time</legend>
-                <input
-                  type="time"
-                  className="input focus:outline-none focus:ring-0"
-                  placeholder="Type here"
-                  value={depTime}
-                  onChange={(e) => setDepTime(e.target.value)}
-                  min={new Date().toISOString().split("T")[1].slice(0, 5)} // Prevent past times
-                />
-              </fieldset>
+        <div className="modal-box w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-primary/10 rounded-lg border border-primary/20">
+                <Filter className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-base-content">
+                  Advanced Filters
+                </h2>
+                <p className="text-sm text-base-content/60">
+                  Refine your search results
+                </p>
+              </div>
             </div>
-          </div>
-          <hr className="border-t border-base-200 my-0 mt-4" />
-          <div className="mt-4">
-            <h1 className="font-bold">Specific Arrival Date & Time</h1>
-            <div className="flex flex-row gap-2">
-              <fieldset className="fieldset">
-                <legend className="fieldset-legend">Date</legend>
-                <input
-                  type="date"
-                  className="input focus:outline-none focus:ring-0"
-                  placeholder="Type here"
-                  value={arrDate}
-                  onChange={(e) => setArrDate(e.target.value)}
-                  min={depDate || new Date().toISOString().split("T")[0]} // Prevent past dates
-                />
-              </fieldset>
-              <fieldset className="fieldset">
-                <legend className="fieldset-legend">Time</legend>
-                <input
-                  type="time"
-                  className="input focus:outline-none focus:ring-0"
-                  placeholder="Type here"
-                  value={arrTime}
-                  onChange={(e) => setArrTime(e.target.value)}
-                  min={
-                    depTime ||
-                    new Date().toISOString().split("T")[1].slice(0, 5)
-                  } // Prevent past times
-                />
-              </fieldset>
-            </div>
-          </div>
-          <hr className="border-t border-base-200 my-0 mt-4" />
-          <div className="mt-4">
-            <h1 className="font-bold">Select Vehicle Type</h1>
-            <div className="flex flex-row gap-2">
-              <fieldset className="fieldset">
-                <legend className="fieldset-legend">Type Select</legend>
-                <select
-                  id="truckTypeSelect"
-                  className="select focus:outline-none focus:ring-0"
-                  value={truckType}
-                  onChange={(e) => setType(e.target.value)}
-                >
-                  <option value="Any">Any</option>
-                  {TRUCK_TYPES.map((type) => (
-                    <option key={type} value={type}>
-                      {type}
-                    </option>
-                  ))}
-                </select>
-              </fieldset>
-            </div>
-          </div>
-          <hr className="border-t border-base-200 my-0 mt-4" />
-          <div className="mt-4">
-            <h1 className="font-bold">Dimensions & Capacity</h1>
-            <div className="flex flex-row flex-wrap gap-2">
-              <fieldset className="fieldset">
-                <legend className="fieldset-legend">Width</legend>
-                <input
-                  type="number"
-                  min="0"
-                  className="input focus:outline-none focus:ring-0"
-                  placeholder="Type here"
-                  value={width}
-                  onChange={(e) => setWidth(e.target.value)}
-                />
-                <p className="label">(In Meter)</p>
-              </fieldset>
-              <fieldset className="fieldset">
-                <legend className="fieldset-legend">Length</legend>
-                <input
-                  type="number"
-                  min="0"
-                  className="input focus:outline-none focus:ring-0"
-                  placeholder="Type here"
-                  value={length}
-                  onChange={(e) => setlength(e.target.value)}
-                />
-                <p className="label">(In Meter)</p>
-              </fieldset>
-              <fieldset className="fieldset">
-                <legend className="fieldset-legend">Height</legend>
-                <input
-                  type="number"
-                  min="0"
-                  className="input focus:outline-none focus:ring-0"
-                  placeholder="Type here"
-                  value={height}
-                  onChange={(e) => setHeight(e.target.value)}
-                />
-                <p className="label">(In Meter)</p>
-              </fieldset>
-              <fieldset className="fieldset">
-                <legend className="fieldset-legend">Payload Capacity</legend>
-                <input
-                  type="number"
-                  min="0"
-                  className="input focus:outline-none focus:ring-0"
-                  placeholder="Type here"
-                  value={payload}
-                  onChange={(e) => setPayload(e.target.value)}
-                />
-                <p className="label">(In Kg)</p>
-              </fieldset>
-            </div>
-          </div>
-          <div className="mt-4 flex justify-end gap-2">
-            <button className="btn btn-primary" onClick={applyFilters}>
-              Apply
-            </button>
-            <button className="btn btn-base-200" onClick={resetFilters}>
-              Clear Filters
-            </button>
-
             <form method="dialog">
-              <button className="btn btn-base-200">Close</button>
+              <button className="btn btn-ghost btn-sm p-2">
+                <X className="w-5 h-5" />
+              </button>
             </form>
           </div>
+
+          <div className="space-y-6">
+            {/* Departure Section */}
+            <div className="bg-base-200/50 border border-base-300 rounded-xl p-4">
+              <div className="flex items-center gap-2 mb-4">
+                <Calendar className="w-4 h-4 text-primary" />
+                <h3 className="font-semibold text-base-content">
+                  Departure Time
+                </h3>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="label">
+                    <span className="label-text font-medium">Date</span>
+                  </label>
+                  <input
+                    type="date"
+                    className="input input-bordered w-full focus:outline-none focus:border-primary"
+                    value={depDate}
+                    onChange={(e) => setDepDate(e.target.value)}
+                    min={new Date().toISOString().split("T")[0]}
+                  />
+                </div>
+                <div>
+                  <label className="label">
+                    <span className="label-text font-medium">Time</span>
+                  </label>
+                  <input
+                    type="time"
+                    className="input input-bordered w-full focus:outline-none focus:border-primary"
+                    value={depTime}
+                    onChange={(e) => setDepTime(e.target.value)}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Arrival Section */}
+            <div className="bg-base-200/50 border border-base-300 rounded-xl p-4">
+              <div className="flex items-center gap-2 mb-4">
+                <Calendar className="w-4 h-4 text-success" />
+                <h3 className="font-semibold text-base-content">
+                  Arrival Time
+                </h3>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="label">
+                    <span className="label-text font-medium">Date</span>
+                  </label>
+                  <input
+                    type="date"
+                    className="input input-bordered w-full focus:outline-none focus:border-primary"
+                    value={arrDate}
+                    onChange={(e) => setArrDate(e.target.value)}
+                    min={depDate || new Date().toISOString().split("T")[0]}
+                  />
+                </div>
+                <div>
+                  <label className="label">
+                    <span className="label-text font-medium">Time</span>
+                  </label>
+                  <input
+                    type="time"
+                    className="input input-bordered w-full focus:outline-none focus:border-primary"
+                    value={arrTime}
+                    onChange={(e) => setArrTime(e.target.value)}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Vehicle Type Section */}
+            <div className="bg-base-200/50 border border-base-300 rounded-xl p-4">
+              <div className="flex items-center gap-2 mb-4">
+                <Truck className="w-4 h-4 text-warning" />
+                <h3 className="font-semibold text-base-content">
+                  Vehicle Type
+                </h3>
+              </div>
+              <select
+                className="select select-bordered w-full focus:outline-none focus:border-primary"
+                value={truckType}
+                onChange={(e) => setType(e.target.value)}
+              >
+                <option value="">Any vehicle type</option>
+                {TRUCK_TYPES.map((type) => (
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Dimensions & Capacity Section */}
+            <div className="bg-base-200/50 border border-base-300 rounded-xl p-4">
+              <div className="flex items-center gap-2 mb-4">
+                <Package className="w-4 h-4 text-info" />
+                <h3 className="font-semibold text-base-content">
+                  Dimensions & Capacity
+                </h3>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div>
+                  <label className="label">
+                    <span className="label-text font-medium">Width (m)</span>
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    className="input input-bordered w-full focus:outline-none focus:border-primary"
+                    placeholder="0.0"
+                    value={width}
+                    onChange={(e) => setWidth(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="label">
+                    <span className="label-text font-medium">Length (m)</span>
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    className="input input-bordered w-full focus:outline-none focus:border-primary"
+                    placeholder="0.0"
+                    value={length}
+                    onChange={(e) => setlength(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="label">
+                    <span className="label-text font-medium">Height (m)</span>
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    className="input input-bordered w-full focus:outline-none focus:border-primary"
+                    placeholder="0.0"
+                    value={height}
+                    onChange={(e) => setHeight(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="label">
+                    <span className="label-text font-medium">Payload (kg)</span>
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    className="input input-bordered w-full focus:outline-none focus:border-primary"
+                    placeholder="0"
+                    value={payload}
+                    onChange={(e) => setPayload(e.target.value)}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Footer Actions */}
+          <div className="flex flex-col sm:flex-row justify-end gap-3 mt-8 pt-6 border-t border-base-300">
+            <button
+              className="btn btn-ghost order-3 sm:order-1"
+              onClick={resetFilters}
+            >
+              Clear All Filters
+            </button>
+            <form method="dialog" className="order-2">
+              <button className="btn btn-outline w-full sm:w-auto">
+                Cancel
+              </button>
+            </form>
+            <button
+              className="btn btn-primary order-1 sm:order-3 w-full sm:w-auto gap-2"
+              onClick={applyFilters}
+            >
+              <Filter className="w-4 h-4" />
+              Apply Filters
+            </button>
+          </div>
         </div>
+        <form method="dialog" className="modal-backdrop">
+          <button>close</button>
+        </form>
       </dialog>
-    </div>
+    </>
   );
 };
 

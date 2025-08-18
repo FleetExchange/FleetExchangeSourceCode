@@ -2,7 +2,7 @@
 
 import { usePlacesWithRestrictions } from "@/hooks/usePlacesWithRestrictions";
 import { useState } from "react";
-import { IoIosSearch } from "react-icons/io";
+import { Search, MapPin, Calendar } from "lucide-react";
 import { AddressAutocomplete } from "./AddressAutocomplete";
 
 export default function SearchBar({
@@ -31,76 +31,210 @@ export default function SearchBar({
   };
 
   return (
-    <form className="flex flex-row space-x-2" onSubmit={handleSubmit}>
-      <div className="relative mx-auto flex h-18 w-[625px] rounded-2xl border-1 border-base-300 bg-base-100 shadow">
-        <div className="flex h-18 w-[175px] rounded-2xl  items-center">
-          <fieldset className="fieldset ml-4">
-            <legend className="fieldset-legend ml-3 mb-0 pb-0">Origin</legend>
+    <div className="w-full">
+      {/* Header */}
+      <div className="flex items-center gap-3 mb-4">
+        <div className="p-2 bg-primary/10 rounded-lg border border-primary/20">
+          <Search className="w-5 h-5 text-primary" />
+        </div>
+        <div>
+          <h3 className="text-lg font-bold text-base-content">Search Routes</h3>
+          <p className="text-sm text-base-content/60">
+            Find available transportation
+          </p>
+        </div>
+      </div>
 
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Desktop Layout */}
+        <div className="hidden lg:flex bg-base-200/50 border border-base-300 rounded-xl p-2 gap-2">
+          {/* Origin */}
+          <div className="flex-1 bg-base-100 rounded-lg p-4 border border-base-300">
+            <div className="flex items-center gap-2 mb-2">
+              <MapPin className="w-4 h-4 text-primary" />
+              <label className="text-sm font-medium text-base-content">
+                Origin
+              </label>
+            </div>
             <AddressAutocomplete
               value={from}
               onChange={(address) => {
                 setFrom(address || "");
-                pickup.setValue(address || ""); // Add this line to update input value
+                pickup.setValue(address || "");
               }}
               ready={pickup.ready}
               inputValue={pickup.value}
               onInputChange={(value) => {
                 pickup.setValue(value);
-                // Don't update 'from' here, wait for selection
               }}
               suggestions={pickup.suggestions}
               status={pickup.status}
               clearSuggestions={pickup.clearSuggestions}
               label="Enter City"
             />
-          </fieldset>
-        </div>
+          </div>
 
-        <div className="flex h-18 w-[175px] rounded-2xl  items-center">
-          <fieldset className="fieldset ml-4">
-            <legend className="fieldset-legend ml-3 mb-0 pb-0">
-              Destination
-            </legend>
+          {/* Destination */}
+          <div className="flex-1 bg-base-100 rounded-lg p-4 border border-base-300">
+            <div className="flex items-center gap-2 mb-2">
+              <MapPin className="w-4 h-4 text-success" />
+              <label className="text-sm font-medium text-base-content">
+                Destination
+              </label>
+            </div>
             <AddressAutocomplete
               value={to}
               onChange={(address) => {
                 setTo(address || "");
-                delivery.setValue(address || ""); // Add this line to update input value
+                delivery.setValue(address || "");
               }}
               ready={delivery.ready}
               inputValue={delivery.value}
               onInputChange={(value) => {
                 delivery.setValue(value);
-                // Don't update 'to' here, wait for selection
               }}
               suggestions={delivery.suggestions}
               status={delivery.status}
               clearSuggestions={delivery.clearSuggestions}
               label="Enter City"
             />
-          </fieldset>
-        </div>
-        <div className="flex h-18 w-[175px] rounded-2xl items-center ">
-          <fieldset className="fieldset ml-4">
-            <legend className="fieldset-legend ml-3 mb-0 pb-0">
-              Latest Arrival?
-            </legend>
+          </div>
+
+          {/* Date */}
+          <div className="flex-1 bg-base-100 rounded-lg p-4 border border-base-300">
+            <div className="flex items-center gap-2 mb-2">
+              <Calendar className="w-4 h-4 text-info" />
+              <label className="text-sm font-medium text-base-content">
+                Latest Arrival
+              </label>
+            </div>
             <input
               type="date"
               value={arrival}
               onChange={(e) => setArrival(e.target.value)}
-              min={new Date().toISOString().split("T")[0]} // Prevent past dates
-              className="input input-ghost input-xs mt-0 pt-0  focus:outline-none focus:ring-0 focus:border-transparent"
+              min={new Date().toISOString().split("T")[0]}
+              className="w-full text-sm bg-transparent border-none focus:outline-none focus:ring-0"
             />
-          </fieldset>
+          </div>
+
+          {/* Search Button */}
+          <div className="flex items-center">
+            <button
+              type="submit"
+              className="btn btn-primary btn-lg h-full px-8 gap-2 hover:bg-primary-focus"
+            >
+              <Search className="w-5 h-5" />
+              <span className="hidden xl:inline">Search</span>
+            </button>
+          </div>
         </div>
-        <div className="flex h-18 w-[100px] rounded-2xl items-center justify-center">
-          <button className="btn btn-lg btn-circle bg-primary outline-none">
-            <IoIosSearch className="text-white" />
+
+        {/* Mobile Layout */}
+        <div className="lg:hidden space-y-4">
+          {/* Origin */}
+          <div className="bg-base-100 rounded-xl p-4 border border-base-300 shadow-sm">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="p-1 bg-primary/10 rounded-lg border border-primary/20">
+                <MapPin className="w-4 h-4 text-primary" />
+              </div>
+              <label className="text-sm font-medium text-base-content">
+                From
+              </label>
+            </div>
+            <AddressAutocomplete
+              value={from}
+              onChange={(address) => {
+                setFrom(address || "");
+                pickup.setValue(address || "");
+              }}
+              ready={pickup.ready}
+              inputValue={pickup.value}
+              onInputChange={(value) => {
+                pickup.setValue(value);
+              }}
+              suggestions={pickup.suggestions}
+              status={pickup.status}
+              clearSuggestions={pickup.clearSuggestions}
+              label="Enter origin city"
+            />
+          </div>
+
+          {/* Destination */}
+          <div className="bg-base-100 rounded-xl p-4 border border-base-300 shadow-sm">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="p-1 bg-success/10 rounded-lg border border-success/20">
+                <MapPin className="w-4 h-4 text-success" />
+              </div>
+              <label className="text-sm font-medium text-base-content">
+                To
+              </label>
+            </div>
+            <AddressAutocomplete
+              value={to}
+              onChange={(address) => {
+                setTo(address || "");
+                delivery.setValue(address || "");
+              }}
+              ready={delivery.ready}
+              inputValue={delivery.value}
+              onInputChange={(value) => {
+                delivery.setValue(value);
+              }}
+              suggestions={delivery.suggestions}
+              status={delivery.status}
+              clearSuggestions={delivery.clearSuggestions}
+              label="Enter destination city"
+            />
+          </div>
+
+          {/* Date */}
+          <div className="bg-base-100 rounded-xl p-4 border border-base-300 shadow-sm">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="p-1 bg-info/10 rounded-lg border border-info/20">
+                <Calendar className="w-4 h-4 text-info" />
+              </div>
+              <label className="text-sm font-medium text-base-content">
+                Latest Arrival Date
+              </label>
+            </div>
+            <input
+              type="date"
+              value={arrival}
+              onChange={(e) => setArrival(e.target.value)}
+              min={new Date().toISOString().split("T")[0]}
+              className="w-full text-base bg-transparent border-none focus:outline-none focus:ring-0"
+            />
+          </div>
+
+          {/* Search Button */}
+          <button
+            type="submit"
+            className="btn btn-primary w-full h-14 text-base gap-3 hover:bg-primary-focus"
+          >
+            <Search className="w-5 h-5" />
+            Search Available Trips
           </button>
         </div>
-      </div>
-    </form>
+
+        {/* Search Tips */}
+        <div className="bg-info/5 border border-info/20 rounded-xl p-4 mt-4">
+          <div className="flex items-start gap-3">
+            <div className="p-1 bg-info/20 rounded-lg mt-0.5">
+              <Search className="w-4 h-4 text-info" />
+            </div>
+            <div>
+              <h4 className="font-semibold text-sm text-base-content mb-1">
+                Search Tips
+              </h4>
+              <p className="text-xs text-base-content/70 leading-relaxed">
+                Enter your pickup and delivery cities. Use the date filter to
+                find trips arriving by your deadline. Leave fields empty to
+                browse all available routes.
+              </p>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
   );
 }

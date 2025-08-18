@@ -4,12 +4,17 @@ import { api } from "@/convex/_generated/api";
 import { useQuery } from "convex/react";
 import { Id } from "@/convex/_generated/dataModel";
 import { useRouter } from "next/navigation";
-import { CiRuler } from "react-icons/ci";
-import { FaLongArrowAltRight } from "react-icons/fa";
-import { BsTruck } from "react-icons/bs";
-import { BsBoxSeam } from "react-icons/bs";
+import {
+  MapPin,
+  ArrowRight,
+  Truck,
+  Package,
+  Calendar,
+  Clock,
+  Star,
+  User,
+} from "lucide-react";
 import Link from "next/link";
-import { IoPersonOutline } from "react-icons/io5";
 import ProfileImage from "@/components/ProfileImage";
 
 export default function TripCard({ tripId }: { tripId: Id<"trip"> }) {
@@ -27,97 +32,132 @@ export default function TripCard({ tripId }: { tripId: Id<"trip"> }) {
     trip?.truckId ? { truckId: trip.truckId } : "skip"
   );
 
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat("en-ZA", {
+      style: "currency",
+      currency: "ZAR",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
+  };
+
+  const formatDate = (date: string | number) => {
+    return new Intl.DateTimeFormat("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    }).format(new Date(date));
+  };
+
+  const formatTime = (date: string | number) => {
+    return new Intl.DateTimeFormat("en-GB", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    }).format(new Date(date));
+  };
+
+  if (!trip || !tripOwner || !truck) {
+    return (
+      <div className="bg-base-100 rounded-xl border border-base-300 p-4 animate-pulse">
+        <div className="h-24 bg-base-200 rounded-lg"></div>
+      </div>
+    );
+  }
+
   return (
-    <div className=" pointer-events-none flex flex-col rounded-xl border border-base-300 bg-base-100 px-5 py-3 shadow transition-all duration-300 hover:shadow-xl mb-8">
-      {/* Avatar & Name of company & Price */}
-      <div className="flex flex-row justify-between gap-2">
-        <div className="flex flex-row  items-center avatar avatar-placeholder gap-2">
-          <ProfileImage fileUrl={tripOwner?.profileImageUrl} size={30} />
-          <h3 className="text-sm">{tripOwner?.name}</h3>
-        </div>
+    <div className="bg-base-100 rounded-xl shadow-lg border border-base-300 overflow-hidden transition-all duration-200 hover:shadow-xl cursor-pointer">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-primary/5 to-primary/10 border-b border-primary/20 p-4">
+        <div className="flex items-center justify-between">
+          {/* Transporter Info */}
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <ProfileImage fileUrl={tripOwner?.profileImageUrl} size={40} />
+              <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-success rounded-full border-2 border-base-100"></div>
+            </div>
+            <div>
+              <h3 className="font-semibold text-sm text-base-content">
+                {tripOwner?.name}
+              </h3>
+              <div className="flex items-center gap-1 text-xs text-base-content/60">
+                <Star className="w-3 h-3 fill-warning text-warning" />
+                <span>{tripOwner?.averageRating}</span>
+              </div>
+            </div>
+          </div>
 
-        <div className="flex justify-end badge badge-info rounded-2xl">
-          From R{trip?.basePrice}
+          {/* Price Badge */}
+          <div className="bg-success/10 border border-success/20 rounded-lg px-3 py-1">
+            <p className="text-sm font-bold text-success">
+              {trip.basePrice
+                ? formatCurrency(trip.basePrice)
+                : trip.KMPrice
+                  ? `${formatCurrency(trip.KMPrice)} per km`
+                  : `${formatCurrency(trip.KGPrice)} per kg`}
+            </p>
+          </div>
         </div>
       </div>
 
-      <div className="mt-4 flex flex-row justify-evenly">
-        <div className="flex flex-col items-center">
-          <p className="text-2xl">{trip?.originCity}</p>
-          <p className="text-sm">
-            {trip?.departureDate
-              ? new Intl.DateTimeFormat("en-GB", {
-                  day: "2-digit",
-                  month: "2-digit",
-                  year: "numeric",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  hour12: false,
-                }).format(new Date(trip?.departureDate))
-              : "No Date"}
-          </p>
-        </div>
-        <div className="flex justify-center items-center">
-          <FaLongArrowAltRight />
-        </div>
-        <div className="flex flex-col items-center">
-          <p className="text-2xl">{trip?.destinationCity}</p>
-          <p className="text-sm">
-            {trip?.arrivalDate
-              ? new Intl.DateTimeFormat("en-GB", {
-                  day: "2-digit",
-                  month: "2-digit",
-                  year: "numeric",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  hour12: false,
-                }).format(new Date(trip?.arrivalDate))
-              : "No Date"}
-          </p>
-        </div>
-      </div>
+      {/* Main Content */}
+      <div className="p-4">
+        {/* Route */}
+        <div className="grid grid-cols-5 gap-2 items-center mb-4">
+          {/* Origin */}
+          <div className="col-span-2">
+            <div className="flex items-center gap-1 mb-1">
+              <MapPin className="w-3 h-3 text-primary" />
+              <span className="text-xs text-base-content/60">From</span>
+            </div>
+            <h4 className="text-sm font-bold text-base-content truncate">
+              {trip.originCity}
+            </h4>
+            <div className="text-xs text-base-content/60">
+              {formatDate(trip.departureDate)} •{" "}
+              {formatTime(trip.departureDate)}
+            </div>
+          </div>
 
-      <hr className="border-t border-base-300 mt-4 mb-4"></hr>
+          {/* Arrow */}
+          <div className="flex justify-center">
+            <ArrowRight className="w-4 h-4 text-info" />
+          </div>
 
-      <div className="flex flex-row justify-between items-center gap-6 w-full">
-        {/* Truck Info Card */}
-        <div className="bg-base-200 rounded-lg p-4 flex flex-row justify-between gap-6 w-full">
-          <div className="flex flex-col items-center gap-1 flex-1 min-w-0">
-            <BsTruck className="text-primary" />
-            <span className="font-medium text-base-content text-xs">Type</span>
-            <span className="text-sm break-words">{truck?.truckType}</span>
-          </div>
-          <div className="flex flex-col items-center gap-1 flex-1 min-w-0">
-            <BsBoxSeam className="text-primary" />
-            <span className="font-medium text-base-content text-xs">
-              Payload
-            </span>
-            <span className="text-sm break-words">
-              {truck?.maxLoadCapacity} KG
-            </span>
-          </div>
-          <div className="flex flex-col items-center gap-1 flex-1 min-w-0">
-            <CiRuler className="text-primary" />
-            <span className="font-medium text-base-content text-xs">Width</span>
-            <span className="text-sm break-words">{truck?.width} m</span>
-          </div>
-          <div className="flex flex-col items-center gap-1 flex-1 min-w-0">
-            <CiRuler className="text-primary" />
-            <span className="font-medium text-base-content text-xs">
-              Length
-            </span>
-            <span className="text-sm break-words">{truck?.length} m</span>
-          </div>
-          <div className="flex flex-col items-center gap-1 flex-1 min-w-0">
-            <CiRuler className="text-primary" />
-            <span className="font-medium text-base-content text-xs">
-              Height
-            </span>
-            <span className="text-sm break-words">{truck?.height} m</span>
+          {/* Destination */}
+          <div className="col-span-2 text-right">
+            <div className="flex items-center gap-1 mb-1 justify-end">
+              <span className="text-xs text-base-content/60">To</span>
+              <MapPin className="w-3 h-3 text-success" />
+            </div>
+            <h4 className="text-sm font-bold text-base-content truncate">
+              {trip.destinationCity}
+            </h4>
+            <div className="text-xs text-base-content/60">
+              {formatDate(trip.arrivalDate)} • {formatTime(trip.arrivalDate)}
+            </div>
           </div>
         </div>
 
-        {/* View Trip Button */}
+        {/* Truck Specs - Compact */}
+        <div className="bg-base-200/30 border border-base-300 rounded-lg p-3 mb-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Truck className="w-4 h-4 text-warning" />
+              <span className="text-xs font-medium text-base-content">
+                {truck.truckType}
+              </span>
+            </div>
+            <div className="flex items-center gap-4 text-xs text-base-content/60">
+              <span>Max payload: {truck.maxLoadCapacity}kg</span>
+              <span>
+                Dimensions: {truck.width}×{truck.length}×{truck.height}m
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Action Button */}
         <Link
           href={{
             pathname: "/tripClient",
@@ -126,8 +166,9 @@ export default function TripCard({ tripId }: { tripId: Id<"trip"> }) {
             },
           }}
         >
-          <button className="pointer-events-auto btn btn-primary text-sm">
-            View Trip
+          <button className="btn btn-primary btn-sm w-full gap-2 hover:bg-primary-focus transition-all duration-200">
+            <Package className="w-4 h-4" />
+            View Details
           </button>
         </Link>
       </div>

@@ -26,31 +26,43 @@ export default function RoleBasedRedirect() {
   );
 
   useEffect(() => {
-    if (user && convexUser) {
-      if (convexUser.isApproved) {
-        setStatus("Account approved! Redirecting to dashboard...");
+    // Only proceed if we have both user and convexUser data loaded
+    if (!user) return;
 
-        // if a transporter then run the transporter check account setup mutation
-        if (convexUser.role === "transporter") {
-          transporterSetupCheck({ userId: convexUser._id });
-        }
+    // If convexUser is still loading (undefined), don't do anything yet
+    if (convexUser === undefined) {
+      setStatus("Loading account data...");
+      return;
+    }
 
-        // if a client then run the client check account setup mutation
-        if (convexUser.role === "client") {
-          clientSetupCheck({ userId: convexUser._id });
-        }
-
-        //Redirect based on role
-        router.push(`/${convexUser.role}/dashboard`);
-      } else {
-        setStatus("Account pending approval. Redirecting...");
-        router.push("/pending-approval");
-      }
-    } else if (user && convexUser === null) {
+    // If convexUser is null, account doesn't exist
+    if (convexUser === null) {
       setStatus("Account not found. Redirecting...");
       router.push("/unauthorized");
+      return;
     }
-  }, [user, convexUser, router, transporterSetupCheck]);
+
+    // Now we have valid convexUser data
+    if (convexUser.isApproved) {
+      setStatus("Account approved! Redirecting to dashboard...");
+
+      // if a transporter then run the transporter check account setup mutation
+      if (convexUser.role === "transporter") {
+        transporterSetupCheck({ userId: convexUser._id });
+      }
+
+      // if a client then run the client check account setup mutation
+      if (convexUser.role === "client") {
+        clientSetupCheck({ userId: convexUser._id });
+      }
+
+      //Redirect based on role
+      router.push(`/${convexUser.role}/dashboard`);
+    } else {
+      setStatus("Account pending approval. Redirecting...");
+      router.push("/pending-approval");
+    }
+  }, [user, convexUser, router, transporterSetupCheck, clientSetupCheck]);
 
   return (
     <div className="min-h-screen bg-base-200 flex items-center justify-center">
