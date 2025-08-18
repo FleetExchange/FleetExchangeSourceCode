@@ -1,7 +1,10 @@
+"use client";
+
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
 import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   GoogleMap,
   DirectionsService,
@@ -19,6 +22,20 @@ import { isAddressWithinRange } from "@/utils/geocoding";
 import TripRatingComponent from "./TripRatingComponent";
 import ProfileImage from "./ProfileImage";
 import BookTripButton from "./BookTripButton";
+import {
+  MapPin,
+  Package,
+  Truck,
+  User,
+  Calendar,
+  Clock,
+  Route,
+  FileText,
+  Star,
+  ArrowRight,
+  ArrowLeft,
+} from "lucide-react";
+
 type DirectionsResult = google.maps.DirectionsResult;
 
 interface TripPageClientProps {
@@ -26,6 +43,8 @@ interface TripPageClientProps {
 }
 
 const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
+  const router = useRouter();
+
   // Get the logged in user identity
   const { user } = useUser();
 
@@ -71,13 +90,11 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
   const [distance, setDistance] = useState<number>(0);
 
   // Trip pricing calculations
-  // use price without fees in DB as it is added later in api's. this is purely visual to show breakdown
+  const variableKMPrice = (trip?.KMPrice ?? 0) * distance;
+  const variableKGPrice = (trip?.KGPrice ?? 0) * cargoWeight;
   const tripPriceWithoutFees =
-    (trip?.basePrice ?? 0) +
-    (trip?.KGPrice ?? 0) * cargoWeight +
-    (trip?.KMPrice ?? 0) * distance;
-
-  const tripFees = tripPriceWithoutFees * 0.05; // Assuming a 5% fee
+    (trip?.basePrice ?? 0) + variableKGPrice + variableKMPrice;
+  const tripFees = tripPriceWithoutFees * 0.05;
   const fullTripPrice = tripPriceWithoutFees + tripFees;
 
   // Get whether the trip is booked or not
@@ -111,11 +128,7 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
     ? formatDateTime(trip.arrivalDate)
     : null;
 
-  //
-  //  Google Maps API Section
-  //
-  //
-  // First, add these helper functions at the top of your component
+  // Google Maps helper functions
   const getCityCoordinates = async (cityName: string) => {
     try {
       const results = await getGeocode({
@@ -124,11 +137,11 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
       return getLatLng(results[0]);
     } catch (error) {
       console.error("Error getting coordinates for city:", error);
-      return { lat: -26.2041, lng: 28.0473 }; // Fallback to Johannesburg
+      return { lat: -26.2041, lng: 28.0473 };
     }
   };
 
-  // Update the Places Autocomplete setup
+  // Coordinates state
   const [pickupCoords, setPickupCoords] = useState({
     lat: -26.2041,
     lng: 28.0473,
@@ -138,7 +151,7 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
     lng: 28.0473,
   });
 
-  // Add this effect to update coordinates when trip data loads
+  // Update coordinates when trip data loads
   useEffect(() => {
     if (trip?.originCity) {
       getCityCoordinates(trip.originCity).then(setPickupCoords);
@@ -148,24 +161,18 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
     }
   }, [trip?.originCity, trip?.destinationCity]);
 
+  // Places autocomplete hooks
   const pickup = usePlacesWithRestrictions({ cityName: trip?.originCity });
   const delivery = usePlacesWithRestrictions({
     cityName: trip?.destinationCity,
   });
 
-  // First, add this style to ensure the map container is properly sized
-  const mapContainerStyle = {
-    width: "100%",
-    height: "600px",
-    position: "relative" as const,
-  };
-
-  // Book event handler
+  // Mutations
   const bookTrip = useMutation(api.trip.setTripBooked);
   const purchaseTrip = useMutation(api.purchasetrip.createPurchaseTrip);
   const setTripAdresses = useMutation(api.trip.setTripAddresses);
 
-  // Add this validation function inside your component
+  // Address validation
   const validateAddress = async (
     address: string,
     cityName: string,
@@ -179,18 +186,16 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
       );
       return false;
     }
-
     return true;
   };
 
+  // Book trip handler
   const handleBookTrip = async (): Promise<string> => {
-    // Check if truck data is loaded
     if (!truck) {
       alert("Truck information is not available. Please try again.");
       return "";
     }
 
-    // Validate all required fields
     if (
       !pickupAddress ||
       !pickupInstructions ||
@@ -203,14 +208,11 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
       return "";
     }
 
-    // Make sure cargo weight is below the max load capacity
-    // Now TypeScript knows truck is defined
     if (cargoWeight > truck.maxLoadCapacity) {
       alert("The cargo weight exceeds the truck's maximum load capacity.");
       return "";
     }
 
-    // Validate addresses are within range
     const isPickupValid = await validateAddress(
       pickupAddress,
       trip?.originCity || "",
@@ -227,16 +229,13 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
     }
 
     try {
-      // Set trip to booked
       await bookTrip({ tripId: trip?._id as Id<"trip"> });
       setBooked(true);
-      // Update trips origin and destination addresses
       await setTripAdresses({
         tripId: trip?._id as Id<"trip">,
         originAdress: pickupAddress,
         destinationAddress: deliveryAddress,
       });
-      // Create trip purchase object
       const PurchaseTripId = await purchaseTrip({
         tripId: trip?._id as Id<"trip">,
         userId: userId as Id<"users">,
@@ -247,7 +246,6 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
         cargoWeight: cargoWeight,
       });
 
-      // If all went well, purch trip Id will be returned
       return PurchaseTripId || "";
     } catch (error) {
       alert("Failed to book trip. Please try again.");
@@ -255,15 +253,12 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
     }
   };
 
-  // Combine the effects and add better dependency control
+  // Update form fields when trip is booked
   useEffect(() => {
-    // Only update if we have trip data
     if (!trip) return;
 
-    // Update booked state
     setBooked(trip.isBooked ?? false);
 
-    // Only update form fields if trip is booked and we have purchase details
     if (trip.isBooked && purchaseTripDetails) {
       setPickupAddress(trip.originAddress || "");
       setDeliveryAddress(trip.destinationAddress || "");
@@ -272,380 +267,640 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
       setCargoDescription(purchaseTripDetails.freightNotes || "");
       setCargoWeight(purchaseTripDetails.cargoWeight || 0);
 
-      // Update autocomplete values
       if (trip.originAddress) pickup.setValue(trip.originAddress);
       if (trip.destinationAddress) delivery.setValue(trip.destinationAddress);
     }
-  }, [trip, purchaseTripDetails]); // Simplified dependencies
+  }, [trip, purchaseTripDetails]);
 
   return (
-    <div className="container mx-auto px-2 md:px-6 py-8">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
-        {/* Main Trip Info */}
-        <div className="lg:col-span-2 flex flex-col gap-8">
-          <div className="bg-base-100 rounded-2xl shadow-xl p-8">
-            <h1 className="text-3xl font-bold text-primary mb-6">
-              {trip?.originCity}{" "}
-              <span className="text-base-content/60">to</span>{" "}
-              {trip?.destinationCity}
-            </h1>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {/* Pickup */}
+    <div className="min-h-screen bg-base-200">
+      <div className="p-4 lg:p-6">
+        <div className="w-full max-w-7xl mx-auto">
+          {/* Header with Back Button */}
+          <div className="mb-8 pl-16 lg:pl-0">
+            <div className="flex items-center gap-4 mb-4">
+              <button
+                onClick={() => router.back()}
+                className="btn btn-ghost btn-sm gap-2 text-base-content hover:bg-base-300 transition-colors"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                <span className="hidden sm:inline">Back</span>
+              </button>
+              <div className="w-px h-6 bg-base-300"></div>
               <div>
-                <div className="mb-4">
-                  <h2 className="text-lg font-semibold flex items-center gap-2">
-                    <span className="badge badge-primary badge-sm" />{" "}
-                    {trip?.originCity}
-                  </h2>
-                  <p className="text-base-content/70 text-sm">
-                    {departureDateTime && (
-                      <span>
-                        {departureDateTime.date} at {departureDateTime.time}
-                      </span>
-                    )}
-                  </p>
-                </div>
-                <fieldset className="mb-4">
-                  <legend className="text-base font-medium mb-1">
-                    Pickup Address
-                  </legend>
-                  <AddressAutocomplete
-                    value={pickupAddress || ""}
-                    onChange={(address) => {
-                      setPickupAddress(address || "");
-                      pickup.setValue(address || "");
-                    }}
-                    disabled={booked}
-                    ready={pickup.ready}
-                    inputValue={pickup.value || ""}
-                    onInputChange={(value) => pickup.setValue(value || "")}
-                    suggestions={pickup.suggestions}
-                    status={pickup.status}
-                    clearSuggestions={pickup.clearSuggestions}
-                    label="Pickup Address"
-                    onBlur={async () => {
-                      if (pickupAddress) {
-                        const isValid = await validateAddress(
-                          pickupAddress,
-                          trip?.originCity || "",
-                          "pickup"
-                        );
-                        if (!isValid) {
-                          setPickupAddress("");
-                          pickup.setValue("");
-                        }
-                      }
-                    }}
-                  />
-                </fieldset>
-                <fieldset>
-                  <legend className="text-base font-medium mb-1">
-                    Pickup Instructions
-                  </legend>
-                  <textarea
-                    className="textarea textarea-bordered w-full h-20 focus:outline-none focus:ring-0"
-                    placeholder="Enter pickup instructions"
-                    value={pickupInstructions}
-                    onChange={(e) => setPickupInstructions(e.target.value)}
-                    disabled={booked}
-                  />
-                </fieldset>
-              </div>
-              {/* Delivery */}
-              <div>
-                <div className="mb-4">
-                  <h2 className="text-lg font-semibold flex items-center gap-2">
-                    <span className="badge badge-secondary badge-sm" />{" "}
-                    {trip?.destinationCity}
-                  </h2>
-                  <p className="text-base-content/70 text-sm">
-                    {arrivalDateTime && (
-                      <span>
-                        {arrivalDateTime.date} at {arrivalDateTime.time}
-                      </span>
-                    )}
-                  </p>
-                </div>
-                <fieldset className="mb-4">
-                  <legend className="text-base font-medium mb-1">
-                    Delivery Address
-                  </legend>
-                  <AddressAutocomplete
-                    value={deliveryAddress || ""}
-                    onChange={(address) => {
-                      setDeliveryAddress(address || "");
-                      delivery.setValue(address || "");
-                    }}
-                    disabled={booked}
-                    ready={delivery.ready}
-                    inputValue={delivery.value || ""}
-                    onInputChange={(value) => delivery.setValue(value || "")}
-                    suggestions={delivery.suggestions}
-                    status={delivery.status}
-                    clearSuggestions={delivery.clearSuggestions}
-                    label="Delivery Address"
-                    onBlur={async () => {
-                      if (deliveryAddress) {
-                        const isValid = await validateAddress(
-                          deliveryAddress,
-                          trip?.destinationCity || "",
-                          "delivery"
-                        );
-                        if (!isValid) {
-                          setDeliveryAddress("");
-                          delivery.setValue("");
-                        }
-                      }
-                    }}
-                  />
-                </fieldset>
-                <fieldset>
-                  <legend className="text-base font-medium mb-1">
-                    Delivery Instructions
-                  </legend>
-                  <textarea
-                    className="textarea textarea-bordered w-full h-20 focus:outline-none focus:ring-0"
-                    placeholder="Enter delivery instructions"
-                    value={deliveryInstructions}
-                    onChange={(e) => setDeliveryInstructions(e.target.value)}
-                    disabled={booked}
-                  />
-                </fieldset>
-              </div>
-            </div>
-            <div className="divider my-6" />
-            <div className="flex justify-end text-base-content/70 text-sm">
-              <span>
-                Distance:{" "}
-                <span className="font-semibold">{distance.toFixed(2)} km</span>
-              </span>
-            </div>
-          </div>
-
-          {/* Cargo Section */}
-          <div className="bg-base-100 p-6 rounded-2xl shadow flex flex-col gap-6">
-            <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
-              Cargo Details
-            </h3>
-            <div className="flex flex-col gap-4">
-              <div>
-                <label
-                  className="block text-sm font-medium mb-1"
-                  htmlFor="cargo-weight"
-                >
-                  Cargo Weight (kg)
-                </label>
-                <input
-                  id="cargo-weight"
-                  type="number"
-                  min="0"
-                  className="input input-bordered focus:outline-none focus:ring-0"
-                  placeholder="Enter cargo weight"
-                  value={cargoWeight}
-                  onChange={(e) => setCargoWeight(Number(e.target.value))}
-                  disabled={booked}
-                />
-              </div>
-              <div>
-                <label
-                  className="block text-sm font-medium mb-1"
-                  htmlFor="cargo-description"
-                >
-                  Cargo Description
-                </label>
-                <textarea
-                  id="cargo-description"
-                  className="textarea textarea-bordered w-full h-20 focus:outline-none focus:ring-0"
-                  placeholder="Describe your cargo"
-                  value={cargoDescription}
-                  onChange={(e) => setCargoDescription(e.target.value)}
-                  disabled={booked}
-                />
+                <h1 className="text-2xl lg:text-3xl font-bold text-base-content">
+                  Trip Details
+                </h1>
+                <p className="text-base-content/60 mt-1">
+                  Review and book this transportation service
+                </p>
               </div>
             </div>
           </div>
 
-          {/* Truck & Issuer (merged) */}
-          <div className="bg-base-100 p-6 rounded-2xl shadow flex flex-col gap-4 md:col-span-2">
-            <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
-              Truck & Issuer Details
-            </h3>
-            <div className="mb-2 text-base font-medium text-center">
-              {truck?.year} {truck?.make} {truck?.model} - {truck?.truckType}
-            </div>
-            <div className="grid grid-cols-4 gap-2 mt-2">
-              <div className="flex flex-col items-center">
-                <span className="text-xs text-base-content/70 mt-1">
-                  Length
-                </span>
-                <span className="font-bold">{truck?.length} m</span>
+          {/* Route Overview */}
+          <div className="bg-base-100 rounded-2xl shadow-xl border border-base-300 p-6 mb-8">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-2 bg-primary/10 rounded-lg border border-primary/20">
+                <Route className="w-6 h-6 text-primary" />
               </div>
-              <div className="flex flex-col items-center">
-                <span className="text-xs text-base-content/70 mt-1">Width</span>
-                <span className="font-bold">{truck?.width} m</span>
-              </div>
-              <div className="flex flex-col items-center">
-                <span className="text-xs text-base-content/70 mt-1">
-                  Height
-                </span>
-                <span className="font-bold">{truck?.height} m</span>
-              </div>
-              <div className="flex flex-col items-center">
-                <span className="text-xs text-base-content/70 mt-1">
-                  Max Load
-                </span>
-                <span className="font-bold">{truck?.maxLoadCapacity} kg</span>
+              <div>
+                <h2 className="text-xl font-bold text-base-content">
+                  {trip?.originCity} → {trip?.destinationCity}
+                </h2>
+                <p className="text-sm text-base-content/60">
+                  Trip route and schedule
+                </p>
               </div>
             </div>
-            <div className="divider my-2" />
-            <div>
-              <h4 className="text-base font-semibold mb-3">Trip Issuer</h4>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <ProfileImage
-                    fileUrl={tripIssuer?.profileImageUrl}
-                    size={40}
-                  />
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Origin */}
+              <div className="text-center md:text-left">
+                <div className="flex items-center gap-2 mb-2 justify-center md:justify-start">
+                  <div className="p-1 bg-primary/10 rounded-lg border border-primary/20">
+                    <MapPin className="w-4 h-4 text-primary" />
+                  </div>
+                  <span className="text-sm font-medium text-base-content/60">
+                    From
+                  </span>
+                </div>
+                <h3 className="text-lg font-bold text-base-content mb-2">
+                  {trip?.originCity}
+                </h3>
+                {departureDateTime && (
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-1 justify-center md:justify-start text-sm text-base-content/70">
+                      <Calendar className="w-3 h-3" />
+                      <span>{departureDateTime.date}</span>
+                    </div>
+                    <div className="flex items-center gap-1 justify-center md:justify-start text-sm text-base-content/70">
+                      <Clock className="w-3 h-3" />
+                      <span>{departureDateTime.time}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Arrow */}
+              <div className="flex items-center justify-center">
+                <div className="p-3 bg-info/10 rounded-full border border-info/20">
+                  <ArrowRight className="w-6 h-6 text-info" />
+                </div>
+              </div>
+
+              {/* Destination */}
+              <div className="text-center md:text-right">
+                <div className="flex items-center gap-2 mb-2 justify-center md:justify-end">
+                  <span className="text-sm font-medium text-base-content/60">
+                    To
+                  </span>
+                  <div className="p-1 bg-success/10 rounded-lg border border-success/20">
+                    <MapPin className="w-4 h-4 text-success" />
+                  </div>
+                </div>
+                <h3 className="text-lg font-bold text-base-content mb-2">
+                  {trip?.destinationCity}
+                </h3>
+                {arrivalDateTime && (
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-1 justify-center md:justify-end text-sm text-base-content/70">
+                      <Calendar className="w-3 h-3" />
+                      <span>{arrivalDateTime.date}</span>
+                    </div>
+                    <div className="flex items-center gap-1 justify-center md:justify-end text-sm text-base-content/70">
+                      <Clock className="w-3 h-3" />
+                      <span>{arrivalDateTime.time}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Main Content */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Address Details */}
+              <div className="bg-base-100 rounded-2xl shadow-xl border border-base-300 p-6">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-2 bg-warning/10 rounded-lg border border-warning/20">
+                    <MapPin className="w-5 h-5 text-warning" />
+                  </div>
                   <div>
-                    <p className="font-medium">{tripIssuer?.name}</p>
-                    <p className="text-sm text-base-content/70">
-                      {tripIssuer?.email}
+                    <h3 className="text-lg font-bold text-base-content">
+                      Address Details
+                    </h3>
+                    <p className="text-sm text-base-content/60">
+                      Pickup and delivery locations
                     </p>
                   </div>
                 </div>
-                <button
-                  className="btn btn-outline btn-sm"
-                  onClick={() =>
-                    (window.location.href = `/profiles/${tripIssuer?._id}`)
-                  }
-                >
-                  View Profile
-                </button>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Pickup */}
+                  <div className="bg-base-200/50 border border-base-300 rounded-xl p-4">
+                    <div className="flex items-center gap-2 mb-4">
+                      <div className="p-1 bg-primary/10 rounded-lg border border-primary/20">
+                        <MapPin className="w-4 h-4 text-primary" />
+                      </div>
+                      <h4 className="font-semibold text-base-content">
+                        Pickup Location
+                      </h4>
+                    </div>
+
+                    <div className="space-y-4">
+                      <div>
+                        <label className="label">
+                          <span className="label-text font-medium">
+                            Address
+                          </span>
+                        </label>
+                        <AddressAutocomplete
+                          value={pickupAddress || ""}
+                          onChange={(address) => {
+                            setPickupAddress(address || "");
+                            pickup.setValue(address || "");
+                          }}
+                          disabled={booked}
+                          ready={pickup.ready}
+                          inputValue={pickup.value || ""}
+                          onInputChange={(value) =>
+                            pickup.setValue(value || "")
+                          }
+                          suggestions={pickup.suggestions}
+                          status={pickup.status}
+                          clearSuggestions={pickup.clearSuggestions}
+                          label="Pickup Address"
+                          onBlur={async () => {
+                            if (pickupAddress) {
+                              const isValid = await validateAddress(
+                                pickupAddress,
+                                trip?.originCity || "",
+                                "pickup"
+                              );
+                              if (!isValid) {
+                                setPickupAddress("");
+                                pickup.setValue("");
+                              }
+                            }
+                          }}
+                        />
+                      </div>
+
+                      <div>
+                        <label className="label">
+                          <span className="label-text font-medium">
+                            Instructions
+                          </span>
+                        </label>
+                        <textarea
+                          className="textarea textarea-bordered w-full focus:outline-none focus:border-primary"
+                          placeholder="Special pickup instructions"
+                          value={pickupInstructions}
+                          onChange={(e) =>
+                            setPickupInstructions(e.target.value)
+                          }
+                          disabled={booked}
+                          rows={3}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Delivery */}
+                  <div className="bg-base-200/50 border border-base-300 rounded-xl p-4">
+                    <div className="flex items-center gap-2 mb-4">
+                      <div className="p-1 bg-success/10 rounded-lg border border-success/20">
+                        <MapPin className="w-4 h-4 text-success" />
+                      </div>
+                      <h4 className="font-semibold text-base-content">
+                        Delivery Location
+                      </h4>
+                    </div>
+
+                    <div className="space-y-4">
+                      <div>
+                        <label className="label">
+                          <span className="label-text font-medium">
+                            Address
+                          </span>
+                        </label>
+                        <AddressAutocomplete
+                          value={deliveryAddress || ""}
+                          onChange={(address) => {
+                            setDeliveryAddress(address || "");
+                            delivery.setValue(address || "");
+                          }}
+                          disabled={booked}
+                          ready={delivery.ready}
+                          inputValue={delivery.value || ""}
+                          onInputChange={(value) =>
+                            delivery.setValue(value || "")
+                          }
+                          suggestions={delivery.suggestions}
+                          status={delivery.status}
+                          clearSuggestions={delivery.clearSuggestions}
+                          label="Delivery Address"
+                          onBlur={async () => {
+                            if (deliveryAddress) {
+                              const isValid = await validateAddress(
+                                deliveryAddress,
+                                trip?.destinationCity || "",
+                                "delivery"
+                              );
+                              if (!isValid) {
+                                setDeliveryAddress("");
+                                delivery.setValue("");
+                              }
+                            }
+                          }}
+                        />
+                      </div>
+
+                      <div>
+                        <label className="label">
+                          <span className="label-text font-medium">
+                            Instructions
+                          </span>
+                        </label>
+                        <textarea
+                          className="textarea textarea-bordered w-full focus:outline-none focus:border-primary"
+                          placeholder="Special delivery instructions"
+                          value={deliveryInstructions}
+                          onChange={(e) =>
+                            setDeliveryInstructions(e.target.value)
+                          }
+                          disabled={booked}
+                          rows={3}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-info/5 border border-info/20 rounded-xl p-4 mt-6">
+                  <div className="flex items-center gap-2 text-sm text-base-content/70">
+                    <Route className="w-4 h-4 text-info" />
+                    <span>
+                      Total Distance:{" "}
+                      <span className="font-semibold">
+                        {distance.toFixed(2)} km
+                      </span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Cargo Details */}
+              <div className="bg-base-100 rounded-2xl shadow-xl border border-base-300 p-6">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-2 bg-info/10 rounded-lg border border-info/20">
+                    <Package className="w-5 h-5 text-info" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-base-content">
+                      Cargo Information
+                    </h3>
+                    <p className="text-sm text-base-content/60">
+                      Weight and description of your cargo
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div>
+                    <label className="label">
+                      <span className="label-text font-medium">
+                        Weight (kg)
+                      </span>
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      className="input input-bordered w-full focus:outline-none focus:border-primary"
+                      placeholder="Enter cargo weight"
+                      value={cargoWeight}
+                      onChange={(e) => setCargoWeight(Number(e.target.value))}
+                      disabled={booked}
+                    />
+                    {truck && (
+                      <div className="label">
+                        <span className="label-text-alt text-base-content/60">
+                          Max capacity: {truck.maxLoadCapacity} kg
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="label">
+                      <span className="label-text font-medium">
+                        Description
+                      </span>
+                    </label>
+                    <textarea
+                      className="textarea textarea-bordered w-full focus:outline-none focus:border-primary"
+                      placeholder="Describe your cargo"
+                      value={cargoDescription}
+                      onChange={(e) => setCargoDescription(e.target.value)}
+                      disabled={booked}
+                      rows={3}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Vehicle & Transporter Info */}
+              <div className="bg-base-100 rounded-2xl shadow-xl border border-base-300 p-6">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-2 bg-warning/10 rounded-lg border border-warning/20">
+                    <Truck className="w-5 h-5 text-warning" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-base-content">
+                      Vehicle & Transporter
+                    </h3>
+                    <p className="text-sm text-base-content/60">
+                      Vehicle specifications and driver information
+                    </p>
+                  </div>
+                </div>
+
+                {/* Vehicle Specs */}
+                <div className="bg-base-200/50 border border-base-300 rounded-xl p-4 mb-6">
+                  <h4 className="font-semibold text-base-content mb-4 text-center">
+                    {truck?.year} {truck?.make} {truck?.model} -{" "}
+                    {truck?.truckType}
+                  </h4>
+
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="bg-base-100 rounded-lg p-3 text-center border border-base-300">
+                      <div className="w-4 h-4 mx-auto mb-1 text-primary font-bold">
+                        L
+                      </div>
+                      <p className="text-xs text-base-content/60">Length</p>
+                      <p className="text-sm font-semibold text-base-content">
+                        {truck?.length}m
+                      </p>
+                    </div>
+                    <div className="bg-base-100 rounded-lg p-3 text-center border border-base-300">
+                      <div className="w-4 h-4 mx-auto mb-1 text-primary font-bold">
+                        W
+                      </div>
+                      <p className="text-xs text-base-content/60">Width</p>
+                      <p className="text-sm font-semibold text-base-content">
+                        {truck?.width}m
+                      </p>
+                    </div>
+                    <div className="bg-base-100 rounded-lg p-3 text-center border border-base-300">
+                      <div className="w-4 h-4 mx-auto mb-1 text-primary font-bold">
+                        H
+                      </div>
+                      <p className="text-xs text-base-content/60">Height</p>
+                      <p className="text-sm font-semibold text-base-content">
+                        {truck?.height}m
+                      </p>
+                    </div>
+                    <div className="bg-base-100 rounded-lg p-3 text-center border border-base-300">
+                      <Package className="w-4 h-4 text-primary mx-auto mb-1" />
+                      <p className="text-xs text-base-content/60">Max Load</p>
+                      <p className="text-sm font-semibold text-base-content">
+                        {truck?.maxLoadCapacity}kg
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Transporter Info */}
+                <div className="bg-base-200/50 border border-base-300 rounded-xl p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="relative">
+                        <ProfileImage
+                          fileUrl={tripIssuer?.profileImageUrl}
+                          size={48}
+                        />
+                        <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-success rounded-full border-2 border-base-100"></div>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-base-content">
+                          {tripIssuer?.name}
+                        </h4>
+                        <div className="flex items-center gap-1 text-sm text-base-content/60">
+                          <Star className="w-3 h-3 fill-warning text-warning" />
+                          <span>
+                            {tripIssuer?.averageRating} (
+                            {tripIssuer?.ratingCount} reviews)
+                          </span>
+                        </div>
+                        <p className="text-sm text-base-content/60">
+                          {tripIssuer?.email}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      className="btn btn-outline btn-sm gap-2"
+                      onClick={() =>
+                        (window.location.href = `/profiles/${tripIssuer?._id}`)
+                      }
+                    >
+                      <User className="w-4 h-4" />
+                      View Profile
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
 
-        {/* Map & Price/Action */}
-        <div className="flex flex-col gap-8 h-full">
-          {/* Map */}
-          <div
-            className="bg-base-100 rounded-2xl shadow-xl overflow-hidden"
-            style={{ height: "400px" }}
-          >
-            <GoogleMap
-              mapContainerStyle={{
-                width: "100%",
-                height: "100%",
-              }}
-              options={{
-                zoomControl: true,
-                streetViewControl: true,
-                mapTypeControl: true,
-                fullscreenControl: true,
-                gestureHandling: "greedy",
-                clickableIcons: false,
-                mapTypeId: google.maps.MapTypeId.ROADMAP,
-              }}
-              zoom={7}
-              center={pickupCoords}
-              onClick={(e) => {}}
-              onLoad={(map) => {
-                window.google.maps.event.trigger(map, "resize");
-              }}
-            >
-              {(trip?.originCity || pickupAddress) &&
-                (trip?.destinationCity || deliveryAddress) && (
-                  <DirectionsService
+            {/* Sidebar */}
+            <div className="space-y-6">
+              {/* Map */}
+              <div className="bg-base-100 rounded-2xl shadow-xl border border-base-300 overflow-hidden">
+                <div className="p-4 border-b border-base-300">
+                  <div className="flex items-center gap-2">
+                    <Route className="w-5 h-5 text-primary" />
+                    <h3 className="font-semibold text-base-content">
+                      Route Map
+                    </h3>
+                  </div>
+                </div>
+                <div style={{ height: "400px", width: "100%" }}>
+                  <GoogleMap
+                    mapContainerStyle={{ width: "100%", height: "100%" }}
                     options={{
-                      origin:
-                        pickupAddress || `${trip?.originCity}, South Africa`,
-                      destination:
-                        deliveryAddress ||
-                        `${trip?.destinationCity}, South Africa`,
-                      travelMode: google.maps.TravelMode.DRIVING,
+                      zoomControl: true,
+                      streetViewControl: true,
+                      mapTypeControl: true,
+                      fullscreenControl: true,
+                      gestureHandling: "greedy",
+                      clickableIcons: false,
+                      mapTypeId: google.maps.MapTypeId.ROADMAP,
                     }}
-                    callback={(response, status) => {
-                      if (response !== null && status === "OK") {
-                        setDirections(response);
-                        const distanceInKm =
-                          response.routes?.[0]?.legs?.[0]?.distance?.value !=
-                          null
-                            ? response.routes[0].legs[0].distance.value / 1000
-                            : 0;
-                        setDistance(distanceInKm);
-                      }
+                    zoom={7}
+                    center={pickupCoords}
+                    onClick={(e) => {}}
+                    onLoad={(map) => {
+                      window.google.maps.event.trigger(map, "resize");
                     }}
-                  />
-                )}
-              {directions && (
-                <DirectionsRenderer
-                  options={{
-                    suppressMarkers: false,
-                    preserveViewport: false,
-                    draggable: true,
-                  }}
-                  directions={directions}
-                />
-              )}
-            </GoogleMap>
-          </div>
-          {/* Price & Action */}
-          <div className="bg-base-100 rounded-2xl shadow-xl p-6 flex flex-col gap-4">
-            <div className="space-y-2 mb-4">
-              <p className="flex justify-between">
-                <span>Base Price:</span>
-                <span className="font-semibold">R{trip?.basePrice}</span>
-              </p>
-              <p className="flex justify-between">
-                <span>Rate per KG:</span>
-                <span>R{trip?.KGPrice}</span>
-              </p>
-              <p className="flex justify-between">
-                <span>Rate per KM:</span>
-                <span>R{trip?.KMPrice}</span>
-              </p>
-              <p className="flex justify-between">
-                <span>Service Fees:</span>
-                <span>R{tripFees}</span>
-              </p>
-              <div className="border-t border-base-300 my-2" />
-              <p className="flex justify-between text-lg font-semibold">
-                <span>Total:</span>
-                <span>R{fullTripPrice.toFixed(2)}</span>
-              </p>
-            </div>
-            <div className="flex justify-center">
-              {!trip || !userId ? (
-                <div className="loading loading-spinner"></div>
-              ) : userId === trip.userId ? (
-                <p className="text-base-content/80">You are the trip issuer</p>
-              ) : booked && purchaseTripDetails ? (
-                purchaseTripDetails.status === "Delivered" ? (
-                  <TripRatingComponent
-                    purchaseTripId={purchaseTripDetails._id}
-                  />
-                ) : (
-                  <TripCancelButton
-                    purchaseTripId={purchaseTripDetails._id}
-                    tripId={trip._id}
-                    currentStatus={purchaseTripDetails.status}
-                  />
-                )
-              ) : (
-                <BookTripButton
-                  trip={{
-                    tripId: trip?._id as Id<"trip">,
-                    price: tripPriceWithoutFees,
-                    transporterId: trip?.userId,
-                  }}
-                  user={{
-                    _id: userId,
-                    email: user?.emailAddresses[0]?.emailAddress,
-                  }}
-                  onBookTrip={handleBookTrip} // Pass the handler
-                />
-              )}
+                  >
+                    {(trip?.originCity || pickupAddress) &&
+                      (trip?.destinationCity || deliveryAddress) && (
+                        <DirectionsService
+                          options={{
+                            origin:
+                              pickupAddress ||
+                              `${trip?.originCity}, South Africa`,
+                            destination:
+                              deliveryAddress ||
+                              `${trip?.destinationCity}, South Africa`,
+                            travelMode: google.maps.TravelMode.DRIVING,
+                          }}
+                          callback={(response, status) => {
+                            if (response !== null && status === "OK") {
+                              setDirections(response);
+                              const distanceInKm =
+                                response.routes?.[0]?.legs?.[0]?.distance
+                                  ?.value != null
+                                  ? response.routes[0].legs[0].distance.value /
+                                    1000
+                                  : 0;
+                              setDistance(distanceInKm);
+                            }
+                          }}
+                        />
+                      )}
+                    {directions && (
+                      <DirectionsRenderer
+                        options={{
+                          suppressMarkers: false,
+                          preserveViewport: false,
+                          draggable: true,
+                        }}
+                        directions={directions}
+                      />
+                    )}
+                  </GoogleMap>
+                </div>
+              </div>
+
+              {/* Price Breakdown */}
+              <div className="bg-base-100 rounded-2xl shadow-xl border border-base-300 p-6">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-2 bg-success/10 rounded-lg border border-success/20">
+                    <FileText className="w-5 h-5 text-success" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-base-content">
+                      Price Breakdown
+                    </h3>
+                    <p className="text-sm text-base-content/60">
+                      Trip cost details
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  {trip?.basePrice && trip.basePrice > 0 && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-base-content/70">Base Price:</span>
+                      <span className="font-medium">
+                        R{trip.basePrice.toFixed(2)}
+                      </span>
+                    </div>
+                  )}
+
+                  {trip?.KGPrice && trip.KGPrice > 0 && (
+                    <>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-base-content/70">
+                          Rate per KG:
+                        </span>
+                        <span>R{trip.KGPrice}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-base-content/70">
+                          Weight ({cargoWeight}kg):
+                        </span>
+                        <span>R{variableKGPrice.toFixed(2)}</span>
+                      </div>
+                    </>
+                  )}
+
+                  {trip?.KMPrice && trip.KMPrice > 0 && (
+                    <>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-base-content/70">
+                          Rate per KM:
+                        </span>
+                        <span>R{trip.KMPrice}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-base-content/70">
+                          Distance ({distance.toFixed(1)}km):
+                        </span>
+                        <span>R{variableKMPrice.toFixed(2)}</span>
+                      </div>
+                    </>
+                  )}
+
+                  <div className="flex justify-between text-sm">
+                    <span className="text-base-content/70">
+                      Service Fees (5%):
+                    </span>
+                    <span>R{tripFees.toFixed(2)}</span>
+                  </div>
+
+                  <div className="border-t border-base-300 pt-3">
+                    <div className="flex justify-between text-lg font-bold">
+                      <span>Total:</span>
+                      <span className="text-success">
+                        R{fullTripPrice.toFixed(2)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Action Button */}
+                <div className="mt-6">
+                  {!trip || !userId ? (
+                    <div className="flex justify-center py-4">
+                      <div className="loading loading-spinner loading-lg"></div>
+                    </div>
+                  ) : userId === trip.userId ? (
+                    <div className="bg-info/10 border border-info/20 rounded-lg p-4 text-center">
+                      <p className="text-sm text-base-content/70">
+                        You are the trip issuer
+                      </p>
+                    </div>
+                  ) : booked && purchaseTripDetails ? (
+                    purchaseTripDetails.status === "Delivered" ? (
+                      <TripRatingComponent
+                        purchaseTripId={purchaseTripDetails._id}
+                      />
+                    ) : (
+                      <TripCancelButton
+                        purchaseTripId={purchaseTripDetails._id}
+                        tripId={trip._id}
+                        currentStatus={purchaseTripDetails.status}
+                      />
+                    )
+                  ) : (
+                    <BookTripButton
+                      trip={{
+                        tripId: trip?._id as Id<"trip">,
+                        price: tripPriceWithoutFees,
+                        transporterId: trip?.userId,
+                      }}
+                      user={{
+                        _id: userId,
+                        email: user?.emailAddresses[0]?.emailAddress,
+                      }}
+                      onBookTrip={handleBookTrip}
+                    />
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         </div>
