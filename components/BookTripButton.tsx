@@ -64,7 +64,7 @@ const BookTripButton = ({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email: user.email,
-          amount: payableAmount * 100, // Convert to kobo
+          amount: Math.round(payableAmount * 100), // Now: Math.round(150050.0) = 150050 (integer)
           reference: reference,
           callback_url: `${window.location.origin}/payment/callback`,
           tripId: trip.tripId,
