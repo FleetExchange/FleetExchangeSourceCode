@@ -7,8 +7,25 @@ import { useState } from "react";
 import { usePlacesWithRestrictions } from "@/hooks/usePlacesWithRestrictions";
 import { AddressAutocomplete } from "./AddressAutocomplete";
 import { Id } from "@/convex/_generated/dataModel";
+import { useRouter } from "next/navigation";
+import {
+  MapPin,
+  Package,
+  Truck,
+  Calendar,
+  Clock,
+  DollarSign,
+  ArrowLeft,
+  Building,
+  Route,
+  Settings,
+  Plus,
+  X,
+} from "lucide-react";
 
 const CreateTripPage = () => {
+  const router = useRouter();
+
   // Get Id of the user creating the trip
   // Get the logged in user identity
   const { user } = useUser();
@@ -142,200 +159,492 @@ const CreateTripPage = () => {
 
   // Add loading state handling
   if (!userId || !userFleets) {
-    return <div>Loading...</div>;
+    return (
+      <div className="min-h-screen bg-base-200 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="loading loading-spinner loading-lg"></div>
+          <p className="text-base-content/60">Loading...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="flex justify-center items-start min-h-screen bg-base-200 py-10">
-      <div className="w-full max-w-3xl bg-base-100 rounded-2xl shadow-xl p-8">
-        <h1 className="text-3xl font-bold text-primary mb-2">Create Trip</h1>
-        <p className="text-base-content/70 mb-6">
-          Fill in the details below to create a new trip.
-        </p>
-        <div className="divider my-4" />
+    <div className="min-h-screen bg-base-200">
+      <div className="p-4 lg:p-6">
+        <div className="w-full max-w-5xl mx-auto">
+          {/* Header with Back Button */}
+          <div className="mb-8 pl-16 lg:pl-0">
+            <div className="flex items-center gap-4 mb-4">
+              <button
+                onClick={() => router.back()}
+                className="btn btn-ghost btn-sm gap-2 text-base-content hover:bg-base-300 transition-colors"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                <span className="hidden sm:inline">Back</span>
+              </button>
+              <div className="w-px h-6 bg-base-300"></div>
+              <div>
+                <h1 className="text-2xl lg:text-3xl font-bold text-base-content">
+                  Create New Trip
+                </h1>
+                <p className="text-base-content/60 mt-1">
+                  Fill in the details below to create a new transportation
+                  service
+                </p>
+              </div>
+            </div>
+          </div>
 
-        {/* Origin & Destination */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          <fieldset className="space-y-2">
-            <legend className="text-base font-medium">Origin City</legend>
-            <AddressAutocomplete
-              value={originCity}
-              onChange={(city) => {
-                setOriginCity(city);
-                pickup.setValue(city);
-              }}
-              ready={pickup.ready}
-              inputValue={pickup.value}
-              onInputChange={pickup.setValue}
-              suggestions={pickup.suggestions}
-              status={pickup.status}
-              clearSuggestions={pickup.clearSuggestions}
-              label="Origin City"
-            />
-          </fieldset>
-          <fieldset className="space-y-2">
-            <legend className="text-base font-medium">Destination City</legend>
-            <AddressAutocomplete
-              value={destinationCity}
-              onChange={(city) => {
-                setDestinationCity(city);
-                delivery.setValue(city);
-              }}
-              ready={delivery.ready}
-              inputValue={delivery.value}
-              onInputChange={delivery.setValue}
-              suggestions={delivery.suggestions}
-              status={delivery.status}
-              clearSuggestions={delivery.clearSuggestions}
-              label="Destination City"
-            />
-          </fieldset>
-        </div>
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+            {/* Main Form */}
+            <div className="xl:col-span-2 space-y-6">
+              {/* Route Information */}
+              <div className="bg-base-100 rounded-2xl shadow-xl border border-base-300 p-6">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-2 bg-primary/10 rounded-lg border border-primary/20">
+                    <Route className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-bold text-base-content">
+                      Route Information
+                    </h2>
+                    <p className="text-sm text-base-content/60">
+                      Define your trip's origin and destination
+                    </p>
+                  </div>
+                </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          <fieldset className="space-y-2">
-            <legend className="text-base font-medium">Departure Date</legend>
-            <input
-              type="datetime-local"
-              className="input input-bordered w-full focus:outline-none focus:ring-0"
-              value={formatDateForInput(departureDate)}
-              onChange={handleDepartureChange}
-              min={formatDateForInput(new Date().toISOString())}
-            />
-          </fieldset>
-          <fieldset className="space-y-2">
-            <legend className="text-base font-medium">Arrival Date</legend>
-            <input
-              type="datetime-local"
-              className="input input-bordered w-full focus:outline-none focus:ring-0"
-              value={formatDateForInput(arrivalDate)}
-              onChange={handleArrivalChange}
-              min={formatDateForInput(
-                departureDate || new Date().toISOString()
-              )}
-            />
-          </fieldset>
-        </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="label">
+                      <span className="label-text font-medium flex items-center gap-2">
+                        <MapPin className="w-4 h-4 text-primary" />
+                        Origin City
+                      </span>
+                    </label>
+                    <AddressAutocomplete
+                      value={originCity}
+                      onChange={(city) => {
+                        setOriginCity(city);
+                        pickup.setValue(city);
+                      }}
+                      ready={pickup.ready}
+                      inputValue={pickup.value}
+                      onInputChange={pickup.setValue}
+                      suggestions={pickup.suggestions}
+                      status={pickup.status}
+                      clearSuggestions={pickup.clearSuggestions}
+                      label="Origin City"
+                    />
+                  </div>
 
-        <div className="divider my-6" />
+                  <div className="space-y-2">
+                    <label className="label">
+                      <span className="label-text font-medium flex items-center gap-2">
+                        <MapPin className="w-4 h-4 text-success" />
+                        Destination City
+                      </span>
+                    </label>
+                    <AddressAutocomplete
+                      value={destinationCity}
+                      onChange={(city) => {
+                        setDestinationCity(city);
+                        delivery.setValue(city);
+                      }}
+                      ready={delivery.ready}
+                      inputValue={delivery.value}
+                      onInputChange={delivery.setValue}
+                      suggestions={delivery.suggestions}
+                      status={delivery.status}
+                      clearSuggestions={delivery.clearSuggestions}
+                      label="Destination City"
+                    />
+                  </div>
+                </div>
+              </div>
 
-        {/* Price Inputs */}
-        <h2 className="font-semibold text-lg mb-2">Pricing</h2>
-        <p className=" text-sm m-1">
-          {" "}
-          Configure your ideal pricing schema with a combination of minimum trip
-          price & variable prices per KM or KG.
-        </p>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          <fieldset className="space-y-2">
-            <legend className="text-base font-medium">Base Price (R)</legend>
-            <label className="input-group">
-              <span>R</span>
-              <input
-                type="number"
-                step="0.01"
-                min="0"
-                placeholder="0.00"
-                className="input input-bordered w-full focus:outline-none focus:ring-0"
-                value={basePrice}
-                onChange={handleBasePrice}
-              />
-            </label>
-          </fieldset>
-          <fieldset className="space-y-2">
-            <legend className="text-base font-medium">
-              Amount per KG of Additional Weight (R/kg)
-            </legend>
-            <label className="input-group">
-              <span>R</span>
-              <input
-                type="number"
-                step="0.01"
-                min="0"
-                placeholder="0.00"
-                className="input input-bordered w-full focus:outline-none focus:ring-0"
-                value={KGPrice}
-                onChange={handleKGPrice}
-              />
-            </label>
-          </fieldset>
-          <fieldset className="space-y-2">
-            <legend className="text-base font-medium">
-              Amount per KM of Route Distance (R/km)
-            </legend>
-            <label className="input-group">
-              <span>R</span>
-              <input
-                type="number"
-                step="0.01"
-                min="0"
-                placeholder="0.00"
-                className="input input-bordered w-full focus:outline-none focus:ring-0"
-                value={KMPrice}
-                onChange={handleKMPrice}
-              />
-            </label>
-          </fieldset>
-        </div>
+              {/* Schedule */}
+              <div className="bg-base-100 rounded-2xl shadow-xl border border-base-300 p-6">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-2 bg-info/10 rounded-lg border border-info/20">
+                    <Calendar className="w-5 h-5 text-info" />
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-bold text-base-content">
+                      Schedule
+                    </h2>
+                    <p className="text-sm text-base-content/60">
+                      Set your departure and arrival times
+                    </p>
+                  </div>
+                </div>
 
-        <div className="divider my-6" />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="label">
+                      <span className="label-text font-medium flex items-center gap-2">
+                        <Clock className="w-4 h-4 text-info" />
+                        Departure Date & Time
+                      </span>
+                    </label>
+                    <input
+                      type="datetime-local"
+                      className="input input-bordered w-full focus:outline-none focus:border-primary"
+                      value={formatDateForInput(departureDate)}
+                      onChange={handleDepartureChange}
+                      min={formatDateForInput(new Date().toISOString())}
+                    />
+                  </div>
 
-        {/* Fleet and Truck Selection */}
-        <h2 className="font-semibold text-lg mb-2">Fleet & Truck</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          <fieldset className="space-y-2">
-            <legend className="text-base font-medium">Select Fleet</legend>
-            <select
-              className="select select-bordered w-full focus:outline-none focus:ring-0"
-              value={selectedFleetId || ""}
-              onChange={(e) => {
-                const value = e.target.value;
-                setSelectedFleetId(value ? (value as Id<"fleet">) : null);
-                setSelectedTruckId(null);
-              }}
-            >
-              <option value="">Select a fleet</option>
-              {userFleets?.map((fleet) => (
-                <option key={fleet._id} value={fleet._id}>
-                  {fleet.fleetName}
-                </option>
-              ))}
-            </select>
-          </fieldset>
-          <fieldset className="space-y-2">
-            <legend className="text-base font-medium">Select Truck</legend>
-            <select
-              className="select select-bordered w-full focus:outline-none focus:ring-0"
-              value={selectedTruckId || ""}
-              onChange={(e) => {
-                const value = e.target.value;
-                setSelectedTruckId(value ? (value as Id<"truck">) : null);
-              }}
-              disabled={!selectedFleetId || fleetTruckIds.length === 0}
-            >
-              <option value="">Select a truck</option>
-              {fleetTrucks?.map((truck) => (
-                <option key={truck._id} value={truck._id}>
-                  {truck?.registration} - {truck.model}
-                </option>
-              ))}
-            </select>
-          </fieldset>
-        </div>
+                  <div className="space-y-2">
+                    <label className="label">
+                      <span className="label-text font-medium flex items-center gap-2">
+                        <Clock className="w-4 h-4 text-success" />
+                        Arrival Date & Time
+                      </span>
+                    </label>
+                    <input
+                      type="datetime-local"
+                      className="input input-bordered w-full focus:outline-none focus:border-primary"
+                      value={formatDateForInput(arrivalDate)}
+                      onChange={handleArrivalChange}
+                      min={formatDateForInput(
+                        departureDate || new Date().toISOString()
+                      )}
+                    />
+                  </div>
+                </div>
+              </div>
 
-        {/* Action Buttons */}
-        <div className="flex justify-end gap-4 mt-8">
-          <button
-            className="btn btn-ghost"
-            onClick={() => {
-              window.location.href = "/myTrips";
-            }}
-          >
-            Discard
-          </button>
-          <button className="btn btn-primary" onClick={handleCreateTrip}>
-            Create Trip
-          </button>
+              {/* Pricing */}
+              <div className="bg-base-100 rounded-2xl shadow-xl border border-base-300 p-6">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-2 bg-success/10 rounded-lg border border-success/20">
+                    <DollarSign className="w-5 h-5 text-success" />
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-bold text-base-content">
+                      Pricing Structure
+                    </h2>
+                    <p className="text-sm text-base-content/60">
+                      Configure your pricing with base price and variable rates
+                    </p>
+                  </div>
+                </div>
+
+                <div className="bg-warning/5 border border-warning/20 rounded-xl p-4 mb-6">
+                  <div className="flex items-start gap-2">
+                    <Settings className="w-4 h-4 text-warning mt-0.5" />
+                    <div className="text-sm text-base-content/70">
+                      <p className="font-medium mb-1">
+                        Flexible Pricing Options:
+                      </p>
+                      <p>
+                        Combine a minimum trip price with variable rates per KM
+                        or KG to create your ideal pricing schema.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  <div className="space-y-2">
+                    <label className="label">
+                      <span className="label-text font-medium">
+                        Base Price (R)
+                      </span>
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <span className="text-base-content/60 text-sm">R</span>
+                      </div>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        placeholder="0.00"
+                        className="input input-bordered w-full pl-8 focus:outline-none focus:border-primary"
+                        value={basePrice || ""}
+                        onChange={handleBasePrice}
+                      />
+                    </div>
+                    <div className="label">
+                      <span className="label-text-alt text-base-content/60">
+                        Minimum trip cost
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="label">
+                      <span className="label-text font-medium">
+                        Rate per KG (R/kg)
+                      </span>
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <span className="text-base-content/60 text-sm">R</span>
+                      </div>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        placeholder="0.00"
+                        className="input input-bordered w-full pl-8 focus:outline-none focus:border-primary"
+                        value={KGPrice || ""}
+                        onChange={handleKGPrice}
+                      />
+                    </div>
+                    <div className="label">
+                      <span className="label-text-alt text-base-content/60">
+                        Per kg of cargo weight
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="label">
+                      <span className="label-text font-medium">
+                        Rate per KM (R/km)
+                      </span>
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <span className="text-base-content/60 text-sm">R</span>
+                      </div>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        placeholder="0.00"
+                        className="input input-bordered w-full pl-8 focus:outline-none focus:border-primary"
+                        value={KMPrice || ""}
+                        onChange={handleKMPrice}
+                      />
+                    </div>
+                    <div className="label">
+                      <span className="label-text-alt text-base-content/60">
+                        Per km of route distance
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Fleet & Truck Selection */}
+              <div className="bg-base-100 rounded-2xl shadow-xl border border-base-300 p-6">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-2 bg-warning/10 rounded-lg border border-warning/20">
+                    <Truck className="w-5 h-5 text-warning" />
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-bold text-base-content">
+                      Fleet & Vehicle
+                    </h2>
+                    <p className="text-sm text-base-content/60">
+                      Select the fleet and truck for this trip
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="label">
+                      <span className="label-text font-medium flex items-center gap-2">
+                        <Building className="w-4 h-4 text-warning" />
+                        Select Fleet
+                      </span>
+                    </label>
+                    <select
+                      className="select select-bordered w-full focus:outline-none focus:border-primary"
+                      value={selectedFleetId || ""}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setSelectedFleetId(
+                          value ? (value as Id<"fleet">) : null
+                        );
+                        setSelectedTruckId(null);
+                      }}
+                    >
+                      <option value="">Choose a fleet</option>
+                      {userFleets?.map((fleet) => (
+                        <option key={fleet._id} value={fleet._id}>
+                          {fleet.fleetName}
+                        </option>
+                      ))}
+                    </select>
+                    {!userFleets?.length && (
+                      <div className="label">
+                        <span className="label-text-alt text-error">
+                          No fleets available. Create a fleet first.
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="label">
+                      <span className="label-text font-medium flex items-center gap-2">
+                        <Truck className="w-4 h-4 text-warning" />
+                        Select Truck
+                      </span>
+                    </label>
+                    <select
+                      className="select select-bordered w-full focus:outline-none focus:border-primary"
+                      value={selectedTruckId || ""}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setSelectedTruckId(
+                          value ? (value as Id<"truck">) : null
+                        );
+                      }}
+                      disabled={!selectedFleetId || fleetTruckIds.length === 0}
+                    >
+                      <option value="">Choose a truck</option>
+                      {fleetTrucks?.map((truck) => (
+                        <option key={truck._id} value={truck._id}>
+                          {truck?.registration} - {truck.model}
+                        </option>
+                      ))}
+                    </select>
+                    {selectedFleetId && fleetTruckIds.length === 0 && (
+                      <div className="label">
+                        <span className="label-text-alt text-warning">
+                          No trucks in selected fleet
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Sidebar - Preview & Actions */}
+            <div className="space-y-6">
+              {/* Trip Preview */}
+              <div className="bg-base-100 rounded-2xl shadow-xl border border-base-300 p-6 sticky top-6">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-2 bg-info/10 rounded-lg border border-info/20">
+                    <Package className="w-5 h-5 text-info" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-base-content">
+                      Trip Preview
+                    </h3>
+                    <p className="text-sm text-base-content/60">
+                      Review your trip details
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  {/* Route */}
+                  <div className="bg-base-200/50 border border-base-300 rounded-lg p-3">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Route className="w-4 h-4 text-primary" />
+                      <span className="text-sm font-medium">Route</span>
+                    </div>
+                    <p className="text-sm text-base-content/70">
+                      {originCity || "Origin"} →{" "}
+                      {destinationCity || "Destination"}
+                    </p>
+                  </div>
+
+                  {/* Schedule */}
+                  {(departureDate || arrivalDate) && (
+                    <div className="bg-base-200/50 border border-base-300 rounded-lg p-3">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Calendar className="w-4 h-4 text-info" />
+                        <span className="text-sm font-medium">Schedule</span>
+                      </div>
+                      <div className="space-y-1 text-xs text-base-content/70">
+                        {departureDate && (
+                          <p>
+                            Depart: {new Date(departureDate).toLocaleString()}
+                          </p>
+                        )}
+                        {arrivalDate && (
+                          <p>
+                            Arrive: {new Date(arrivalDate).toLocaleString()}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Pricing */}
+                  {(basePrice > 0 || KGPrice > 0 || KMPrice > 0) && (
+                    <div className="bg-base-200/50 border border-base-300 rounded-lg p-3">
+                      <div className="flex items-center gap-2 mb-2">
+                        <DollarSign className="w-4 h-4 text-success" />
+                        <span className="text-sm font-medium">Pricing</span>
+                      </div>
+                      <div className="space-y-1 text-xs text-base-content/70">
+                        {basePrice > 0 && <p>Base: R{basePrice.toFixed(2)}</p>}
+                        {KGPrice > 0 && <p>Per KG: R{KGPrice.toFixed(2)}</p>}
+                        {KMPrice > 0 && <p>Per KM: R{KMPrice.toFixed(2)}</p>}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Vehicle */}
+                  {selectedFleetId && selectedTruckId && (
+                    <div className="bg-base-200/50 border border-base-300 rounded-lg p-3">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Truck className="w-4 h-4 text-warning" />
+                        <span className="text-sm font-medium">Vehicle</span>
+                      </div>
+                      <div className="space-y-1 text-xs text-base-content/70">
+                        <p>
+                          Fleet:{" "}
+                          {
+                            userFleets?.find((f) => f._id === selectedFleetId)
+                              ?.fleetName
+                          }
+                        </p>
+                        <p>
+                          Truck:{" "}
+                          {
+                            fleetTrucks?.find((t) => t._id === selectedTruckId)
+                              ?.registration
+                          }
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex flex-col gap-3 mt-6">
+                  <button
+                    className="btn btn-primary gap-2"
+                    onClick={handleCreateTrip}
+                    disabled={
+                      !originCity ||
+                      !destinationCity ||
+                      !departureDate ||
+                      !arrivalDate ||
+                      !selectedFleetId ||
+                      !selectedTruckId
+                    }
+                  >
+                    <Plus className="w-4 h-4" />
+                    Create Trip
+                  </button>
+                  <button
+                    className="btn btn-ghost gap-2"
+                    onClick={() => {
+                      window.location.href = "/myTrips";
+                    }}
+                  >
+                    <X className="w-4 h-4" />
+                    Discard
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

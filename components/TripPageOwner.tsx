@@ -139,7 +139,7 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
     try {
       await deleteTrip({ tripId: tripId as Id<"trip"> });
       alert("Trip deleted successfully.");
-      window.location.href = "/";
+      window.location.href = "/myTrips";
     } catch (error) {
       console.error("Failed to delete trip:", error);
       alert("Failed to delete trip. Please try again.");
