@@ -4,6 +4,8 @@ import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import ClientSidebar from "@/components/ClientSidebar";
 import TransporterSidebar from "@/components/TransporterSidebar";
+import MobileMenuTransporter from "@/components/MobileMenuTransporter";
+import MobileMenuClient from "@/components/MobileMenuClient";
 
 export default function BookingsLayout({
   children,
@@ -33,9 +35,25 @@ export default function BookingsLayout({
   const renderSidebar = () => {
     switch (convexUser.role) {
       case "client":
-        return <ClientSidebar />;
+        return (
+          <>
+            <div className="hidden lg:block">
+              <ClientSidebar />
+            </div>
+            <MobileMenuClient />
+          </>
+        );
+
       case "transporter":
-        return <TransporterSidebar />;
+        return (
+          <>
+            <div className="hidden lg:block">
+              <TransporterSidebar />
+            </div>
+
+            <MobileMenuTransporter />
+          </>
+        );
       default:
         return (
           <div className="w-64 bg-base-100 min-h-screen flex items-center justify-center">
@@ -46,9 +64,10 @@ export default function BookingsLayout({
   };
 
   return (
-    <div className="flex min-h-screen">
+    <>
       {renderSidebar()}
-      <main className="flex-1 overflow-auto">{children}</main>
-    </div>
+      {/* Main Content */}
+      <main className="lg:ml-20">{children}</main>
+    </>
   );
 }
