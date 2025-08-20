@@ -5,6 +5,7 @@ import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useUser } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
+import { Calendar as CalendarIcon } from "lucide-react";
 
 const ClientCalendarPage = () => {
   const { user } = useUser();
@@ -40,14 +41,54 @@ const ClientCalendarPage = () => {
     })) ?? [];
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-base-200 p-4">
-      <div className="w-full max-w-6xl bg-base-100 rounded-2xl shadow-xl p-6">
-        <h1 className="text-3xl font-bold mb-2 text-primary">Calendar</h1>
-        <p className="mb-6 text-base-content/70 text-center">
-          View all your upcoming bookings in one place.
-        </p>
+    <div className="min-h-screen bg-base-200">
+      <div className="p-4 lg:p-6">
+        <div className="w-full max-w-7xl mx-auto">
+          {/* Header Section */}
+          <div className="mb-8 pl-16 lg:pl-0">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
+              <div>
+                <h1 className="text-2xl lg:text-3xl font-bold text-base-content">
+                  Calendar
+                </h1>
+                <p className="text-base-content/60 mt-2">
+                  View all your upcoming bookings in one place
+                </p>
+              </div>
+              {/* Optional stats or action button could go here */}
+            </div>
+          </div>
 
-        <FullCalendar bookings={bookingEvents} />
+          {/* Calendar Section */}
+          <div className="bg-base-100 rounded-2xl shadow-xl border border-base-300 overflow-hidden">
+            <div className="bg-gradient-to-r from-primary/10 to-primary/5 border-b border-base-300 p-4 lg:p-6">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-primary/10 rounded-lg border border-primary/20">
+                  <CalendarIcon className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-bold text-base-content">
+                    Booking Calendar
+                  </h2>
+                  <p className="text-sm text-base-content/60">
+                    {bookingEvents.length} active bookings scheduled
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Calendar Content */}
+            <div className="p-4 lg:p-6">
+              {clientBookings ? (
+                <FullCalendar bookings={bookingEvents} />
+              ) : (
+                <div className="flex items-center justify-center py-8">
+                  <div className="loading loading-spinner loading-lg"></div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

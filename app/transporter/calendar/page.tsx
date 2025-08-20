@@ -5,6 +5,7 @@ import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useUser } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
+import { Calendar as CalendarIcon, Truck } from "lucide-react";
 
 const TransporterCalendarPage = () => {
   const { user } = useUser();
@@ -82,30 +83,70 @@ const TransporterCalendarPage = () => {
       end: new Date(booking.arrivalDate),
     })) ?? [];
 
+  const totalEvents = tripEvents.length + bookingEvents.length;
+
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-base-200 p-4">
-      <div className="w-full max-w-6xl bg-base-100 rounded-2xl shadow-xl p-6">
-        <h1 className="text-3xl font-bold mb-2 text-primary">Calendar</h1>
-        <p className="mb-6 text-base-content/70 text-center">
-          View all your upcoming trips and bookings in one place.
-        </p>
-        <div className="flex items-center justify-center gap-6 mb-6">
-          <div className="flex items-center gap-2">
-            <span className="inline-block w-4 h-4 rounded bg-blue-500 border border-blue-700"></span>
-            <span className="text-sm text-base-content">
-              Trips are{" "}
-              <span className="font-semibold text-blue-600">blue</span>
-            </span>
+    <div className="min-h-screen bg-base-200">
+      <div className="p-4 lg:p-6">
+        <div className="w-full max-w-7xl mx-auto">
+          {/* Header Section */}
+          <div className="mb-8 pl-16 lg:pl-0">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
+              <div>
+                <h1 className="text-2xl lg:text-3xl font-bold text-base-content">
+                  Calendar
+                </h1>
+                <p className="text-base-content/60 mt-2">
+                  View all your trips and bookings in one place
+                </p>
+              </div>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="inline-block w-4 h-4 rounded bg-green-500 border border-green-700"></span>
-            <span className="text-sm text-base-content">
-              Bookings are{" "}
-              <span className="font-semibold text-green-600">green</span>
-            </span>
+
+          {/* Calendar Section */}
+          <div className="bg-base-100 rounded-2xl shadow-xl border border-base-300 overflow-hidden">
+            <div className="bg-gradient-to-r from-primary/10 to-primary/5 border-b border-base-300 p-4 lg:p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 bg-primary/10 rounded-lg border border-primary/20">
+                  <CalendarIcon className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-bold text-base-content">
+                    Transportation Calendar
+                  </h2>
+                  <p className="text-sm text-base-content/60">
+                    {totalEvents} active trips and bookings scheduled
+                  </p>
+                </div>
+              </div>
+
+              {/* Legend */}
+              <div className="flex flex-wrap items-center gap-4 lg:gap-6">
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded bg-info border-2 border-info-content/20"></div>
+                  <span className="text-sm text-base-content">Your Trips</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded bg-success border-2 border-success-content/20"></div>
+                  <span className="text-sm text-base-content">
+                    Your Bookings
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Calendar Content */}
+            <div className="p-4 lg:p-6">
+              {trips && transporterBookings ? (
+                <FullCalendar trips={tripEvents} bookings={bookingEvents} />
+              ) : (
+                <div className="flex items-center justify-center py-8">
+                  <div className="loading loading-spinner loading-lg"></div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
-        <FullCalendar trips={tripEvents} bookings={bookingEvents} />
       </div>
     </div>
   );
