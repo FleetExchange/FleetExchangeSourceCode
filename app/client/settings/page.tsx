@@ -1,31 +1,140 @@
 "use client";
 
 import HelpPage from "@/components/HelpPage";
-import React from "react";
+
+import { Settings, Bell, HelpCircle } from "lucide-react";
+import React, { useState } from "react";
 
 const ClientSettings = () => {
+  const [activeTab, setActiveTab] = useState("notifications");
+
+  const tabs = [
+    {
+      id: "help",
+      label: "Help & Support",
+      icon: HelpCircle,
+      component: <HelpPage />,
+    },
+  ];
+
   return (
-    <div className="flex items-center justify-center min-h-screen bg-base-200">
-      <div className="w-full max-w-2xl mx-auto">
-        <div className="tabs tabs-lift">
-          <input
-            type="radio"
-            name="my_tabs_3"
-            className="tab"
-            aria-label="Notification Center"
-          />
-          <div className="tab-content bg-base-100 border-base-300 p-6">
-            Tab content 2
+    <div className="min-h-screen bg-base-200">
+      <div className="p-4 lg:p-6">
+        <div className="w-full max-w-6xl mx-auto">
+          {/* Header Section */}
+          <div className="mb-8 pl-16 lg:pl-0">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
+              <div>
+                <h1 className="text-2xl lg:text-3xl font-bold text-base-content">
+                  Settings
+                </h1>
+                <p className="text-base-content/60 mt-2">
+                  Manage your account preferences and configurations
+                </p>
+              </div>
+            </div>
           </div>
 
-          <input
-            type="radio"
-            name="my_tabs_3"
-            className="tab"
-            aria-label="Help & Support"
-          />
-          <div className="tab-content bg-base-100 border-base-300 p-6">
-            <HelpPage />
+          {/* Settings Content */}
+          <div className="bg-base-100 rounded-2xl shadow-xl border border-base-300 overflow-hidden">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-primary/10 to-primary/5 border-b border-base-300 p-4 lg:p-6">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-primary/10 rounded-lg border border-primary/20">
+                  <Settings className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-bold text-base-content">
+                    Account Settings
+                  </h2>
+                  <p className="text-sm text-base-content/60">
+                    Configure your client account
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Mobile Tab Navigation */}
+            <div className="block lg:hidden border-b border-base-300">
+              <div className="dropdown dropdown-bottom w-full">
+                <div
+                  tabIndex={0}
+                  role="button"
+                  className="btn btn-ghost w-full justify-between"
+                >
+                  <div className="flex items-center gap-2">
+                    {React.createElement(
+                      tabs.find((tab) => tab.id === activeTab)?.icon ||
+                        Settings,
+                      { className: "w-4 h-4" }
+                    )}
+                    {tabs.find((tab) => tab.id === activeTab)?.label}
+                  </div>
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </div>
+                <ul
+                  tabIndex={0}
+                  className="dropdown-content menu bg-base-100 rounded-box z-[1] w-full p-2 shadow border border-base-300"
+                >
+                  {tabs.map((tab) => {
+                    const Icon = tab.icon;
+                    return (
+                      <li key={tab.id}>
+                        <button
+                          onClick={() => setActiveTab(tab.id)}
+                          className={`flex items-center gap-2 w-full ${
+                            activeTab === tab.id ? "active" : ""
+                          }`}
+                        >
+                          <Icon className="w-4 h-4" />
+                          {tab.label}
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            </div>
+
+            {/* Desktop Tab Navigation */}
+            <div className="hidden lg:block border-b border-base-300">
+              <div className="flex">
+                {tabs.map((tab) => {
+                  const Icon = tab.icon;
+                  return (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id)}
+                      className={`flex items-center gap-2 px-6 py-4 border-b-2 transition-colors ${
+                        activeTab === tab.id
+                          ? "border-primary text-primary bg-primary/5"
+                          : "border-transparent text-base-content/60 hover:text-base-content hover:bg-base-200/50"
+                      }`}
+                    >
+                      <Icon className="w-4 h-4" />
+                      <span className="font-medium">{tab.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Tab Content */}
+            <div className="p-4 lg:p-6">
+              {tabs.find((tab) => tab.id === activeTab)?.component}
+            </div>
           </div>
         </div>
       </div>

@@ -64,11 +64,7 @@ const MobileMenuTransporter = () => {
       icon: CiCompass1,
       label: "Discover",
     },
-    {
-      href: "/fleetManager",
-      icon: CiDeliveryTruck,
-      label: "Fleet Manager",
-    },
+
     {
       href: "/myTrips",
       icon: CiBookmark,
