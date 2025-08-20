@@ -1,9 +1,9 @@
 import { createPortal } from "react-dom";
 import React, { useEffect, useState } from "react";
-import { Id } from "@/convex/_generated/dataModel"; // adjust import path
+import { Id } from "@/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { query } from "@/convex/_generated/server";
+import { Edit, Trash2, Truck, AlertTriangle, CheckCircle } from "lucide-react";
 
 interface Fleet {
   _id: Id<"fleet">;
@@ -85,51 +85,158 @@ const EditFleetModal = ({ UserFleets }: { UserFleets: Fleet[] }) => {
     }
   };
 
+  const getMessageStyle = () => {
+    if (
+      returnMessage.includes("Fleet Edited") ||
+      returnMessage.includes("Fleet Deleted")
+    ) {
+      return "text-success";
+    } else if (
+      returnMessage.includes("IMPORTANT") ||
+      returnMessage.includes("already have")
+    ) {
+      return "text-warning";
+    } else if (returnMessage.includes("went wrong")) {
+      return "text-error";
+    }
+    return "text-base-content/60";
+  };
+
+  const getMessageIcon = () => {
+    if (
+      returnMessage.includes("Fleet Edited") ||
+      returnMessage.includes("Fleet Deleted")
+    ) {
+      return <CheckCircle className="w-4 h-4 text-success" />;
+    } else if (
+      returnMessage.includes("IMPORTANT") ||
+      returnMessage.includes("already have")
+    ) {
+      return <AlertTriangle className="w-4 h-4 text-warning" />;
+    } else if (returnMessage.includes("went wrong")) {
+      return <AlertTriangle className="w-4 h-4 text-error" />;
+    }
+    return null;
+  };
+
   return createPortal(
     <dialog id="EditFleetModal" className="modal">
-      <div className="modal-box w-[500px] bg-base-200">
-        <div className="flex flex-col mx-auto gap-4">
-          <h3 className="font-bold text-lg">Edit Fleet</h3>
-          <select
-            defaultValue={userFleet}
-            onChange={handleFleetChange}
-            className="select focus:outline-none focus:ring-0"
-          >
-            {UserFleets.map((fleet: { _id: string; fleetName: string }) => (
-              <option key={fleet._id} value={fleet._id}>
-                {fleet.fleetName}
-              </option>
-            ))}
-          </select>
-          <fieldset className="fieldset">
-            <input
-              type="text"
-              className="input focus:outline-none focus:ring-0"
-              placeholder="Enter The New Name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-            {returnMessage && (
-              <p className="text-neutral text-sm mt-1">{returnMessage}</p>
-            )}
-          </fieldset>
-          <div className="modal-action">
-            <div className="flex flex-row gap-2 justify-between">
-              <button className="btn btn-primary border-1" onClick={handleEdit}>
-                Edit
-              </button>
-              <button
-                className="btn btn-primary border-1"
-                onClick={handleDelete}
-              >
-                Delete
-              </button>
-              <form method="dialog">
-                <button className="btn">Close</button>
-              </form>
+      <div className="modal-box w-full max-w-[500px] bg-base-100">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 rounded-lg p-4 mb-6">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-primary/10 rounded-lg border border-primary/20">
+              <Edit className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-base-content">
+                Edit Fleet
+              </h3>
+              <p className="text-sm text-base-content/60">
+                Modify or remove your fleet configuration
+              </p>
             </div>
           </div>
         </div>
+
+        {/* Fleet Selection */}
+        <div className="bg-base-200/50 border border-base-300 rounded-lg p-4 mb-4">
+          <div className="flex items-center gap-2 mb-3">
+            <Truck className="w-4 h-4 text-primary" />
+            <h4 className="font-semibold text-base-content">Select Fleet</h4>
+          </div>
+          <div className="form-control">
+            <label className="label">
+              <span className="label-text">Choose fleet to edit</span>
+            </label>
+            <select
+              value={userFleet || ""}
+              onChange={handleFleetChange}
+              className="select select-bordered focus:outline-none focus:border-primary"
+            >
+              {UserFleets.map((fleet: { _id: string; fleetName: string }) => (
+                <option key={fleet._id} value={fleet._id}>
+                  {fleet.fleetName}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* Fleet Name Input */}
+        <div className="bg-base-200/50 border border-base-300 rounded-lg p-4 mb-4">
+          <div className="form-control">
+            <label className="label">
+              <span className="label-text">New Fleet Name</span>
+            </label>
+            <input
+              type="text"
+              className="input input-bordered focus:outline-none focus:border-primary"
+              placeholder="Enter the new fleet name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </div>
+        </div>
+
+        {/* Return Message */}
+        {returnMessage && (
+          <div
+            className={`alert mb-4 ${
+              returnMessage.includes("Fleet Edited") ||
+              returnMessage.includes("Fleet Deleted")
+                ? "alert-success"
+                : returnMessage.includes("IMPORTANT") ||
+                    returnMessage.includes("already have")
+                  ? "alert-warning"
+                  : returnMessage.includes("went wrong")
+                    ? "alert-error"
+                    : "alert-info"
+            }`}
+          >
+            <div className="flex items-start gap-2">
+              {getMessageIcon()}
+              <span className="text-sm">{returnMessage}</span>
+            </div>
+          </div>
+        )}
+
+        {/* Action Buttons */}
+        <div className="flex justify-between gap-3 pt-4 border-t border-base-300">
+          <div className="flex gap-3">
+            <button
+              className="btn btn-primary gap-2"
+              onClick={handleEdit}
+              disabled={!name.trim()}
+            >
+              <Edit className="w-4 h-4" />
+              Save Changes
+            </button>
+            <button className="btn btn-error gap-2" onClick={handleDelete}>
+              <Trash2 className="w-4 h-4" />
+              Delete Fleet
+            </button>
+          </div>
+          <form method="dialog">
+            <button className="btn btn-outline">Close</button>
+          </form>
+        </div>
+
+        {/* Warning for Delete */}
+        {trucksInFleet && trucksInFleet.length > 0 && (
+          <div className="alert alert-warning mt-4">
+            <div className="flex items-start gap-2">
+              <AlertTriangle className="w-4 h-4 text-warning" />
+              <div>
+                <p className="text-sm font-medium">Cannot delete fleet</p>
+                <p className="text-xs text-warning/80">
+                  This fleet contains {trucksInFleet.length} truck(s). Please
+                  reassign or remove all trucks before deleting.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </dialog>,
     document.body

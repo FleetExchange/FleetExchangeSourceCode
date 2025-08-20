@@ -1,8 +1,8 @@
 "use client";
 
 import { TRUCK_TYPES } from "@/shared/truckTypes";
-import React, { use, useState } from "react";
-import { IoFilter } from "react-icons/io5";
+import React, { useState } from "react";
+import { Filter, Truck, Calendar, Ruler, Weight } from "lucide-react";
 
 const FleetManagerTableFilter = ({
   onFilter,
@@ -36,7 +36,6 @@ const FleetManagerTableFilter = ({
       height,
       payload,
     });
-    // You can now send this data to an API, etc.
   };
 
   const resetFilters = (e: React.FormEvent) => {
@@ -49,15 +48,16 @@ const FleetManagerTableFilter = ({
     setPayload(0);
     setType("");
     onFilter({
-      make,
-      year,
-      truckType,
-      width,
-      length,
-      height,
-      payload,
+      make: "",
+      year: "",
+      truckType: "",
+      width: 0,
+      length: 0,
+      height: 0,
+      payload: 0,
     });
   };
+
   const openModal = () => {
     const modal = document.getElementById(
       "FleetManagerFilterModal"
@@ -72,147 +72,191 @@ const FleetManagerTableFilter = ({
   return (
     <div className="flex flex-row h-18 items-center">
       <button
-        className="btn btn-soft bg-base-100 hover:bg-base-200"
+        className="btn btn-ghost gap-2 hover:bg-base-200 border border-base-300"
         onClick={openModal}
       >
-        <IoFilter /> Filters
+        <Filter className="w-4 h-4" />
+        Filters
       </button>
 
       <dialog id="FleetManagerFilterModal" className="modal">
-        <div className="modal-box w-full max-w-[500px]">
-          <div>
-            <h1 className="font-bold mb-4">Filters</h1>
-          </div>
-          <hr className="border-t border-base-200 my-0 mt-4" />
-          <div className="mt-4">
-            <h1 className="font-bold">Select Vehicle Type</h1>
-            <div className="flex flex-row gap-2">
-              <fieldset className="fieldset">
-                <legend className="fieldset-legend">Type Select</legend>
-                <select
-                  id="truckTypeSelect"
-                  className="select focus:outline-none focus:ring-0"
-                  value={truckType}
-                  onChange={(e) => setType(e.target.value)}
-                >
-                  <option value="Any">Any</option>
-                  {TRUCK_TYPES.map((type) => (
-                    <option key={type} value={type}>
-                      {type}
-                    </option>
-                  ))}
-                </select>
-              </fieldset>
+        <div className="modal-box w-full max-w-[600px] bg-base-100">
+          {/* Header */}
+          <div className="bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 rounded-lg p-4 mb-6">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-primary/10 rounded-lg border border-primary/20">
+                <Filter className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <h1 className="text-lg font-bold text-base-content">
+                  Filter Fleet
+                </h1>
+                <p className="text-sm text-base-content/60">
+                  Refine your vehicle search criteria
+                </p>
+              </div>
             </div>
           </div>
 
-          <hr className="border-t border-base-200 my-0 mt-4" />
-          <div className="mt-4">
-            <h1 className="font-bold">Vehcile Information</h1>
-            <div className="flex flex-row gap-2">
-              <fieldset className="fieldset">
-                <legend className="fieldset-legend">Vehcile Make</legend>
+          {/* Vehicle Type Section */}
+          <div className="bg-base-200/50 border border-base-300 rounded-lg p-4 mb-4">
+            <div className="flex items-center gap-2 mb-3">
+              <Truck className="w-4 h-4 text-primary" />
+              <h2 className="font-semibold text-base-content">Vehicle Type</h2>
+            </div>
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text">Type Selection</span>
+              </label>
+              <select
+                id="truckTypeSelect"
+                className="select select-bordered focus:outline-none focus:border-primary"
+                value={truckType}
+                onChange={(e) => setType(e.target.value)}
+              >
+                <option value="Any">Any Type</option>
+                {TRUCK_TYPES.map((type) => (
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Vehicle Information Section */}
+          <div className="bg-base-200/50 border border-base-300 rounded-lg p-4 mb-4">
+            <div className="flex items-center gap-2 mb-3">
+              <Calendar className="w-4 h-4 text-primary" />
+              <h2 className="font-semibold text-base-content">
+                Vehicle Information
+              </h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text">Vehicle Make</span>
+                </label>
                 <input
                   type="text"
-                  className="input focus:outline-none focus:ring-0"
-                  placeholder="Type here"
+                  className="input input-bordered focus:outline-none focus:border-primary"
+                  placeholder="e.g., Mercedes, Volvo"
                   value={make}
                   onChange={(e) => setMake(e.target.value)}
                 />
-              </fieldset>
-              <fieldset className="fieldset">
-                <legend className="fieldset-legend">Year of Model</legend>
+              </div>
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text">Year of Model</span>
+                </label>
                 <input
                   type="number"
                   min="1900"
                   max={new Date().getFullYear() + 1}
-                  className="input focus:outline-none focus:ring-0"
-                  placeholder="Type here"
+                  className="input input-bordered focus:outline-none focus:border-primary"
+                  placeholder="e.g., 2020"
                   value={year}
                   onChange={(e) => setYear(e.target.value)}
                 />
-              </fieldset>
+              </div>
             </div>
           </div>
 
-          <hr className="border-t border-base-200 my-0 mt-4" />
-          <div className="mt-4">
-            <h1 className="font-bold">Dimensions & Capacity</h1>
-            <div className="flex flex-row flex-wrap gap-2">
-              <fieldset className="fieldset">
-                <legend className="fieldset-legend">Width</legend>
+          {/* Dimensions & Capacity Section */}
+          <div className="bg-base-200/50 border border-base-300 rounded-lg p-4 mb-6">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="flex items-center gap-1">
+                <Ruler className="w-4 h-4 text-primary" />
+                <Weight className="w-4 h-4 text-primary" />
+              </div>
+              <h2 className="font-semibold text-base-content">
+                Dimensions & Capacity
+              </h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text">Width (meters)</span>
+                </label>
                 <input
                   type="number"
                   min="0"
-                  className="input focus:outline-none focus:ring-0"
-                  placeholder="Type here"
-                  value={width}
+                  step="0.1"
+                  className="input input-bordered focus:outline-none focus:border-primary"
+                  placeholder="e.g., 2.5"
+                  value={width || ""}
                   onChange={(e) =>
                     setWidth(e.target.value === "" ? 0 : Number(e.target.value))
                   }
                 />
-                <p className="label">(In Meter)</p>
-              </fieldset>
-              <fieldset className="fieldset">
-                <legend className="fieldset-legend">Length</legend>
+              </div>
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text">Length (meters)</span>
+                </label>
                 <input
                   type="number"
                   min="0"
-                  className="input focus:outline-none focus:ring-0"
-                  placeholder="Type here"
-                  value={length}
+                  step="0.1"
+                  className="input input-bordered focus:outline-none focus:border-primary"
+                  placeholder="e.g., 12.0"
+                  value={length || ""}
                   onChange={(e) =>
                     setlength(
                       e.target.value === "" ? 0 : Number(e.target.value)
                     )
                   }
                 />
-                <p className="label">(In Meter)</p>
-              </fieldset>
-              <fieldset className="fieldset">
-                <legend className="fieldset-legend">Height</legend>
+              </div>
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text">Height (meters)</span>
+                </label>
                 <input
                   type="number"
                   min="0"
-                  className="input focus:outline-none focus:ring-0"
-                  placeholder="Type here"
-                  value={height}
+                  step="0.1"
+                  className="input input-bordered focus:outline-none focus:border-primary"
+                  placeholder="e.g., 4.0"
+                  value={height || ""}
                   onChange={(e) =>
                     setHeight(
                       e.target.value === "" ? 0 : Number(e.target.value)
                     )
                   }
                 />
-                <p className="label">(In Meter)</p>
-              </fieldset>
-              <fieldset className="fieldset">
-                <legend className="fieldset-legend">Payload Capacity</legend>
+              </div>
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text">Payload Capacity (kg)</span>
+                </label>
                 <input
                   type="number"
                   min="0"
-                  className="input focus:outline-none focus:ring-0"
-                  placeholder="Type here"
-                  value={payload}
+                  className="input input-bordered focus:outline-none focus:border-primary"
+                  placeholder="e.g., 10000"
+                  value={payload || ""}
                   onChange={(e) =>
                     setPayload(
                       e.target.value === "" ? 0 : Number(e.target.value)
                     )
                   }
                 />
-                <p className="label">(In Kg)</p>
-              </fieldset>
+              </div>
             </div>
           </div>
-          <div className="mt-4 flex justify-end gap-2">
-            <button className="btn btn-primary" onClick={applyFilters}>
-              Apply
-            </button>
-            <button className="btn btn-base-200" onClick={resetFilters}>
-              Clear Filters
-            </button>
 
+          {/* Action Buttons */}
+          <div className="flex justify-end gap-3 pt-4 border-t border-base-300">
+            <button className="btn btn-primary gap-2" onClick={applyFilters}>
+              <Filter className="w-4 h-4" />
+              Apply Filters
+            </button>
+            <button className="btn btn-ghost gap-2" onClick={resetFilters}>
+              Clear All
+            </button>
             <form method="dialog">
-              <button className="btn btn-base-200">Close</button>
+              <button className="btn btn-outline">Close</button>
             </form>
           </div>
         </div>
