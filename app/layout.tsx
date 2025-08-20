@@ -4,6 +4,7 @@ import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ConvexClientProvider } from "@/components/ConvexClientProvider";
 import { GoogleMapsProvider } from "@/components/GoogleMapsProvider";
+import Footer from "@/components/Footer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,7 +35,11 @@ export default function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <ClerkProvider>
           <ConvexClientProvider>
-            <GoogleMapsProvider>{children}</GoogleMapsProvider>
+            <GoogleMapsProvider>
+              {" "}
+              <main className="flex-1">{children}</main>
+              <Footer />
+            </GoogleMapsProvider>
           </ConvexClientProvider>
         </ClerkProvider>
       </body>
