@@ -15,6 +15,7 @@ import {
   X,
   Package,
 } from "lucide-react";
+import Link from "next/link";
 
 const MyTripsCardList = () => {
   // Get the logged in user identity
@@ -25,16 +26,23 @@ const MyTripsCardList = () => {
     clerkId: clerkUserId,
   })?._id;
 
-  // Get all the trips that belong to the user
-  const allUserTrips = useQuery(api.trip.getTripsByIssuerId, {
-    issuerId: userId as Id<"users">,
+  // Get all the trips that belong to the user - ONLY call if userId exists
+  const allUserTrips = useQuery(
+    api.trip.getTripsByIssuerId,
+    userId ? { issuerId: userId as Id<"users"> } : "skip"
+  );
+
+  // Get all the truck Id's from trips
+  const userTrucksIds = allUserTrips?.map((trip) => trip.truckId) || [];
+  const userTrucks = useQuery(api.truck.getTruckByIdArray, {
+    truckIds: userTrucksIds as Id<"truck">[],
   });
 
   // From all the trips, get the booked trips and their purchase trip objects
   const bookedTrips = allUserTrips?.filter((trip) => trip.isBooked === true);
   const purchaseTripIds = bookedTrips?.map((trip) => trip._id) || [];
 
-  // Fix: Only call the query if there are actually trip IDs
+  //Only call the query if there are actually trip IDs
   const purchaseTrips = useQuery(
     api.purchasetrip.getPurchaseTripByIdArray,
     purchaseTripIds.length > 0
@@ -89,7 +97,7 @@ const MyTripsCardList = () => {
   const sortedTrips = statusFilteredTrips?.sort((a, b) => {
     const aDate = a.departureDate ? new Date(a.departureDate).getTime() : 0;
     const bDate = b.departureDate ? new Date(b.departureDate).getTime() : 0;
-    return bDate - aDate; // Sort descending
+    return aDate - bDate; // Sort descending
   });
 
   // Get status for a trip
@@ -213,6 +221,7 @@ const MyTripsCardList = () => {
             const purchaseTrip = purchaseTrips?.find(
               (pt) => pt.tripId === trip._id
             );
+            const truck = userTrucks?.find((t) => t._id === trip.truckId);
 
             return (
               <div
@@ -236,7 +245,7 @@ const MyTripsCardList = () => {
                   </div>
                 </div>
 
-                {/* Trip Details */}
+                {/* Trip Details Grid */}
                 <div className="grid grid-cols-2 gap-3 mb-4">
                   <div className="flex items-center gap-2">
                     <Calendar className="w-3 h-3 text-info" />
@@ -249,7 +258,7 @@ const MyTripsCardList = () => {
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <Package className="w-3 h-3 text-warning" />
+                    <Calendar className="w-3 h-3 text-success" />
                     <div className="text-xs">
                       <p className="text-base-content/60">Arrival</p>
                       <p className="font-medium">
@@ -259,12 +268,55 @@ const MyTripsCardList = () => {
                   </div>
                 </div>
 
-                {/* Pricing Info */}
-                {(trip.basePrice > 0 ||
-                  trip.KGPrice > 0 ||
-                  trip.KMPrice > 0) && (
-                  <div className="bg-base-200/50 border border-base-300 rounded-lg p-3 mb-4">
+                {/* Truck Information */}
+                {truck && (
+                  <div className="bg-warning/5 border border-warning/20 rounded-lg p-3 mb-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Truck className="w-3 h-3 text-warning" />
+                      <span className="text-xs font-medium text-base-content">
+                        Vehicle Details
+                      </span>
+                    </div>
                     <div className="text-xs space-y-1">
+                      <div className="flex justify-between">
+                        <span className="text-base-content/60">
+                          Registration:
+                        </span>
+                        <span className="font-medium">
+                          {truck.registration}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-base-content/60">Type:</span>
+                        <span className="font-medium">{truck.truckType}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-base-content/60">Capacity:</span>
+                        <span className="font-medium">
+                          {truck.maxLoadCapacity}kg
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Pricing Section */}
+                <div className="bg-success/5 border border-success/20 rounded-lg p-3 mb-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Package className="w-3 h-3 text-success" />
+                    <span className="text-xs font-medium text-base-content">
+                      Pricing & Trip Details
+                    </span>
+                  </div>
+
+                  {/* Pricing Breakdown */}
+                  {(trip.basePrice > 0 ||
+                    trip.KGPrice > 0 ||
+                    trip.KMPrice > 0) && (
+                    <div className="text-xs space-y-1 mb-3">
+                      <p className="text-base-content/60 font-medium">
+                        Rate Structure:
+                      </p>
                       {trip.basePrice > 0 && (
                         <div className="flex justify-between">
                           <span className="text-base-content/60">
@@ -292,63 +344,80 @@ const MyTripsCardList = () => {
                         </div>
                       )}
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {/* Customer Info (if booked) */}
-                {trip.isBooked && purchaseTrip && (
-                  <div className="bg-info/5 border border-info/20 rounded-lg p-3 mb-4">
-                    <div className="text-xs">
-                      <p className="text-base-content/60 mb-1">Trip Details:</p>
-                      <div className="space-y-1">
+                  {/* Trip Specifics (if booked) */}
+                  {trip.isBooked && purchaseTrip && (
+                    <div className="border-t border-success/20 pt-2">
+                      <p className="text-base-content/60 font-medium mb-1 text-xs">
+                        This Trip:
+                      </p>
+                      <div className="text-xs space-y-1">
                         {purchaseTrip.cargoWeight && (
                           <div className="flex justify-between">
-                            <span>Weight:</span>
+                            <span className="text-base-content/60">
+                              Cargo Weight:
+                            </span>
                             <span className="font-medium">
                               {purchaseTrip.cargoWeight}kg
                             </span>
                           </div>
                         )}
-                        {purchaseTrip.amount && (
+                        {purchaseTrip.freightNotes && (
                           <div className="flex justify-between">
-                            <span>Total Amount:</span>
-                            <span className="font-medium text-success">
+                            <span className="text-base-content/60">
+                              Cargo Type:
+                            </span>
+                            <span className="font-medium text-xs truncate max-w-[120px]">
+                              {purchaseTrip.freightNotes}
+                            </span>
+                          </div>
+                        )}
+                        {purchaseTrip.amount && (
+                          <div className="flex justify-between border-t border-success/20 pt-2 mt-2">
+                            <span className="text-base-content font-medium">
+                              Total Earned:
+                            </span>
+                            <span className="font-bold text-success">
                               R{purchaseTrip.amount.toFixed(2)}
                             </span>
                           </div>
                         )}
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
+
+                  {/* Estimated Earnings (if not booked) */}
+                  {!trip.isBooked &&
+                    (trip.basePrice > 0 ||
+                      trip.KGPrice > 0 ||
+                      trip.KMPrice > 0) && (
+                      <div className="border-t border-success/20 pt-2">
+                        <div className="flex justify-between">
+                          <span className="text-base-content/60 text-xs">
+                            Min. Earnings:
+                          </span>
+                          <span className="font-medium text-success text-xs">
+                            R{(trip.basePrice || 0).toFixed(2)}+
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                </div>
 
                 {/* Action Buttons */}
                 <div className="flex gap-2">
-                  <button
-                    onClick={() => {
-                      if (trip.isBooked) {
-                        window.location.href = `/trips/${trip._id}/owner`;
-                      } else {
-                        window.location.href = `/trips/${trip._id}`;
-                      }
+                  <Link
+                    href={{
+                      pathname: "/tripOwner",
+                      query: { tripId: trip._id as string },
                     }}
-                    className="btn btn-primary btn-sm gap-2 flex-1"
                   >
-                    <Eye className="w-3 h-3" />
-                    View
-                  </button>
-
-                  {!trip.isBooked && (
-                    <button
-                      onClick={() => {
-                        window.location.href = `/editTrip/${trip._id}`;
-                      }}
-                      className="btn btn-ghost btn-sm gap-2 flex-1"
-                    >
-                      <Edit className="w-3 h-3" />
-                      Edit
+                    <button className="btn btn-primary btn-sm gap-2 flex-1">
+                      <Eye className="w-3 h-3" />
+                      {trip.isBooked ? "Manage" : "View"}
                     </button>
-                  )}
+                  </Link>
                 </div>
               </div>
             );

@@ -3,11 +3,21 @@ import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useUser } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
-import { CiMenuKebab, CiSearch } from "react-icons/ci";
-
 import Link from "next/link";
 import { useState } from "react";
 import PaginationControls from "./PaginationControls";
+import {
+  Search,
+  Filter,
+  Calendar,
+  MapPin,
+  Truck,
+  Eye,
+  Package,
+  DollarSign,
+  Edit,
+  Receipt,
+} from "lucide-react";
 
 type SortOption = "Price Asc" | "Price Desc" | "Date Asc" | "Date Desc";
 
@@ -40,19 +50,25 @@ const MyUnbookedTripsTable = () => {
   const userTrips = useQuery(api.trip.getTripsByIssuerId, {
     issuerId: userId ?? "skip",
   });
+
   // Only process unbooked trips if we have userTrips
   const unbookedTrips =
     userTrips?.filter((trip) => trip.isBooked === false) ?? [];
 
   // Get all the trucks from the user trips
   const userTripTrucks = (unbookedTrips ?? []).map((trip) => trip.truckId);
+
   // Get all the trucks by a array of truck IDs
   const trucks = useQuery(api.truck.getTruckByIdArray, {
     truckIds: userTripTrucks.length > 0 ? userTripTrucks : [],
   });
 
   if (!userTrips) {
-    return <div className="p-4">Loading trips...</div>;
+    return (
+      <div className="flex items-center justify-center py-8">
+        <div className="loading loading-spinner loading-lg"></div>
+      </div>
+    );
   }
 
   // Add this filtering function before the return statement
@@ -103,63 +119,63 @@ const MyUnbookedTripsTable = () => {
   const currentItems = sortedAndFilteredTrips.slice(startIndex, endIndex);
 
   return (
-    <>
-      <div className="flex w-full max-w-8xl flex-col p-8">
-        {/* Improved Table Heading */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-2">
+    <div className="p-6">
+      {/* Filter Controls */}
+      <div className="bg-base-200/50 border border-base-300 rounded-xl p-4 mb-6">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="p-2 bg-primary/10 rounded-lg border border-primary/20">
+            <Filter className="w-4 h-4 text-primary" />
+          </div>
           <div>
-            <h2 className="text-2xl font-bold text-base-content mb-1">
-              Unbooked Trips
-            </h2>
-            <p className="text-base-content/60 text-sm">
-              These are your trips that have not been booked yet.
+            <h3 className="font-semibold text-base-content">Filter & Sort</h3>
+            <p className="text-sm text-base-content/60">
+              {totalItems} trips found
             </p>
           </div>
         </div>
-        {/* Action bar */}
-        <div className="flex flex-row justify-between gap-2 bg-base-100 border border-base-300 rounded-t-xl items-center px-5 py-2">
-          <div className="flex flex-row justify-start gap-4 items-center">
-            {/* Search Bar */}
-            <div className="form-control w-full max-w-sm">
-              <div className="input input-bordered flex items-center gap-2">
-                <CiSearch className="w-4 h-4 opacity-70" />
-                <input
-                  className="grow focus:ring-0 focus:outline-none bg-transparent"
-                  type="search"
-                  placeholder="Search Address"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-            </div>
-            {/* Past/Upcoming */}
-            <select
-              className="select select-bordered focus:ring-0 focus:outline-none"
-              value={pastOrUpcoming}
-              onChange={(e) =>
-                setPastOrFuture(
-                  e.target.value as
-                    | "Upcomming Trips"
-                    | "Past Trips"
-                    | "All Trips"
-                )
-              }
-            >
-              <option value="All Trips">All Trips</option>
-              <option value="Upcomming Trips">Upcomming Trips</option>
-              <option value="Past Trips">Past Trips</option>
-            </select>
-            {/* Sort By - Price, Date */}
-            <select
-              className="select select-bordered focus:ring-0 focus:outline-none"
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as SortOption)}
-            >
-              <option value="Date Asc">Date Ascending</option>
-              <option value="Date Desc">Date Descending</option>
-              <option value="Price Asc">Price Ascending</option>
-              <option value="Price Desc">Price Descending</option>
-            </select>
+
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+          {/* Search Bar */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-base-content/60" />
+            <input
+              type="search"
+              placeholder="Search cities..."
+              className="input input-bordered w-full pl-10 focus:outline-none focus:border-primary"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+
+          {/* Past/Upcoming */}
+          <select
+            className="select select-bordered focus:outline-none focus:border-primary"
+            value={pastOrUpcoming}
+            onChange={(e) =>
+              setPastOrFuture(
+                e.target.value as "Upcomming Trips" | "Past Trips" | "All Trips"
+              )
+            }
+          >
+            <option value="All Trips">All Trips</option>
+            <option value="Upcomming Trips">Upcoming Trips</option>
+            <option value="Past Trips">Past Trips</option>
+          </select>
+
+          {/* Sort By */}
+          <select
+            className="select select-bordered focus:outline-none focus:border-primary"
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as SortOption)}
+          >
+            <option value="Date Asc">Date Ascending</option>
+            <option value="Date Desc">Date Descending</option>
+            <option value="Price Asc">Price Ascending</option>
+            <option value="Price Desc">Price Descending</option>
+          </select>
+
+          {/* Pagination */}
+          <div className="flex items-center justify-center">
             <PaginationControls
               currentPage={totalPages === 0 ? 0 : currentPage}
               totalPages={totalPages}
@@ -170,59 +186,168 @@ const MyUnbookedTripsTable = () => {
             />
           </div>
         </div>
+      </div>
 
-        {/* Table */}
-        <div>
-          <div className="overflow-x-auto border border-base-300 border-t-0">
-            <table className="table">
-              {/* head */}
-              <thead>
-                <tr>
-                  <th>Index</th>
-                  <th>Origin City</th>
-                  <th>Destination City</th>
-                  <th>Departure Date</th>
-                  <th>Arrival Date</th>
-                  <th>Truck</th>
-                  <th>Base Price</th>
-                  <th></th>
-                </tr>
-              </thead>
-              {/* Table Body */}
-              <tbody>
-                {currentItems?.map((trip, index) => {
+      {/* Table */}
+      <div className="bg-base-100 rounded-xl shadow-xl border border-base-300 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="table table-zebra">
+            <thead className="bg-base-200">
+              <tr>
+                <th className="font-semibold text-base-content">#</th>
+                <th className="font-semibold text-base-content">
+                  <div className="flex items-center gap-2">
+                    <MapPin className="w-4 h-4" />
+                    Route
+                  </div>
+                </th>
+                <th className="font-semibold text-base-content">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4" />
+                    Schedule
+                  </div>
+                </th>
+                <th className="font-semibold text-base-content">
+                  <div className="flex items-center gap-2">
+                    <Truck className="w-4 h-4" />
+                    Vehicle
+                  </div>
+                </th>
+                <th className="font-semibold text-base-content">
+                  <div className="flex items-center gap-2">
+                    <DollarSign className="w-4 h-4" />
+                    Base Price
+                  </div>
+                </th>
+                <th className="font-semibold text-base-content">
+                  <div className="flex items-center gap-2">
+                    <Receipt className="w-4 h-4" />
+                    Pricing Breakdown
+                  </div>
+                </th>
+                <th className="font-semibold text-base-content">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {currentItems && currentItems.length > 0 ? (
+                currentItems.map((trip, index) => {
                   const truck = trucks?.find((t) => t._id === trip.truckId);
 
                   return (
-                    <tr key={trip._id} className="bg-base-100">
-                      <th>{index + 1}</th>
-                      <td>{trip.originCity}</td>
-                      <td>{trip.destinationCity}</td>
-                      <td>{formatDate(trip.departureDate)}</td>
-                      <td>{formatDate(trip.arrivalDate)}</td>
-                      <td>{truck?.registration}</td>
-                      <td>{trip?.basePrice}</td>
+                    <tr key={trip._id} className="hover:bg-base-200/50">
+                      <td className="font-medium text-base-content/60">
+                        {startIndex + index + 1}
+                      </td>
                       <td>
-                        <Link
-                          href={{
-                            pathname: "/tripOwner",
-                            query: { tripId: trip._id as string },
-                          }}
-                        >
-                          <button className="btn btn-square bg-base-100 border-none">
-                            <CiMenuKebab />
-                          </button>
-                        </Link>
+                        <div className="space-y-1">
+                          <div className="font-medium text-base-content">
+                            {trip.originCity}
+                          </div>
+                          <div className="text-sm text-base-content/60">
+                            → {trip.destinationCity}
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <div className="space-y-1">
+                          <div className="text-sm">
+                            <span className="text-base-content/60">Dep:</span>{" "}
+                            <span className="font-medium">
+                              {formatDate(trip.departureDate)}
+                            </span>
+                          </div>
+                          <div className="text-sm">
+                            <span className="text-base-content/60">Arr:</span>{" "}
+                            <span className="font-medium">
+                              {formatDate(trip.arrivalDate)}
+                            </span>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <div className="font-medium text-base-content">
+                          {truck?.registration || "N/A"}
+                        </div>
+                      </td>
+                      <td>
+                        <div className="font-semibold text-warning">
+                          R{trip.basePrice?.toFixed(2) || "0.00"}
+                        </div>
+                      </td>
+                      <td>
+                        <div className="text-xs space-y-1">
+                          {trip.KGPrice > 0 && (
+                            <div className="text-base-content/60">
+                              R{trip.KGPrice.toFixed(2)}/kg
+                            </div>
+                          )}
+                          {trip.KMPrice > 0 && (
+                            <div className="text-base-content/60">
+                              R{trip.KMPrice.toFixed(2)}/km
+                            </div>
+                          )}
+                          {trip.KGPrice === 0 && trip.KMPrice === 0 && (
+                            <div className="text-base-content/60">
+                              Base only
+                            </div>
+                          )}
+                        </div>
+                      </td>
+                      <td>
+                        <div className="flex gap-2">
+                          <Link
+                            href={{
+                              pathname: "/tripOwner",
+                              query: { tripId: trip._id as string },
+                            }}
+                          >
+                            <button className="btn btn-ghost btn-sm gap-2 hover:bg-base-200">
+                              <Eye className="w-4 h-4" />
+                              <span className="hidden lg:inline">View</span>
+                            </button>
+                          </Link>
+                          <Link
+                            href={{
+                              pathname: "/editTrip",
+                              query: { tripId: trip._id as string },
+                            }}
+                          >
+                            <button className="btn btn-primary btn-sm gap-2">
+                              <Edit className="w-4 h-4" />
+                              <span className="hidden lg:inline">Edit</span>
+                            </button>
+                          </Link>
+                        </div>
                       </td>
                     </tr>
                   );
-                })}
-              </tbody>
-            </table>
-          </div>
+                })
+              ) : (
+                <tr>
+                  <td colSpan={7} className="text-center py-8">
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="p-4 bg-base-200/50 rounded-full">
+                        <Package className="w-8 h-8 text-base-content/60" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-base-content mb-1">
+                          No trips found
+                        </h3>
+                        <p className="text-base-content/60 text-sm">
+                          {searchTerm || pastOrUpcoming !== "All Trips"
+                            ? "Try adjusting your filters to see more trips."
+                            : "No available trips found."}
+                        </p>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

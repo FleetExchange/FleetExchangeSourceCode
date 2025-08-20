@@ -3,6 +3,7 @@ import { useUser } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import TransporterSidebar from "@/components/TransporterSidebar";
+import MobileMenuTransporter from "@/components/MobileMenuTransporter";
 
 export default function MyTripLayout({
   children,
@@ -44,7 +45,12 @@ export default function MyTripLayout({
 
   return (
     <div className="flex">
-      <TransporterSidebar />
+      <div className="hidden lg:block">
+        <TransporterSidebar />
+      </div>
+
+      <MobileMenuTransporter />
+
       <main className="flex-1">{children}</main>
     </div>
   );
