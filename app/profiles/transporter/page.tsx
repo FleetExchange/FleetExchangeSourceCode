@@ -19,7 +19,14 @@ const Page = () => {
     }
   }, [currentUser, router]);
 
-  return <div>Redirecting...</div>;
+  return (
+    <div className="min-h-screen bg-base-200 flex items-center justify-center">
+      <div className="flex flex-col items-center gap-4">
+        <div className="loading loading-spinner loading-lg text-primary"></div>
+        <p className="text-base-content/60">Loading profile...</p>
+      </div>
+    </div>
+  );
 };
 
 export default Page;
