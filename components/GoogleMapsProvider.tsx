@@ -20,7 +20,7 @@ export function GoogleMapsProvider({
   }
 
   if (!isLoaded) {
-    return <div>Loading maps...</div>;
+    return <div></div>;
   }
 
   return <>{children}</>;

@@ -45,7 +45,7 @@ export default function MyTripLayout({
 
   return (
     <div className="flex">
-      <div className="hidden lg:block">
+      <div className="hidden lg:block pr-10">
         <TransporterSidebar />
       </div>
 

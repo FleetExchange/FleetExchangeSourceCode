@@ -306,17 +306,6 @@ const MyUnbookedTripsTable = () => {
                               <span className="hidden lg:inline">View</span>
                             </button>
                           </Link>
-                          <Link
-                            href={{
-                              pathname: "/editTrip",
-                              query: { tripId: trip._id as string },
-                            }}
-                          >
-                            <button className="btn btn-primary btn-sm gap-2">
-                              <Edit className="w-4 h-4" />
-                              <span className="hidden lg:inline">Edit</span>
-                            </button>
-                          </Link>
                         </div>
                       </td>
                     </tr>

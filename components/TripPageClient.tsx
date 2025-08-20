@@ -729,11 +729,11 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
                   <GoogleMap
                     mapContainerStyle={{ width: "100%", height: "100%" }}
                     options={{
-                      zoomControl: true,
-                      streetViewControl: true,
-                      mapTypeControl: true,
-                      fullscreenControl: true,
-                      gestureHandling: "greedy",
+                      zoomControl: false,
+                      streetViewControl: false,
+                      mapTypeControl: false,
+                      fullscreenControl: false,
+                      gestureHandling: "none",
                       clickableIcons: false,
                       mapTypeId: google.maps.MapTypeId.ROADMAP,
                     }}
