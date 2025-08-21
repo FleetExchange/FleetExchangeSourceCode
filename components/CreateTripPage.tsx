@@ -3,7 +3,7 @@
 import { api } from "@/convex/_generated/api";
 import { useUser } from "@clerk/nextjs";
 import { useQuery, useMutation } from "convex/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { usePlacesWithRestrictions } from "@/hooks/usePlacesWithRestrictions";
 import { AddressAutocomplete } from "./AddressAutocomplete";
 import { Id } from "@/convex/_generated/dataModel";
@@ -21,6 +21,8 @@ import {
   Settings,
   Plus,
   X,
+  CheckCircle,
+  AlertTriangle,
 } from "lucide-react";
 
 const CreateTripPage = () => {
@@ -53,6 +55,12 @@ const CreateTripPage = () => {
     null
   );
 
+  // Add availability state
+  const [truckAvailability, setTruckAvailability] = useState<{
+    isAvailable: boolean;
+    conflictingTrips: any[];
+  } | null>(null);
+
   // Add Places Autocomplete hooks for origin and destination
   const pickup = usePlacesWithRestrictions({
     cityName: originCity,
@@ -80,6 +88,30 @@ const CreateTripPage = () => {
       api.truck.getTruckByIdArray,
       fleetTruckIds.length > 0 ? { truckIds: fleetTruckIds } : "skip"
     ) ?? [];
+
+  // Check truck availability query
+  const checkTruckAvailability = useQuery(
+    api.truck.isTruckAvailable,
+    selectedTruckId && departureDate && arrivalDate
+      ? {
+          truckId: selectedTruckId,
+          departureDate,
+          arrivalDate,
+        }
+      : "skip"
+  );
+
+  // Update availability when query result changes
+  useEffect(() => {
+    if (checkTruckAvailability !== undefined) {
+      setTruckAvailability(checkTruckAvailability);
+    }
+  }, [checkTruckAvailability]);
+
+  // Reset availability when truck selection changes
+  useEffect(() => {
+    setTruckAvailability(null);
+  }, [selectedTruckId, departureDate, arrivalDate]);
 
   const createTrip = useMutation(api.trip.createTrip);
 
@@ -133,6 +165,14 @@ const CreateTripPage = () => {
       return;
     }
 
+    // Check availability one more time before creating
+    if (truckAvailability && !truckAvailability.isAvailable) {
+      alert(
+        `This truck is not available during the selected time period. It conflicts with ${truckAvailability.conflictingTrips.length} existing trip(s).`
+      );
+      return;
+    }
+
     try {
       await createTrip({
         userId,
@@ -153,7 +193,74 @@ const CreateTripPage = () => {
       window.location.href = "/myTrips";
     } catch (error) {
       console.error("Failed to create trip:", error);
-      alert("Failed to create trip. Please try again.");
+      alert(
+        `Failed to create trip: ${error instanceof Error ? error.message : "Unknown error"}`
+      );
+    }
+  };
+
+  // Add this function to render availability status
+  const renderTruckAvailabilityStatus = () => {
+    if (!selectedTruckId || !departureDate || !arrivalDate) return null;
+
+    if (truckAvailability === null) {
+      return (
+        <div className="bg-info/10 border border-info/20 rounded-lg p-3 mt-2">
+          <div className="flex items-center gap-2">
+            <div className="loading loading-spinner loading-sm"></div>
+            <span className="text-sm text-base-content/70">
+              Checking truck availability...
+            </span>
+          </div>
+        </div>
+      );
+    }
+
+    if (truckAvailability.isAvailable) {
+      return (
+        <div className="bg-success/10 border border-success/20 rounded-lg p-3 mt-2">
+          <div className="flex items-center gap-2">
+            <CheckCircle className="w-4 h-4 text-success" />
+            <span className="text-sm text-success font-medium">
+              Truck is available for selected dates
+            </span>
+          </div>
+        </div>
+      );
+    } else {
+      return (
+        <div className="bg-error/10 border border-error/20 rounded-lg p-3 mt-2">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 text-error" />
+              <span className="text-sm text-error font-medium">
+                Truck is not available
+              </span>
+            </div>
+            <div className="text-xs text-base-content/60">
+              Conflicts with {truckAvailability.conflictingTrips.length}{" "}
+              existing trip(s):
+              {truckAvailability.conflictingTrips.map((trip, index) => (
+                <div
+                  key={trip._id}
+                  className="mt-1 pl-2 border-l-2 border-error/20"
+                >
+                  <div className="font-medium">
+                    {trip.originCity} → {trip.destinationCity}
+                  </div>
+                  <div className="text-xs">
+                    {new Date(trip.departureDate).toLocaleString()} -{" "}
+                    {new Date(trip.arrivalDate).toLocaleString()}
+                  </div>
+                  <div className="text-xs">
+                    Status: {trip.isBooked ? "Booked" : "Available for booking"}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      );
     }
   };
 
@@ -508,6 +615,10 @@ const CreateTripPage = () => {
                         </option>
                       ))}
                     </select>
+
+                    {/* Add availability status here */}
+                    {renderTruckAvailabilityStatus()}
+
                     {selectedFleetId && fleetTruckIds.length === 0 && (
                       <div className="label">
                         <span className="label-text-alt text-warning">
@@ -626,7 +737,9 @@ const CreateTripPage = () => {
                       !departureDate ||
                       !arrivalDate ||
                       !selectedFleetId ||
-                      !selectedTruckId
+                      !selectedTruckId ||
+                      (truckAvailability !== null &&
+                        !truckAvailability.isAvailable)
                     }
                   >
                     <Plus className="w-4 h-4" />

@@ -6,6 +6,7 @@ import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
 import { cronJobs } from "convex/server";
+import { api } from "./_generated/api";
 
 // Get a trip that adheres to searchterms and filters
 export const getTrip = query({
@@ -294,32 +295,48 @@ export const createTrip = mutation({
     userId: v.id("users"),
     truckId: v.id("truck"),
     originCity: v.string(),
-    originAddress: v.string(),
     destinationCity: v.string(),
-    destinationAddress: v.string(),
     departureDate: v.string(),
     arrivalDate: v.string(),
     basePrice: v.number(),
     KMPrice: v.number(),
     KGPrice: v.number(),
     isBooked: v.boolean(),
+    originAddress: v.string(),
+    destinationAddress: v.string(),
   },
   handler: async (ctx, args) => {
-    return await ctx.db.insert("trip", {
+    // Double-check truck availability on the backend
+    const availability = await ctx.runQuery(api.truck.isTruckAvailable, {
+      truckId: args.truckId,
+      departureDate: args.departureDate,
+      arrivalDate: args.arrivalDate,
+    });
+
+    if (!availability.isAvailable) {
+      throw new Error(
+        `Truck is not available during the selected time period. Conflicts with ${availability.conflictingTrips.length} existing trip(s).`
+      );
+    }
+
+    // Create the trip if truck is available
+    const tripId = await ctx.db.insert("trip", {
       userId: args.userId,
       truckId: args.truckId,
       originCity: args.originCity,
-      originAddress: args.originAddress,
       destinationCity: args.destinationCity,
-      destinationAddress: args.destinationAddress,
-      departureDate: Date.parse(args.departureDate),
-      arrivalDate: Date.parse(args.arrivalDate),
+      departureDate: new Date(args.departureDate).getTime(),
+      arrivalDate: new Date(args.arrivalDate).getTime(),
       basePrice: args.basePrice,
       KMPrice: args.KMPrice,
       KGPrice: args.KGPrice,
       isBooked: args.isBooked,
-      isExpired: false, // Default to false, can be updated later
+      originAddress: args.originAddress,
+      destinationAddress: args.destinationAddress,
+      isExpired: false,
     });
+
+    return tripId;
   },
 });
 

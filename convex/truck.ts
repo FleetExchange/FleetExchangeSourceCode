@@ -127,3 +127,67 @@ export const deleteTruck = mutation({
     }
   },
 });
+
+// convex/truck.ts
+export const isTruckAvailable = query({
+  args: {
+    truckId: v.id("truck"),
+    departureDate: v.string(),
+    arrivalDate: v.string(),
+    excludeTripId: v.optional(v.id("trip")), // For editing existing trips
+  },
+  handler: async (ctx, args) => {
+    const departureTime = new Date(args.departureDate).getTime();
+    const arrivalTime = new Date(args.arrivalDate).getTime();
+
+    // Find all active trips for this truck that overlap with the requested dates
+    const conflictingTrips = await ctx.db
+      .query("trip")
+      .filter((q) =>
+        q.and(
+          q.eq(q.field("truckId"), args.truckId),
+          q.eq(q.field("isExpired"), false),
+          // Exclude the current trip if editing
+          args.excludeTripId
+            ? q.neq(q.field("_id"), args.excludeTripId)
+            : q.eq(1, 1),
+          // Check for date overlap using four conditions:
+          // 1. New trip starts during existing trip
+          // 2. New trip ends during existing trip
+          // 3. New trip encompasses existing trip
+          // 4. Existing trip encompasses new trip
+          q.or(
+            q.and(
+              q.lte(q.field("departureDate"), departureTime),
+              q.gte(q.field("arrivalDate"), departureTime)
+            ),
+            q.and(
+              q.lte(q.field("departureDate"), arrivalTime),
+              q.gte(q.field("arrivalDate"), arrivalTime)
+            ),
+            q.and(
+              q.gte(q.field("departureDate"), departureTime),
+              q.lte(q.field("arrivalDate"), arrivalTime)
+            ),
+            q.and(
+              q.lte(q.field("departureDate"), departureTime),
+              q.gte(q.field("arrivalDate"), arrivalTime)
+            )
+          )
+        )
+      )
+      .collect();
+
+    return {
+      isAvailable: conflictingTrips.length === 0,
+      conflictingTrips: conflictingTrips.map((trip) => ({
+        _id: trip._id,
+        originCity: trip.originCity,
+        destinationCity: trip.destinationCity,
+        departureDate: trip.departureDate,
+        arrivalDate: trip.arrivalDate,
+        isBooked: trip.isBooked,
+      })),
+    };
+  },
+});
