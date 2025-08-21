@@ -93,9 +93,9 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
   const variableKMPrice = (trip?.KMPrice ?? 0) * distance;
   const variableKGPrice = (trip?.KGPrice ?? 0) * cargoWeight;
   const tripPriceWithoutFees =
-    (trip?.basePrice ?? 0) + variableKGPrice + variableKMPrice;
-  const tripFees = tripPriceWithoutFees * 0.05;
-  const fullTripPrice = tripPriceWithoutFees + tripFees;
+    (trip?.basePrice ?? 0) + variableKGPrice + variableKMPrice; // As transporter intended
+  const tripFees = tripPriceWithoutFees * 0.05; // 5% commission
+  const fullTripPrice = tripPriceWithoutFees + tripFees; // What the client pays
 
   // Get whether the trip is booked or not
   useEffect(() => {
@@ -239,7 +239,13 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
       const PurchaseTripId = await purchaseTrip({
         tripId: trip?._id as Id<"trip">,
         userId: userId as Id<"users">,
-        amount: tripPriceWithoutFees,
+
+        clientPayable: fullTripPrice, // Final amount of the sale to be paid by the client
+        tripTotal: tripPriceWithoutFees, // Total cost of the trip as specified by the transporter
+        transporterAmount: tripPriceWithoutFees - tripFees, // Amount the transporter will receive after commission
+        commissionAmount: tripFees, // Amount the platform will take as commission
+        commissionPercentage: 5, // Percentage of the commission
+        distance: distance,
         pickupInstructions: pickupInstructions,
         deliveryInstructions: deliveryInstructions,
         freightNotes: cargoDescription,
@@ -266,7 +272,7 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
       setDeliveryInstructions(purchaseTripDetails.deliveryInstructions || "");
       setCargoDescription(purchaseTripDetails.freightNotes || "");
       setCargoWeight(purchaseTripDetails.cargoWeight || 0);
-
+      setDistance(purchaseTripDetails.distance || 0);
       if (trip.originAddress) pickup.setValue(trip.originAddress);
       if (trip.destinationAddress) delivery.setValue(trip.destinationAddress);
     }

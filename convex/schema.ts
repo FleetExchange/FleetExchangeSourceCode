@@ -36,11 +36,19 @@ export default defineSchema({
       v.literal("Refunded")
     ),
     paymentIntentId: v.optional(v.string()),
-    amount: v.number(), // Final amount of the sale
+
+    // Cost breakdown
+    clientPayable: v.number(), // Final amount of the sale to be paid by the client
+    tripTotal: v.number(), // Total cost of the trip as specified by the transporter
+    transporterAmount: v.number(), // Amount the transporter will receive after commission
+    commissionAmount: v.number(), // Amount the platform will take as commission
+    commissionPercentage: v.number(), // Percentage of the commission
+
     pickupInstructions: v.string(), // Any notes for the transporting company relating to the pickup and delivery of the freight
     deliveryInstructions: v.string(),
     freightNotes: v.string(), // Description of the freight
     cargoWeight: v.number(), // Total weight of the items to be shipped
+    distance: v.number(), // Distance of the trip in km after specific addresses has been set
     tripRating: v.optional(v.number()), // Rating of the trip out of 5
     tripRatingComment: v.optional(v.string()), // Comment for the rating
   }),

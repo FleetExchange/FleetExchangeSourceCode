@@ -17,9 +17,12 @@ const BookTripButton = ({
   onBookTrip,
   disabled = false,
 }: BookTripButtonProps) => {
-  let paymentReference = null;
-  let purchaseTripId: string | null = null;
   const [loading, setLoading] = useState(false);
+  const [purchaseTripId, setPurchaseTripId] = useState<string | null>(null);
+
+  const getPurchaseTripById = useMutation(
+    api.purchasetrip.getPurchaseTripForBooking
+  );
   const createPayment = useMutation(api.payments.createPayment);
 
   const handleBookTrip = async () => {
@@ -29,47 +32,54 @@ const BookTripButton = ({
       setLoading(true);
 
       // 1. Create booking and get the ID back
+      let newPurchaseTripId: string | null = null;
       if (onBookTrip) {
-        purchaseTripId = await onBookTrip();
+        newPurchaseTripId = await onBookTrip();
       }
 
-      if (!purchaseTripId) {
+      if (!newPurchaseTripId) {
         throw new Error("Failed to create booking");
       }
 
-      // 2. Generate unique reference
+      // Set the ID to trigger the query
+      setPurchaseTripId(newPurchaseTripId);
+
+      // 2. Load the purchase trip data
+      const purchaseTripData = await getPurchaseTripById({
+        purchaseTripId: newPurchaseTripId as Id<"purchaseTrip">,
+      });
+
+      // 3. Generate unique reference
       const reference = `trip-${trip.tripId}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
-      // 3. Create payment record
-
-      // Payable amount is the trip price plus the additional service fee of using platform
-      const payableAmount = trip.price * 1.05; // Assuming a 5% service fee
-      const comsmissionAmount = trip.price * 0.05; // 5% commission
-      const transporterAmount = trip.price * 0.95; // Amount transporter receives
+      // 4. Use the loaded data
+      const payableAmount = purchaseTripData.clientPayable;
+      const comsmissionAmount = purchaseTripData.commissionAmount;
+      const transporterAmount = purchaseTripData.transporterAmount;
 
       await createPayment({
         userId: user._id,
         transporterId: trip.transporterId,
         tripId: trip.tripId,
-        purchaseTripId: purchaseTripId as Id<"purchaseTrip">,
+        purchaseTripId: newPurchaseTripId as Id<"purchaseTrip">,
         totalAmount: payableAmount,
-        transporterAmount: transporterAmount, // Amount transporter receives
-        commissionAmount: comsmissionAmount, // Commission amount (5% of
+        transporterAmount: transporterAmount,
+        commissionAmount: comsmissionAmount,
         paystackReference: reference,
       });
 
-      // 4. Initialize transaction with Paystack API
+      // 5. Initialize transaction with Paystack API
       const initResponse = await fetch("/api/paystack/initialize", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email: user.email,
-          amount: Math.round(payableAmount * 100), // Now: Math.round(150050.0) = 150050 (integer)
+          amount: Math.round(payableAmount * 100),
           reference: reference,
           callback_url: `${window.location.origin}/payment/callback`,
           tripId: trip.tripId,
           transporterId: trip.transporterId,
-          purchaseTripId: purchaseTripId,
+          purchaseTripId: newPurchaseTripId,
           userId: user._id,
         }),
       });
@@ -77,7 +87,7 @@ const BookTripButton = ({
       const initData = await initResponse.json();
 
       if (initData.status && initData.data?.authorization_url) {
-        // 5. Redirect to Paystack
+        // 6. Redirect to Paystack
         window.location.href = initData.data.authorization_url;
       } else {
         throw new Error(initData.message || "Failed to initialize payment");
@@ -85,13 +95,13 @@ const BookTripButton = ({
     } catch (error) {
       console.error("Booking failed:", error);
 
-      if (purchaseTripId || paymentReference) {
+      if (purchaseTripId) {
         try {
           const cleanupResponse = await fetch("/api/booking/cleanup", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              paystackReference: paymentReference,
+              paystackReference: null,
               purchaseTripId: purchaseTripId,
               reason: "booking_initialization_failed",
             }),

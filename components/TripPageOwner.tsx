@@ -3,7 +3,7 @@
 
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
-import { usePlacesWithRestrictions } from "@/hooks/usePlacesWithRestrictions";
+
 import {
   DirectionsRenderer,
   DirectionsService,
@@ -126,11 +126,23 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
     }
   }, [trip?.originCity, trip?.destinationCity]);
 
+  useEffect(() => {
+    if (purchaseTrip) {
+      setDeliveryAddress(trip?.destinationAddress || "");
+      setPickupAddress(trip?.originAddress || "");
+      setDistance(purchaseTrip.distance || 0);
+    }
+  }, [
+    purchaseTrip?._id,
+    trip?.destinationAddress,
+    trip?.originAddress,
+    purchaseTrip?.distance,
+  ]);
+
   // Pricing calculations
   const KMPrice = (trip?.KMPrice ?? 0) * distance;
   const KGPrice = (trip?.KGPrice ?? 0) * (purchaseTrip?.cargoWeight ?? 0);
   const tripPriceWithoutFees = (trip?.basePrice ?? 0) + KMPrice + KGPrice;
-
   const platformCommision = tripPriceWithoutFees * 0.05; // Assuming a 5% fee
   const issuerPayout = tripPriceWithoutFees - platformCommision;
 
@@ -601,91 +613,151 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
                       Price Breakdown
                     </h3>
                     <p className="text-sm text-base-content/60">
-                      Trip cost details
+                      {purchaseTrip ? "Trip cost details" : "Pricing structure"}
                     </p>
                   </div>
                 </div>
 
                 <div className="space-y-3 mb-6">
-                  {trip &&
-                    typeof trip.basePrice === "number" &&
-                    trip.basePrice > 0 && (
-                      <div className="flex justify-between text-sm">
-                        <span className="text-base-content/70">
-                          Base Price:
-                        </span>
-                        <span className="font-medium">
-                          R{trip.basePrice.toFixed(2)}
-                        </span>
-                      </div>
-                    )}
+                  {/* Show only basic pricing if no purchaseTrip */}
+                  {!purchaseTrip ? (
+                    <>
+                      {/* Base Price */}
+                      {trip &&
+                        typeof trip.basePrice === "number" &&
+                        trip.basePrice > 0 && (
+                          <div className="flex justify-between text-sm">
+                            <span className="text-base-content/70">
+                              Base Price:
+                            </span>
+                            <span className="font-medium">
+                              R{trip.basePrice.toFixed(2)}
+                            </span>
+                          </div>
+                        )}
 
-                  {trip &&
-                    typeof trip.KGPrice === "number" &&
-                    trip.KGPrice > 0 &&
-                    (purchaseTrip?.cargoWeight ?? 0) > 0 && (
-                      <div className="flex justify-between text-sm">
-                        <span className="text-base-content/70">
-                          Weight Cost:
-                        </span>
-                        <span>
-                          R{trip.KGPrice.toFixed(2)} ×{" "}
-                          {purchaseTrip?.cargoWeight}kg = R{KGPrice.toFixed(2)}
-                        </span>
-                      </div>
-                    )}
+                      {/* KM Price Rate */}
+                      {trip &&
+                        typeof trip.KMPrice === "number" &&
+                        trip.KMPrice > 0 && (
+                          <div className="flex justify-between text-sm">
+                            <span className="text-base-content/70">
+                              Per Kilometer:
+                            </span>
+                            <span className="font-medium">
+                              R{trip.KMPrice.toFixed(2)}/km
+                            </span>
+                          </div>
+                        )}
 
-                  {trip &&
-                    typeof trip.KMPrice === "number" &&
-                    trip.KMPrice > 0 &&
-                    distance > 0 && (
-                      <div className="flex justify-between text-sm">
-                        <span className="text-base-content/70">
-                          Distance Cost:
-                        </span>
-                        <span>
-                          R{trip.KMPrice.toFixed(2)} × {distance.toFixed(1)}km =
-                          R{KMPrice.toFixed(2)}
-                        </span>
-                      </div>
-                    )}
+                      {/* KG Price Rate */}
+                      {trip &&
+                        typeof trip.KGPrice === "number" &&
+                        trip.KGPrice > 0 && (
+                          <div className="flex justify-between text-sm">
+                            <span className="text-base-content/70">
+                              Per Kilogram:
+                            </span>
+                            <span className="font-medium">
+                              R{trip.KGPrice.toFixed(2)}/kg
+                            </span>
+                          </div>
+                        )}
 
-                  {/* Subtotal */}
-                  {tripPriceWithoutFees > 0 && (
-                    <div className="flex justify-between text-sm border-t border-base-300 pt-3">
-                      <span className="text-base-content/70 font-medium">
-                        Subtotal:
-                      </span>
-                      <span className="font-medium">
-                        R{tripPriceWithoutFees.toFixed(2)}
-                      </span>
-                    </div>
+                      <div className="bg-info/10 border border-info/20 rounded-lg p-3 mt-4">
+                        <p className="text-xs text-base-content/60 text-center">
+                          Final price will be calculated based on actual
+                          distance and cargo weight
+                        </p>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      {/* Full breakdown when purchaseTrip exists */}
+                      {trip &&
+                        typeof trip.basePrice === "number" &&
+                        trip.basePrice > 0 && (
+                          <div className="flex justify-between text-sm">
+                            <span className="text-base-content/70">
+                              Base Price:
+                            </span>
+                            <span className="font-medium">
+                              R{trip.basePrice.toFixed(2)}
+                            </span>
+                          </div>
+                        )}
+
+                      {trip &&
+                        typeof trip.KGPrice === "number" &&
+                        trip.KGPrice > 0 &&
+                        (purchaseTrip?.cargoWeight ?? 0) > 0 && (
+                          <div className="flex justify-between text-sm">
+                            <span className="text-base-content/70">
+                              Weight Cost:
+                            </span>
+                            <span>
+                              R{trip.KGPrice.toFixed(2)} ×
+                              {purchaseTrip?.cargoWeight}kg = R
+                              {KGPrice.toFixed(2)}
+                            </span>
+                          </div>
+                        )}
+
+                      {trip &&
+                        typeof trip.KMPrice === "number" &&
+                        trip.KMPrice > 0 &&
+                        distance > 0 && (
+                          <div className="flex justify-between text-sm">
+                            <span className="text-base-content/70">
+                              Distance Cost:
+                            </span>
+                            <span>
+                              R{trip.KMPrice.toFixed(2)} × {distance.toFixed(1)}
+                              km = R{KMPrice.toFixed(2)}
+                            </span>
+                          </div>
+                        )}
+
+                      {/* Subtotal */}
+                      {purchaseTrip.tripTotal > 0 && (
+                        <div className="flex justify-between text-sm border-t border-base-300 pt-3">
+                          <span className="text-base-content/70 font-medium">
+                            Subtotal:
+                          </span>
+                          <span className="font-medium">
+                            R{purchaseTrip.tripTotal.toFixed(2)}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Platform Commission */}
+                      {purchaseTrip.commissionAmount > 0 && (
+                        <div className="flex justify-between text-sm">
+                          <span className="text-base-content/70">
+                            Platform Commission (5%):
+                          </span>
+                          <span className="text-error font-medium">
+                            - R{purchaseTrip.commissionAmount.toFixed(2)}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Final Payout */}
+                      <div className="border-t border-base-300 pt-3">
+                        <div className="flex justify-between text-lg font-bold">
+                          <span className="text-base-content">
+                            Your Earnings:
+                          </span>
+                          <span className="text-success">
+                            R{purchaseTrip.transporterAmount.toFixed(2)}
+                          </span>
+                        </div>
+                        <p className="text-xs text-base-content/60 text-right mt-1">
+                          Amount you receive after commission
+                        </p>
+                      </div>
+                    </>
                   )}
-
-                  {/* Platform Commission */}
-                  {platformCommision > 0 && (
-                    <div className="flex justify-between text-sm">
-                      <span className="text-base-content/70">
-                        Platform Commission (5%):
-                      </span>
-                      <span className="text-error font-medium">
-                        - R{platformCommision.toFixed(2)}
-                      </span>
-                    </div>
-                  )}
-
-                  {/* Final Payout */}
-                  <div className="border-t border-base-300 pt-3">
-                    <div className="flex justify-between text-lg font-bold">
-                      <span className="text-base-content">Your Earnings:</span>
-                      <span className="text-success">
-                        R{issuerPayout.toFixed(2)}
-                      </span>
-                    </div>
-                    <p className="text-xs text-base-content/60 text-right mt-1">
-                      Amount you receive after commission
-                    </p>
-                  </div>
                 </div>
 
                 {/* Action Buttons */}

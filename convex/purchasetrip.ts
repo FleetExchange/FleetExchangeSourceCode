@@ -5,7 +5,13 @@ export const createPurchaseTrip = mutation({
   args: {
     tripId: v.id("trip"),
     userId: v.id("users"),
-    amount: v.number(),
+
+    clientPayable: v.number(), // Final amount of the sale to be paid by the client
+    tripTotal: v.number(), // Total cost of the trip as specified by the transporter
+    transporterAmount: v.number(), // Amount the transporter will receive after commission
+    commissionAmount: v.number(), // Amount the platform will take as commission
+    commissionPercentage: v.number(), // Percentage of the commission
+    distance: v.number(), // Distance of the trip in km after specific addresses has been set
     freightNotes: v.string(),
     pickupInstructions: v.string(),
     deliveryInstructions: v.string(),
@@ -16,11 +22,16 @@ export const createPurchaseTrip = mutation({
     {
       tripId,
       userId,
-      amount,
+      clientPayable,
+      tripTotal,
+      transporterAmount,
+      commissionAmount,
+      commissionPercentage,
       freightNotes,
       pickupInstructions,
       deliveryInstructions,
       cargoWeight,
+      distance,
     }
   ) => {
     const newPurchaseTripId = await ctx.db.insert("purchaseTrip", {
@@ -28,11 +39,16 @@ export const createPurchaseTrip = mutation({
       userId,
       purchasedAt: Date.now(),
       status: "Awaiting Confirmation",
-      amount,
+      clientPayable,
+      tripTotal,
+      transporterAmount,
+      commissionAmount,
+      commissionPercentage,
       freightNotes,
       pickupInstructions,
       deliveryInstructions,
       cargoWeight,
+      distance,
     });
 
     return newPurchaseTripId;
@@ -186,5 +202,18 @@ export const addTripRating = mutation({
       tripRating: args.rating,
       tripRatingComment: args.comment || "",
     });
+  },
+});
+
+// Get the purchase trip via a mutation specifically for the BookTripButton
+export const getPurchaseTripForBooking = mutation({
+  args: { purchaseTripId: v.id("purchaseTrip") },
+  handler: async (ctx, { purchaseTripId }) => {
+    const purchaseTrip = await ctx.db.get(purchaseTripId);
+    if (!purchaseTrip) {
+      throw new Error("Purchase trip not found");
+    }
+
+    return purchaseTrip;
   },
 });
