@@ -11,6 +11,12 @@ crons.interval(
   internal.crons.markExpiredTrips
 );
 
+crons.interval(
+  "expiredUnconfirmedTrips",
+  { minutes: 5 }, // Runs every 5 minutes
+  internal.crons.expiredUnconfirmedTrips
+);
+
 // Cron job for trip reminders in the next 24 hours
 crons.interval(
   "sendTripReminders",
@@ -320,6 +326,83 @@ export const cleanupAbandonedBookings = internalMutation({
 
     console.log(`✅ Cleaned up ${cleanupCount} abandoned bookings`);
     return cleanupCount;
+  },
+});
+
+export const expiredUnconfirmedTrips = internalMutation({
+  handler: async (ctx) => {
+    const currentDate = new Date().getTime();
+
+    // Query for trip that are awaitng confirmation that have passed their departure date
+
+    // Find purchase Trips that are awaiting confirmation
+    const purchaseTrips = await ctx.db
+      .query("purchaseTrip")
+      .filter((q) => q.eq(q.field("status"), "Awaiting Confirmation"))
+      .collect();
+
+    // Extract trip IDs from purchase trips
+    const tripIds = purchaseTrips.map((trip) => trip.tripId as Id<"trip">);
+
+    // Find the trip objects that match the purchase trip IDs and that are expired
+    if (tripIds.length === 0) {
+      console.log("No unconfirmed trips found");
+      return 0; // No trips to update
+    }
+
+    let updatedCount = 0;
+    for (const tripId of tripIds) {
+      const trip = await ctx.db.get(tripId);
+      if (trip && trip.departureDate < currentDate && !trip.isExpired) {
+        // Refund the booking
+        const payment = useQuery(api.payments.getPaymentByTrip, {
+          tripId,
+        });
+
+        if (payment && payment.paystackReference) {
+          // 3. Refund the payment
+          const refundResponse = await fetch("/api/paystack/refund", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              reference: payment.paystackReference,
+            }),
+          });
+
+          if (refundResponse.ok) {
+            // Update payment status
+            await ctx.db.patch(payment._id, { status: "refunded" });
+
+            // 5. Notify client
+            await ctx.runMutation(api.notifications.createNotification, {
+              userId: payment.userId,
+              type: "payment",
+              message:
+                "Your payment has been refunded as the trip was not confirmed.",
+              meta: { tripId, action: "payment_refunded" },
+            });
+
+            console.log("Trip rejected and payment refunded successfully");
+          }
+
+          // Delete the payment
+          await ctx.db.delete(payment._id);
+        }
+
+        // Delete the purchase trip
+        const purchaseTrip = purchaseTrips.find((pt) => pt.tripId === tripId);
+        if (purchaseTrip) {
+          await ctx.db.delete(purchaseTrip._id);
+        }
+
+        // Update the trip to mark it as expired
+        await ctx.db.patch(trip._id, { isExpired: true, isBooked: false });
+        updatedCount++;
+        console.log(`Marked unconfrimed trip ${trip._id} as expired`);
+      }
+    }
+
+    return updatedCount;
   },
 });
 
