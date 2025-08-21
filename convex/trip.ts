@@ -318,6 +318,7 @@ export const createTrip = mutation({
       KMPrice: args.KMPrice,
       KGPrice: args.KGPrice,
       isBooked: args.isBooked,
+      isExpired: false, // Default to false, can be updated later
     });
   },
 });

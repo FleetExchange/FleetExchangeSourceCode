@@ -7,7 +7,7 @@ import { Id } from "./_generated/dataModel";
 const crons = cronJobs();
 crons.interval(
   "markExpiredTrips",
-  { minutes: 15 }, // Runs every 15 minutes
+  { minutes: 5 }, // Runs every 5 minutes
   internal.crons.markExpiredTrips
 );
 
@@ -43,6 +43,10 @@ export const markExpiredTrips = internalMutation({
   handler: async (ctx) => {
     const currentDate = new Date().getTime();
 
+    console.log(
+      `🔍 Checking for expired trips at ${new Date(currentDate).toISOString()}`
+    );
+
     // Query for unbooked trips that have passed their departure date
     const expiredTrips = await ctx.db
       .query("trip")
@@ -55,13 +59,26 @@ export const markExpiredTrips = internalMutation({
       )
       .collect();
 
+    console.log(`📊 Found ${expiredTrips.length} potentially expired trips`);
+
     // Update each expired trip
+    let updatedCount = 0;
     for (const trip of expiredTrips) {
-      await ctx.db.patch(trip._id, {
-        isExpired: true,
-      });
+      try {
+        await ctx.db.patch(trip._id, {
+          isExpired: true,
+        });
+        updatedCount++;
+        console.log(`✅ Marked trip ${trip._id} as expired`);
+      } catch (error) {
+        console.error(`❌ Failed to update trip ${trip._id}:`, error);
+      }
     }
-    console.log(`Updated ${expiredTrips.length} expired trips`);
+
+    console.log(
+      `✅ Successfully updated ${updatedCount}/${expiredTrips.length} expired trips`
+    );
+    return updatedCount;
   },
 });
 
