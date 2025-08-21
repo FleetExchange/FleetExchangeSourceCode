@@ -112,9 +112,9 @@ const MyBookingsTable = () => {
 
     switch (sortBy) {
       case "Price Asc":
-        return a.amount - b.amount;
+        return a.tripTotal - b.tripTotal;
       case "Price Desc":
-        return b.amount - a.amount;
+        return b.tripTotal - a.tripTotal;
       case "Date Asc":
         return (tripA.departureDate || 0) - (tripB.departureDate || 0);
       case "Date Desc":
@@ -342,7 +342,7 @@ const MyBookingsTable = () => {
                       </td>
                       <td>
                         <div className="font-semibold text-success">
-                          R{booking.amount?.toFixed(2) || "0.00"}
+                          R{booking.tripTotal?.toFixed(2) || "0.00"}
                         </div>
                       </td>
                       <td>{getStatusBadge(booking?.status || "")}</td>
