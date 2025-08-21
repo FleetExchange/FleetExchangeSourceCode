@@ -1,3 +1,4 @@
+import Banner from "@/components/Banner";
 import MobileMenuTransporter from "@/components/MobileMenuTransporter";
 import TransporterSidebar from "@/components/TransporterSidebar";
 
@@ -8,6 +9,7 @@ export default function TransporterLayout({
 }) {
   return (
     <div>
+      <Banner />
       {/* Desktop Sidebar */}
       <div className="hidden lg:block">
         <TransporterSidebar />

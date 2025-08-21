@@ -1,3 +1,4 @@
+import Banner from "@/components/Banner";
 import ClientSidebar from "@/components/ClientSidebar";
 import MobileMenuClient from "@/components/MobileMenuClient";
 
@@ -8,6 +9,7 @@ export default function ClientLayout({
 }>) {
   return (
     <div>
+      <Banner />
       {/* Desktop Sidebar */}
       <div className="hidden lg:block">
         <ClientSidebar />
