@@ -53,7 +53,9 @@ const MyUnbookedTripsTable = () => {
 
   // Only process unbooked trips if we have userTrips
   const unbookedTrips =
-    userTrips?.filter((trip) => trip.isBooked === false) ?? [];
+    userTrips?.filter(
+      (trip) => trip.isBooked === false && trip.isExpired === false
+    ) ?? [];
 
   // Get all the trucks from the user trips
   const userTripTrucks = (unbookedTrips ?? []).map((trip) => trip.truckId);

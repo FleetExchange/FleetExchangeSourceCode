@@ -1,7 +1,7 @@
 import { cronJobs } from "convex/server";
 import { api, internal } from "./_generated/api";
 import { internalMutation } from "./_generated/server";
-import { useQuery } from "convex/react";
+
 import { Id } from "./_generated/dataModel";
 
 const crons = cronJobs();
@@ -333,8 +333,6 @@ export const expiredUnconfirmedTrips = internalMutation({
   handler: async (ctx) => {
     const currentDate = new Date().getTime();
 
-    // Query for trip that are awaitng confirmation that have passed their departure date
-
     // Find purchase Trips that are awaiting confirmation
     const purchaseTrips = await ctx.db
       .query("purchaseTrip")
@@ -344,64 +342,48 @@ export const expiredUnconfirmedTrips = internalMutation({
     // Extract trip IDs from purchase trips
     const tripIds = purchaseTrips.map((trip) => trip.tripId as Id<"trip">);
 
-    // Find the trip objects that match the purchase trip IDs and that are expired
     if (tripIds.length === 0) {
       console.log("No unconfirmed trips found");
-      return 0; // No trips to update
+      return 0;
     }
 
     let updatedCount = 0;
     for (const tripId of tripIds) {
       const trip = await ctx.db.get(tripId);
       if (trip && trip.departureDate < currentDate && !trip.isExpired) {
-        // Refund the booking
-        const payment = useQuery(api.payments.getPaymentByTrip, {
-          tripId,
-        });
+        try {
+          const payment = await ctx.db
+            .query("payments")
+            .filter((q) => q.eq(q.field("tripId"), tripId))
+            .first();
 
-        if (payment && payment.paystackReference) {
-          // 3. Refund the payment
-          const refundResponse = await fetch("/api/paystack/refund", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              reference: payment.paystackReference,
-            }),
-          });
-
-          if (refundResponse.ok) {
-            // Update payment status
-            await ctx.db.patch(payment._id, { status: "refunded" });
-
-            // 5. Notify client
-            await ctx.runMutation(api.notifications.createNotification, {
+          if (payment && payment.paystackReference) {
+            // Schedule the refund processing action to run immediately
+            await ctx.scheduler.runAfter(0, api.payments.processRefund, {
+              paystackReference: payment.paystackReference,
+              paymentId: payment._id,
               userId: payment.userId,
-              type: "payment",
-              message:
-                "Your payment has been refunded as the trip was not confirmed.",
-              meta: { tripId, action: "payment_refunded" },
+              tripId: tripId,
             });
-
-            console.log("Trip rejected and payment refunded successfully");
           }
 
-          // Delete the payment
-          await ctx.db.delete(payment._id);
-        }
+          // Delete the purchase trip
+          const purchaseTrip = purchaseTrips.find((pt) => pt.tripId === tripId);
+          if (purchaseTrip) {
+            await ctx.db.delete(purchaseTrip._id);
+          }
 
-        // Delete the purchase trip
-        const purchaseTrip = purchaseTrips.find((pt) => pt.tripId === tripId);
-        if (purchaseTrip) {
-          await ctx.db.delete(purchaseTrip._id);
+          // Update the trip to mark it as expired
+          await ctx.db.patch(trip._id, { isExpired: true, isBooked: false });
+          updatedCount++;
+          console.log(`Marked unconfirmed trip ${trip._id} as expired`);
+        } catch (error) {
+          console.error(`Failed to process expired trip ${tripId}:`, error);
         }
-
-        // Update the trip to mark it as expired
-        await ctx.db.patch(trip._id, { isExpired: true, isBooked: false });
-        updatedCount++;
-        console.log(`Marked unconfrimed trip ${trip._id} as expired`);
       }
     }
 
+    console.log(`✅ Processed ${updatedCount} expired unconfirmed trips`);
     return updatedCount;
   },
 });

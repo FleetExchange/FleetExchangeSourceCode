@@ -1,5 +1,5 @@
 // convex/payments.ts
-import { mutation, query } from "./_generated/server";
+import { mutation, query, action } from "./_generated/server";
 import { v } from "convex/values";
 import { api } from "./_generated/api";
 
@@ -159,7 +159,8 @@ export const updatePaymentStatus = mutation({
       v.literal("charged"),
       v.literal("released"),
       v.literal("failed"),
-      v.literal("refunded")
+      v.literal("refunded"),
+      v.literal("refund_failed")
     ),
     transferReference: v.optional(v.string()),
   },
@@ -193,5 +194,99 @@ export const deletePayment = mutation({
     await ctx.db.delete(args.paymentId);
 
     return true;
+  },
+});
+
+// Process refund
+export const processRefund = action({
+  args: {
+    paystackReference: v.string(),
+    paymentId: v.id("payments"),
+    userId: v.id("users"),
+    tripId: v.id("trip"),
+  },
+  handler: async (ctx, args) => {
+    try {
+      // Check if API key exists
+      const apiKey = process.env.PAYSTACK_SECRET_KEY;
+      if (!apiKey) {
+        throw new Error("Paystack API key not configured");
+      }
+
+      console.log(
+        `🔄 Processing refund for transaction: ${args.paystackReference}`
+      );
+
+      // Call Paystack refund API
+      const response = await fetch("https://api.paystack.co/refund", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          transaction: args.paystackReference,
+        }),
+      });
+
+      const refundData = await response.json();
+
+      console.log(`📊 Paystack refund response:`, {
+        status: response.status,
+        ok: response.ok,
+        data: refundData,
+      });
+
+      if (response.ok && refundData.status) {
+        // Update payment status in database
+        await ctx.runMutation(api.payments.updatePaymentStatus, {
+          paymentId: args.paymentId,
+          status: "refunded",
+        });
+
+        // Send notification
+        await ctx.runMutation(api.notifications.createNotification, {
+          userId: args.userId,
+          type: "payment",
+          message:
+            "Your payment has been refunded as the trip was not confirmed.",
+          meta: { tripId: args.tripId, action: "payment_refunded" },
+        });
+
+        console.log(
+          `✅ Refund processed successfully for ${args.paystackReference}`
+        );
+        return { success: true, message: "Refund processed successfully" };
+      } else {
+        // Log the full error details
+        console.error(`❌ Paystack refund failed:`, {
+          status: response.status,
+          statusText: response.statusText,
+          data: refundData,
+        });
+
+        throw new Error(
+          `Refund failed: ${refundData.message || "Unknown error"}`
+        );
+      }
+    } catch (error) {
+      console.error("🚨 Refund processing failed:", error);
+
+      // Still mark as refund attempted in case of API issues
+      try {
+        await ctx.runMutation(api.payments.updatePaymentStatus, {
+          paymentId: args.paymentId,
+          status: "refund_failed",
+        });
+      } catch (dbError) {
+        console.error("Failed to update payment status:", dbError);
+      }
+
+      return {
+        success: false,
+        error:
+          error instanceof Error ? error.message : "Unknown error occurred",
+      };
+    }
   },
 });

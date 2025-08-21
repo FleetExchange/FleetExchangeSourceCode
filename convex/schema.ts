@@ -162,7 +162,8 @@ export default defineSchema({
       v.literal("charged"), // Payment taken from client
       v.literal("released"), // Payment sent to transporter
       v.literal("failed"),
-      v.literal("refunded")
+      v.literal("refunded"),
+      v.literal("refund_failed")
     ),
 
     // Transfer tracking
