@@ -93,7 +93,7 @@ export const sendTripReminders = internalMutation({
   handler: async (ctx) => {
     const now = Date.now();
     const tomorrow = now + 24 * 60 * 60 * 1000; // 24 hours from now
-
+    let count = 0;
     // Find trips departing tomorrow (between 24-48 hours from now)
     const upcomingTrips = await ctx.db
       .query("trip")
@@ -117,7 +117,10 @@ export const sendTripReminders = internalMutation({
 
     const filteredPurchaseTrips =
       purchasedTrips?.filter(
-        (trip) => trip.status !== "Cancelled" && trip.status !== "Refunded"
+        (trip) =>
+          trip.status !== "Cancelled" &&
+          trip.status !== "Refunded" &&
+          trip.status !== "Awaiting Confirmation"
       ) ?? [];
 
     // for each purch trip departing in next 24
@@ -134,7 +137,7 @@ export const sendTripReminders = internalMutation({
             q.eq(q.field("userId"), trip.userId),
             q.eq(q.field("type"), "trip"),
             q.eq(q.field("meta"), {
-              tripId: purchTrip._id,
+              tripId: trip._id,
               action: "trip_reminder",
             })
           )
@@ -144,6 +147,7 @@ export const sendTripReminders = internalMutation({
       // if reminder not sent, create a new reminder
       if (!existingReminderTransporter) {
         // Create reminder notification
+        count++;
         await ctx.runMutation(api.notifications.createNotification, {
           userId: trip.userId,
           type: "trip",
@@ -185,7 +189,7 @@ export const sendTripReminders = internalMutation({
         });
       }
     }
-    console.log(`Sent ${upcomingTrips.length} trip reminders`);
+    console.log(`Sent ${count} trip reminders`);
   },
 });
 
@@ -194,7 +198,7 @@ export const confirmDeliveryReminders = internalMutation({
   handler: async (ctx) => {
     const now = Date.now();
     const threeHoursAgo = now - 3 * 60 * 60 * 1000; // 3 hours ago
-
+    let count = 0;
     // Find trips delivered in past 3 hours
     const deliveredTrips = await ctx.db
       .query("trip")
@@ -217,9 +221,7 @@ export const confirmDeliveryReminders = internalMutation({
     );
 
     const filteredPurchaseTrips =
-      purchasedTrips?.filter(
-        (trip) => trip.status !== "Cancelled" && trip.status !== "Refunded"
-      ) ?? [];
+      purchasedTrips?.filter((trip) => trip.status === "Dispatched") ?? [];
 
     // for each purch trip ddelivered in the last 3 hours
     for (const purchTrip of filteredPurchaseTrips) {
@@ -235,7 +237,7 @@ export const confirmDeliveryReminders = internalMutation({
             q.eq(q.field("userId"), trip.userId),
             q.eq(q.field("type"), "trip"),
             q.eq(q.field("meta"), {
-              tripId: purchTrip._id,
+              tripId: trip._id,
               action: "confirmDelivery_reminder",
             })
           )
@@ -245,6 +247,7 @@ export const confirmDeliveryReminders = internalMutation({
       // if reminder not sent, create a new reminder
       if (!existingReminder) {
         // Create reminder notification
+        count++;
         await ctx.runMutation(api.notifications.createNotification, {
           userId: trip.userId,
           type: "trip",
@@ -256,9 +259,7 @@ export const confirmDeliveryReminders = internalMutation({
         });
       }
     }
-    console.log(
-      `Sent ${filteredPurchaseTrips.length} trip confirm delivery reminders`
-    );
+    console.log(`Sent ${count} trip confirm delivery reminders`);
   },
 });
 
