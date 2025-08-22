@@ -10,7 +10,9 @@ import {
   ExternalLink,
   Facebook,
   Twitter,
+  Linkedin,
 } from "lucide-react";
+import Logo from "./Logo";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -25,15 +27,15 @@ const Footer = () => {
             <div className="space-y-4">
               <div className="flex items-center gap-2">
                 <div className="p-2 bg-primary/10 rounded-lg border border-primary/20">
-                  <Truck className="w-5 h-5 text-primary" />
+                  <Logo variant="icon" size="md" />
                 </div>
                 <span className="text-lg font-bold text-base-content">
-                  FreightConnect
+                  FleetExchange
                 </span>
               </div>
               <p className="text-sm text-base-content/60 leading-relaxed">
-                Connecting transporters and clients for efficient &
-                instantaneous freight logistics solutions.
+                Connecting transporters and clients for easy, instantaneous and
+                reliable logistic solutions.
               </p>
               {/* Social Links */}
               <div className="flex gap-3">
@@ -42,6 +44,9 @@ const Footer = () => {
                 </a>
                 <a href="#" className="text-base-content/60 hover:text-primary">
                   <Twitter className="w-5 h-5" />
+                </a>
+                <a href="#" className="text-base-content/60 hover:text-primary">
+                  <Linkedin className="w-5 h-5" />
                 </a>
               </div>
             </div>
@@ -52,15 +57,15 @@ const Footer = () => {
               <ul className="space-y-2">
                 <li>
                   <Link
-                    href="/discover"
+                    href="/sign-up"
                     className="text-sm text-base-content/60 hover:text-primary transition-colors"
                   >
-                    Discover Trips
+                    Sign Up
                   </Link>
                 </li>
                 <li>
                   <Link
-                    href="/about"
+                    href="/"
                     className="text-sm text-base-content/60 hover:text-primary transition-colors"
                   >
                     About Us
@@ -68,7 +73,7 @@ const Footer = () => {
                 </li>
                 <li>
                   <Link
-                    href="/how-it-works"
+                    href="/"
                     className="text-sm text-base-content/60 hover:text-primary transition-colors"
                   >
                     How It Works
@@ -76,7 +81,7 @@ const Footer = () => {
                 </li>
                 <li>
                   <Link
-                    href="/pricing"
+                    href="/"
                     className="text-sm text-base-content/60 hover:text-primary transition-colors"
                   >
                     Pricing
@@ -91,7 +96,7 @@ const Footer = () => {
               <ul className="space-y-2">
                 <li>
                   <Link
-                    href="/help"
+                    href="/"
                     className="text-sm text-base-content/60 hover:text-primary transition-colors"
                   >
                     Help Center
@@ -99,7 +104,7 @@ const Footer = () => {
                 </li>
                 <li>
                   <Link
-                    href="/contact"
+                    href="/"
                     className="text-sm text-base-content/60 hover:text-primary transition-colors"
                   >
                     Contact Us
@@ -107,7 +112,7 @@ const Footer = () => {
                 </li>
                 <li>
                   <Link
-                    href="/faq"
+                    href="/"
                     className="text-sm text-base-content/60 hover:text-primary transition-colors"
                   >
                     FAQ
@@ -115,7 +120,7 @@ const Footer = () => {
                 </li>
                 <li>
                   <Link
-                    href="/terms"
+                    href="/"
                     className="text-sm text-base-content/60 hover:text-primary transition-colors"
                   >
                     Terms of Service
@@ -131,19 +136,19 @@ const Footer = () => {
                 <div className="flex items-center gap-2">
                   <Mail className="w-4 h-4 text-primary" />
                   <a
-                    href="mailto:support@freightconnect.com"
+                    href="mailto:support@fleetexchange.com"
                     className="text-sm text-base-content/60 hover:text-primary transition-colors"
                   >
-                    support@freightconnect.com
+                    support@fleetexchange.com
                   </a>
                 </div>
                 <div className="flex items-center gap-2">
                   <Phone className="w-4 h-4 text-primary" />
                   <a
-                    href="tel:+27123456789"
+                    href="tel:++27837840895"
                     className="text-sm text-base-content/60 hover:text-primary transition-colors"
                   >
-                    +27 12 345 6789
+                    +27 83 784 0895
                   </a>
                 </div>
                 <div className="flex items-start gap-2">
@@ -152,15 +157,6 @@ const Footer = () => {
                     Cape Town, South Africa
                   </span>
                 </div>
-              </div>
-            </div>
-
-            {/* Newsletter Signup */}
-            <div className="space-y-4">
-              <h3 className="font-semibold text-base-content">Newsletter</h3>
-              <div className="flex gap-2">
-                <input type="email" className="input input-sm flex-1" />
-                <button className="btn btn-primary btn-sm">Subscribe</button>
               </div>
             </div>
           </div>
@@ -174,13 +170,13 @@ const Footer = () => {
             </div>
             <div className="flex gap-6">
               <Link
-                href="/privacy"
+                href="/"
                 className="text-sm text-base-content/60 hover:text-primary transition-colors"
               >
                 Privacy Policy
               </Link>
               <Link
-                href="/cookies"
+                href="/"
                 className="text-sm text-base-content/60 hover:text-primary transition-colors"
               >
                 Cookie Policy

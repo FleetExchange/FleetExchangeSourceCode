@@ -73,11 +73,11 @@ const TransporterStatsWidget = () => {
 
     // Revenue calculations
     const revenueThisMonth = tripsThisMonth.reduce(
-      (total, trip) => total + (trip.amount || 0),
+      (total, trip) => total + (trip.tripTotal || 0),
       0
     );
     const revenueLastMonth = tripsLastMonth.reduce(
-      (total, trip) => total + (trip.amount || 0),
+      (total, trip) => total + (trip.tripTotal || 0),
       0
     );
 
@@ -104,7 +104,7 @@ const TransporterStatsWidget = () => {
     const totalRevenue =
       purchasedTrips
         ?.filter((trip) => trip.status === "Delivered")
-        .reduce((total, trip) => total + (trip.amount || 0), 0) ?? 0;
+        .reduce((total, trip) => total + (trip.tripTotal || 0), 0) ?? 0;
 
     // Year-over-year growth (simplified - last 12 months vs previous 12 months)
     const twelveMonthsAgo = new Date(now.getFullYear() - 1, now.getMonth(), 1);

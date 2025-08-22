@@ -2,7 +2,7 @@ import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useQuery, useMutation } from "convex/react";
 import React from "react";
-import { FaStar } from "react-icons/fa";
+import { Star, MessageSquare, User, Award } from "lucide-react";
 
 const TripRatingComponent = ({
   purchaseTripId,
@@ -78,13 +78,17 @@ const TripRatingComponent = ({
     return (
       <div className="flex gap-1">
         {[1, 2, 3, 4, 5].map((star) => (
-          <FaStar
+          <Star
             key={star}
-            className={`w-6 h-6 transition-colors ${
+            className={`w-5 h-5 transition-all duration-200 ${
               star <= (hoverRating || currentRating || 0)
-                ? "text-yellow-400"
-                : "text-gray-300"
-            } ${readOnly ? "cursor-default" : "cursor-pointer hover:text-yellow-400"}`}
+                ? "text-warning fill-warning"
+                : "text-base-content/30"
+            } ${
+              readOnly
+                ? "cursor-default"
+                : "cursor-pointer hover:text-warning hover:scale-110"
+            }`}
             onClick={() => !readOnly && onRatingChange?.(star)}
             onMouseEnter={() => !readOnly && setHoverRating(star)}
             onMouseLeave={() => !readOnly && setHoverRating(null)}
@@ -96,83 +100,197 @@ const TripRatingComponent = ({
 
   // Loading state
   if (!purchaseTrip) {
-    return <div className="p-4">Loading rating...</div>;
+    return (
+      <div className="bg-base-100 rounded-2xl shadow-xl border border-base-300 p-6">
+        <div className="flex items-center justify-center gap-3">
+          <div className="loading loading-spinner loading-sm"></div>
+          <span className="text-base-content/70">Loading rating...</span>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="bg-base-100 rounded-lg p-4 border border-base-300">
+    <div className="bg-base-100 rounded-2xl shadow-xl border border-base-300 p-6">
       {hasRating ? (
         // Display existing rating
-        <div className="space-y-3">
-          <h3 className="text-lg font-semibold">
-            {readOnly ? "Customer Rating" : "Your Rating"}
-          </h3>
+        <div className="space-y-6">
+          {/* Header */}
           <div className="flex items-center gap-3">
-            <StarRating
-              currentRating={purchaseTrip.tripRating ?? null}
-              readOnly={true}
-            />
-            <span className="text-sm text-base-content/70">
-              {purchaseTrip.tripRating}/5
-            </span>
-          </div>
-          {purchaseTrip.tripRatingComment && (
-            <div className="mt-3">
-              <p className="text-sm font-medium text-base-content/80">
-                {readOnly ? "Customer Review:" : "Your Review:"}
-              </p>
-              <p className="text-sm text-base-content/70 mt-1 p-3 bg-base-200 rounded-lg">
-                {purchaseTrip.tripRatingComment}
+            <div className="p-2 bg-success/10 rounded-lg border border-success/20">
+              <Award className="w-5 h-5 text-success" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-base-content">
+                {readOnly ? "Customer Rating" : "Your Rating"}
+              </h3>
+              <p className="text-sm text-base-content/60">
+                Trip experience feedback
               </p>
             </div>
-          )}
+          </div>
+
+          {/* Rating Display */}
+          <div className="bg-base-200/50 border border-base-300 rounded-xl p-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-3">
+                <StarRating
+                  currentRating={purchaseTrip.tripRating ?? null}
+                  readOnly={true}
+                />
+                <div className="flex items-center gap-2">
+                  <span className="text-lg font-bold text-base-content">
+                    {purchaseTrip.tripRating}
+                  </span>
+                  <span className="text-sm text-base-content/60">/5</span>
+                </div>
+              </div>
+
+              {/* Rating Badge */}
+              <div
+                className={`badge gap-1 ${
+                  (purchaseTrip.tripRating ?? 0) >= 4
+                    ? "badge-success"
+                    : (purchaseTrip.tripRating ?? 0) >= 3
+                      ? "badge-warning"
+                      : "badge-error"
+                }`}
+              >
+                <Star className="w-3 h-3 fill-current" />
+                {(purchaseTrip.tripRating ?? 0) >= 4
+                  ? "Excellent"
+                  : (purchaseTrip.tripRating ?? 0) >= 3
+                    ? "Good"
+                    : "Needs Improvement"}
+              </div>
+            </div>
+
+            {purchaseTrip.tripRatingComment && (
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <MessageSquare className="w-4 h-4 text-primary" />
+                  <span className="text-sm font-medium text-base-content">
+                    {readOnly ? "Customer Review:" : "Your Review:"}
+                  </span>
+                </div>
+                <div className="bg-base-100 border border-base-300 rounded-lg p-3">
+                  <p className="text-sm text-base-content leading-relaxed">
+                    "{purchaseTrip.tripRatingComment}"
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       ) : // Show different messages based on readOnly prop
       readOnly ? (
-        <div className="text-center py-4">
-          <p className="text-base-content/60">No customer rating yet</p>
+        <div className="text-center py-8">
+          <div className="flex flex-col items-center gap-4">
+            <div className="p-3 bg-base-200 rounded-full">
+              <User className="w-8 h-8 text-base-content/40" />
+            </div>
+            <div>
+              <p className="text-base-content/60 font-medium">
+                No customer rating yet
+              </p>
+              <p className="text-base-content/40 text-sm">
+                Rating will appear after trip completion
+              </p>
+            </div>
+          </div>
         </div>
       ) : (
         // Show rating input form for customers
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Rate Your Trip</h3>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Rating</label>
-            <div className="flex items-center gap-3">
-              <StarRating currentRating={rating} onRatingChange={setRating} />
-              {rating && (
-                <span className="text-sm text-base-content/70">{rating}/5</span>
-              )}
+        <div className="space-y-6">
+          {/* Header */}
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-primary/10 rounded-lg border border-primary/20">
+              <Star className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-base-content">
+                Rate Your Trip
+              </h3>
+              <p className="text-sm text-base-content/60">
+                Share your experience with this trip
+              </p>
             </div>
           </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Comment (Optional)</label>
-            <textarea
-              className="textarea textarea-bordered w-full h-20 resize-none"
-              placeholder="Share your experience with this trip..."
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-              maxLength={500}
-            />
-            <div className="text-xs text-base-content/50 text-right">
-              {comment.length}/500
+          {/* Rating Input */}
+          <div className="space-y-4">
+            <div className="space-y-3">
+              <label className="label">
+                <span className="label-text font-medium">Rating</span>
+                <span className="label-text-alt text-error">Required</span>
+              </label>
+              <div className="flex items-center gap-4 p-4 bg-base-200/50 border border-base-300 rounded-xl">
+                <StarRating currentRating={rating} onRatingChange={setRating} />
+                {rating && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg font-bold text-base-content">
+                      {rating}
+                    </span>
+                    <span className="text-sm text-base-content/60">/5</span>
+                    <div
+                      className={`badge badge-sm ${
+                        rating >= 4
+                          ? "badge-success"
+                          : rating >= 3
+                            ? "badge-warning"
+                            : "badge-error"
+                      }`}
+                    >
+                      {rating >= 4
+                        ? "Excellent"
+                        : rating >= 3
+                          ? "Good"
+                          : "Poor"}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <label className="label">
+                <span className="label-text font-medium flex items-center gap-2">
+                  <MessageSquare className="w-4 h-4 text-primary" />
+                  Comment (Optional)
+                </span>
+              </label>
+              <textarea
+                className="textarea textarea-bordered w-full h-24 resize-none focus:outline-none focus:border-primary"
+                placeholder="Share your experience with this trip..."
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                maxLength={500}
+              />
+              <div className="label">
+                <span className="label-text-alt"></span>
+                <span className="label-text-alt text-base-content/50">
+                  {comment.length}/500 characters
+                </span>
+              </div>
             </div>
           </div>
 
+          {/* Submit Button */}
           <button
-            className="btn btn-primary w-full"
+            className="btn btn-primary w-full gap-2"
             onClick={handleSubmitRating}
             disabled={!rating || isSubmitting}
           >
             {isSubmitting ? (
               <>
-                <span className="loading loading-spinner loading-sm"></span>
-                Submitting...
+                <div className="loading loading-spinner loading-sm"></div>
+                Submitting Rating...
               </>
             ) : (
-              "Submit Rating"
+              <>
+                <Star className="w-4 h-4" />
+                Submit Rating
+              </>
             )}
           </button>
         </div>

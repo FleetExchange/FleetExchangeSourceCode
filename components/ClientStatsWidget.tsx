@@ -63,11 +63,11 @@ const ClientStatsWidget = () => {
 
     // Spending calculations
     const spendingThisMonth = tripsThisMonth.reduce(
-      (total, trip) => total + (trip.amount || 0),
+      (total, trip) => total + (trip.clientPayable || 0),
       0
     );
     const spendingLastMonth = tripsLastMonth.reduce(
-      (total, trip) => total + (trip.amount || 0),
+      (total, trip) => total + (trip.clientPayable || 0),
       0
     );
 
@@ -95,7 +95,7 @@ const ClientStatsWidget = () => {
     const totalSpending =
       userPurchaseTrips
         ?.filter((trip) => trip.status === "Delivered")
-        .reduce((total, trip) => total + (trip.amount || 0), 0) ?? 0;
+        .reduce((total, trip) => total + (trip.clientPayable || 0), 0) ?? 0;
 
     // Average trip cost
     const averageTripCost = totalTrips > 0 ? totalSpending / totalTrips : 0;
