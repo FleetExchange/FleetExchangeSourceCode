@@ -15,9 +15,9 @@ import {
   Eye,
   Package,
   DollarSign,
-  Edit,
   Receipt,
 } from "lucide-react";
+import { formatDateTimeInSAST, formatDateInSAST } from "@/utils/dateUtils";
 
 type SortOption = "Price Asc" | "Price Desc" | "Date Asc" | "Date Desc";
 
@@ -33,9 +33,16 @@ const MyUnbookedTripsTable = () => {
   >("All Trips");
   const [sortBy, setSortBy] = useState<SortOption>("Date Asc");
 
+  // Updated to use SAST formatting
   const formatDate = (timestamp?: number) => {
     if (!timestamp) return "N/A";
-    return new Date(timestamp).toLocaleDateString();
+    return formatDateInSAST(timestamp);
+  };
+
+  const formatDateTime = (timestamp?: number) => {
+    if (!timestamp) return "N/A";
+    const formatted = formatDateTimeInSAST(timestamp);
+    return formatted.fullDateTime;
   };
 
   // Get the logged in user identity
@@ -75,7 +82,7 @@ const MyUnbookedTripsTable = () => {
 
   // Add this filtering function before the return statement
   const filteredTrips = unbookedTrips?.filter((trip) => {
-    // Filter by past or upcoming trips
+    // Filter by past or upcoming trips - using current SAST time
     const currentDate = new Date();
     if (pastOrUpcoming === "Upcomming Trips") {
       if (trip.departureDate && new Date(trip.departureDate) < currentDate) {
@@ -122,6 +129,16 @@ const MyUnbookedTripsTable = () => {
 
   return (
     <div className="p-6">
+      {/* Header */}
+      <div className="mb-6">
+        <h1 className="text-2xl lg:text-3xl font-bold text-base-content mb-2">
+          My Available Trips
+        </h1>
+        <p className="text-base-content/60">
+          All times shown in South African Standard Time (SAST)
+        </p>
+      </div>
+
       {/* Filter Controls */}
       <div className="bg-base-200/50 border border-base-300 rounded-xl p-4 mb-6">
         <div className="flex items-center gap-3 mb-4">
@@ -206,7 +223,7 @@ const MyUnbookedTripsTable = () => {
                 <th className="font-semibold text-base-content">
                   <div className="flex items-center gap-2">
                     <Calendar className="w-4 h-4" />
-                    Schedule
+                    Schedule (SAST)
                   </div>
                 </th>
                 <th className="font-semibold text-base-content">
@@ -235,6 +252,14 @@ const MyUnbookedTripsTable = () => {
                 currentItems.map((trip, index) => {
                   const truck = trucks?.find((t) => t._id === trip.truckId);
 
+                  // Format dates in SAST
+                  const departureSAST = trip.departureDate
+                    ? formatDateTimeInSAST(trip.departureDate)
+                    : null;
+                  const arrivalSAST = trip.arrivalDate
+                    ? formatDateTimeInSAST(trip.arrivalDate)
+                    : null;
+
                   return (
                     <tr key={trip._id} className="hover:bg-base-200/50">
                       <td className="font-medium text-base-content/60">
@@ -255,13 +280,17 @@ const MyUnbookedTripsTable = () => {
                           <div className="text-sm">
                             <span className="text-base-content/60">Dep:</span>{" "}
                             <span className="font-medium">
-                              {formatDate(trip.departureDate)}
+                              {departureSAST
+                                ? `${departureSAST.date} at ${departureSAST.time}`
+                                : "N/A"}
                             </span>
                           </div>
                           <div className="text-sm">
                             <span className="text-base-content/60">Arr:</span>{" "}
                             <span className="font-medium">
-                              {formatDate(trip.arrivalDate)}
+                              {arrivalSAST
+                                ? `${arrivalSAST.date} at ${arrivalSAST.time}`
+                                : "N/A"}
                             </span>
                           </div>
                         </div>

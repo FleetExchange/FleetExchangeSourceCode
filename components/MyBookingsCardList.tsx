@@ -1,3 +1,5 @@
+"use client";
+
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useUser } from "@clerk/nextjs";
@@ -13,8 +15,10 @@ import {
   Eye,
   X,
   DollarSign,
+  Clock,
 } from "lucide-react";
 import Link from "next/link";
+import { formatDateTimeInSAST, formatDateInSAST } from "@/utils/dateUtils";
 
 const MyBookingsCardList = () => {
   // Get the logged in user identity
@@ -41,10 +45,16 @@ const MyBookingsCardList = () => {
     tripIds.length > 0 ? { tripIds: tripIds } : "skip"
   );
 
-  // format date for display
+  // Updated format date function to use SAST formatting
   const formatDate = (timestamp?: number) => {
     if (!timestamp) return "N/A";
-    return new Date(timestamp).toLocaleDateString();
+    const formatted = formatDateInSAST(timestamp);
+    return formatted;
+  };
+
+  const formatDateTime = (timestamp?: number) => {
+    if (!timestamp) return { date: "N/A", time: "N/A" };
+    return formatDateTimeInSAST(timestamp);
   };
 
   // define all states for filtering and sorting
@@ -131,6 +141,16 @@ const MyBookingsCardList = () => {
 
   return (
     <div className="space-y-6">
+      {/* Header */}
+      <div className="mb-6">
+        <h1 className="text-2xl lg:text-3xl font-bold text-base-content mb-2">
+          My Bookings
+        </h1>
+        <p className="text-base-content/60">
+          All times shown in South African Standard Time (SAST)
+        </p>
+      </div>
+
       {/* Filter Header */}
       <div className="bg-base-100 rounded-2xl shadow-xl border border-base-300 p-4">
         <div className="flex items-center gap-3 mb-4">
@@ -204,6 +224,14 @@ const MyBookingsCardList = () => {
           sortedBookings.map((booking) => {
             const trip = trips?.find((t) => t._id === booking.tripId);
 
+            // Format dates in SAST
+            const departureSAST = trip?.departureDate
+              ? formatDateTime(trip.departureDate)
+              : { date: "N/A", time: "N/A" };
+            const arrivalSAST = trip?.arrivalDate
+              ? formatDateTime(trip.arrivalDate)
+              : { date: "N/A", time: "N/A" };
+
             return (
               <div
                 key={booking._id}
@@ -230,25 +258,50 @@ const MyBookingsCardList = () => {
                   </div>
                 </div>
 
-                {/* Trip Details Grid */}
-                <div className="grid grid-cols-2 gap-3 mb-4">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-3 h-3 text-info" />
-                    <div className="text-xs">
-                      <p className="text-base-content/60">Departure</p>
-                      <p className="font-medium">
-                        {formatDate(trip?.departureDate)}
-                      </p>
-                    </div>
+                {/* Trip Details Grid - Enhanced with SAST formatting */}
+                <div className="bg-base-200/30 border border-base-300 rounded-lg p-3 mb-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Clock className="w-3 h-3 text-primary" />
+                    <span className="text-xs font-medium text-base-content">
+                      Schedule (SAST)
+                    </span>
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-3 h-3 text-success" />
-                    <div className="text-xs">
-                      <p className="text-base-content/60">Arrival</p>
-                      <p className="font-medium">
-                        {formatDate(trip?.arrivalDate)}
-                      </p>
+                  <div className="grid grid-cols-1 gap-3">
+                    {/* Departure */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-info rounded-full"></div>
+                        <span className="text-xs text-base-content/60">
+                          Departure
+                        </span>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xs font-medium">
+                          {departureSAST.date}
+                        </p>
+                        <p className="text-xs text-base-content/60">
+                          {departureSAST.time}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Arrival */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-success rounded-full"></div>
+                        <span className="text-xs text-base-content/60">
+                          Arrival
+                        </span>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xs font-medium">
+                          {arrivalSAST.date}
+                        </p>
+                        <p className="text-xs text-base-content/60">
+                          {arrivalSAST.time}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -287,13 +340,13 @@ const MyBookingsCardList = () => {
                     )}
 
                     {/* Payment Information */}
-                    {booking.amount && (
+                    {booking.tripTotal && (
                       <div className="flex justify-between border-t border-info/20 pt-2 mt-2">
                         <span className="text-base-content font-medium">
                           Total Paid:
                         </span>
                         <span className="font-bold text-success">
-                          R{booking.amount.toFixed(2)}
+                          R{booking.tripTotal.toFixed(2)}
                         </span>
                       </div>
                     )}

@@ -1,6 +1,7 @@
 // app/api/booking/cleanup/route.ts
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
+import { getCurrentSASTTime } from "@/utils/dateUtils";
 import { ConvexHttpClient } from "convex/browser";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -104,6 +105,7 @@ export async function POST(request: NextRequest) {
       cleaned: cleanupCount,
       reason: reason || "unknown",
       timestamp: new Date().toISOString(),
+      sastTimeStamp: getCurrentSASTTime(),
       details: {
         paymentCleaned: !!payment,
         purchaseTripCleaned: !!purchaseTrip,

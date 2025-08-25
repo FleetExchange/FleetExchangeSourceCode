@@ -5,6 +5,7 @@ import { useUser } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
 import { useRouter } from "next/navigation";
 import { MapPin, Calendar, User, ChevronRight, Clock } from "lucide-react";
+import { formatDateInSAST } from "@/utils/dateUtils";
 
 const TripToApproveWidget = () => {
   const { user } = useUser();
@@ -48,13 +49,10 @@ const TripToApproveWidget = () => {
     router.push(`/tripOwner?tripId=${tripId}`);
   };
 
+  // Updated to use SAST formatting utility
   const formatDate = (date: string | number) => {
-    return new Date(date).toLocaleDateString("en-ZA", {
-      weekday: "short",
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
+    if (!date) return "TBD";
+    return formatDateInSAST(Number(date));
   };
 
   // Helper function to get booker name
@@ -82,7 +80,7 @@ const TripToApproveWidget = () => {
               Trips to Approve
             </h2>
             <p className="text-sm text-base-content/60">
-              Pending booking confirmations
+              Pending booking confirmations • Dates in SAST
             </p>
           </div>
         </div>
@@ -158,14 +156,14 @@ const TripToApproveWidget = () => {
                     </div>
                   </div>
 
-                  {/* Departure Date */}
+                  {/* Enhanced Departure Date with SAST context */}
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-success/10 rounded-lg border border-success/20">
                       <Calendar className="w-4 h-4 text-success flex-shrink-0" />
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="text-xs text-base-content/60 mb-1">
-                        Departure
+                        Departure (SAST)
                       </div>
                       <div className="font-medium text-sm text-base-content">
                         {formatDate(trip.departureDate)}

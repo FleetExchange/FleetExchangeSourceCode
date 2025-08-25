@@ -13,6 +13,7 @@ import {
   CiUser,
 } from "react-icons/ci";
 import { VscClose } from "react-icons/vsc";
+import { formatRelativeTimeInSAST } from "@/utils/dateUtils";
 
 interface NotificationCenterProps {
   open: boolean;
@@ -28,6 +29,11 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({
   const notifications = useQuery(api.notifications.getByUser, { userId }) ?? [];
   const markAsRead = useMutation(api.notifications.markAsRead);
   const [tab, setTab] = useState<"unread" | "all">("unread");
+
+  // Updated to use the existing utility
+  const formatNotificationDate = (timestamp: number) => {
+    return formatRelativeTimeInSAST(timestamp);
+  };
 
   // Type configurations matching your schema
   const typeConfig = {
@@ -98,7 +104,7 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({
                 <h3 className="font-bold text-lg">Notifications</h3>
                 <p className="text-primary-content/70 text-sm">
                   {unread.length} unread notification
-                  {unread.length !== 1 ? "s" : ""}
+                  {unread.length !== 1 ? "s" : ""} • SAST
                 </p>
               </div>
             </div>
@@ -217,10 +223,14 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({
                           {n.message}
                         </p>
 
-                        {/* Timestamp */}
-                        <p className="text-xs text-base-content/60">
-                          {new Date(n.createdAt).toLocaleString()}
-                        </p>
+                        {/* Simplified Timestamp using existing utility */}
+                        <div className="flex items-center gap-2">
+                          <p className="text-xs text-base-content/60">
+                            {formatNotificationDate(n.createdAt)}
+                          </p>
+                          <div className="w-1 h-1 bg-base-content/30 rounded-full"></div>
+                          <p className="text-xs text-base-content/50">SAST</p>
+                        </div>
                       </div>
 
                       {/* Action Button */}
@@ -246,7 +256,8 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({
           <div className="flex items-center justify-center gap-2">
             <CiTrash className="w-4 h-4 text-base-content/60" />
             <p className="text-xs text-base-content/60 text-center">
-              Notifications are automatically cleared after 10 days
+              Notifications are automatically cleared after 10 days • All times
+              in SAST
             </p>
           </div>
         </div>

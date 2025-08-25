@@ -6,6 +6,7 @@ import { Id } from "@/convex/_generated/dataModel";
 import { useUser } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
 import { Calendar as CalendarIcon } from "lucide-react";
+import { formatDateTimeInSAST } from "@/utils/dateUtils";
 
 const ClientCalendarPage = () => {
   const { user } = useUser();
@@ -33,12 +34,25 @@ const ClientCalendarPage = () => {
   });
 
   const bookingEvents =
-    clientBookings?.map((booking) => ({
-      id: booking._id,
-      title: `Destination: ${booking.destinationCity}`,
-      start: new Date(booking.departureDate),
-      end: new Date(booking.arrivalDate),
-    })) ?? [];
+    clientBookings?.map((booking) => {
+      // Format dates in SAST for calendar display
+      const departureDateTime = formatDateTimeInSAST(booking.departureDate);
+      const arrivalDateTime = formatDateTimeInSAST(booking.arrivalDate);
+
+      return {
+        id: booking._id,
+        title: `Destination: ${booking.destinationCity}`,
+        start: new Date(booking.departureDate), // Calendar library expects Date objects
+        end: new Date(booking.arrivalDate),
+        // Add formatted display data for tooltips/popups
+        formattedStart: departureDateTime.fullDateTime,
+        formattedEnd: arrivalDateTime.fullDateTime,
+        departureDate: departureDateTime.date,
+        departureTime: departureDateTime.time,
+        arrivalDate: arrivalDateTime.date,
+        arrivalTime: arrivalDateTime.time,
+      };
+    }) ?? [];
 
   return (
     <div className="min-h-screen bg-base-200">

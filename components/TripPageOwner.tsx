@@ -37,6 +37,7 @@ import {
   Phone,
   Mail,
 } from "lucide-react";
+import { formatDateTimeInSAST, formatDateInSAST } from "@/utils/dateUtils";
 
 interface TripPageClientProps {
   tripId: string;
@@ -71,21 +72,10 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
     purchaseTrip?.userId ? { userId: purchaseTrip.userId } : "skip"
   );
 
-  // Format date and time
+  // Updated to use SAST formatting utility
   const formatDateTime = (dateInput: string | number) => {
-    const date = new Date(dateInput);
-    return {
-      date: date.toLocaleDateString("en-US", {
-        weekday: "short",
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      }),
-      time: date.toLocaleTimeString("en-US", {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-    };
+    if (!dateInput) return null;
+    return formatDateTimeInSAST(Number(dateInput));
   };
 
   const departureDateTime = trip?.departureDate
@@ -178,13 +168,13 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
                   Trip Management
                 </h1>
                 <p className="text-base-content/60 mt-1">
-                  Manage your trip and track its progress
+                  Manage your trip and track its progress • Times in SAST
                 </p>
               </div>
             </div>
           </div>
 
-          {/* Route Overview */}
+          {/* Enhanced Route Overview with SAST formatting */}
           <div className="bg-base-100 rounded-2xl shadow-xl border border-base-300 p-6 mb-8">
             <div className="flex items-center gap-3 mb-6">
               <div className="p-2 bg-primary/10 rounded-lg border border-primary/20">
@@ -195,7 +185,7 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
                   {trip?.originCity} → {trip?.destinationCity}
                 </h2>
                 <p className="text-sm text-base-content/60">
-                  Trip route and schedule
+                  Trip route and schedule (SAST)
                 </p>
               </div>
             </div>
@@ -208,23 +198,25 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
                     <MapPin className="w-4 h-4 text-primary" />
                   </div>
                   <span className="text-sm font-medium text-base-content/60">
-                    From
+                    Departure
                   </span>
                 </div>
                 <h3 className="text-lg font-bold text-base-content mb-2">
                   {trip?.originCity}
                 </h3>
-                {departureDateTime && (
+                {departureDateTime ? (
                   <div className="space-y-1">
                     <div className="flex items-center gap-1 justify-center md:justify-start text-sm text-base-content/70">
                       <Calendar className="w-3 h-3" />
                       <span>{departureDateTime.date}</span>
                     </div>
-                    <div className="flex items-center gap-1 justify-center md:justify-start text-sm text-base-content/70">
+                    <div className="flex items-center gap-1 justify-center md:justify-start text-sm font-medium text-primary">
                       <Clock className="w-3 h-3" />
-                      <span>{departureDateTime.time}</span>
+                      <span>{departureDateTime.time} SAST</span>
                     </div>
                   </div>
+                ) : (
+                  <div className="text-sm text-base-content/60">TBD</div>
                 )}
               </div>
 
@@ -239,7 +231,7 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
               <div className="text-center md:text-right">
                 <div className="flex items-center gap-2 mb-2 justify-center md:justify-end">
                   <span className="text-sm font-medium text-base-content/60">
-                    To
+                    Arrival
                   </span>
                   <div className="p-1 bg-success/10 rounded-lg border border-success/20">
                     <MapPin className="w-4 h-4 text-success" />
@@ -248,17 +240,19 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
                 <h3 className="text-lg font-bold text-base-content mb-2">
                   {trip?.destinationCity}
                 </h3>
-                {arrivalDateTime && (
+                {arrivalDateTime ? (
                   <div className="space-y-1">
                     <div className="flex items-center gap-1 justify-center md:justify-end text-sm text-base-content/70">
                       <Calendar className="w-3 h-3" />
                       <span>{arrivalDateTime.date}</span>
                     </div>
-                    <div className="flex items-center gap-1 justify-center md:justify-end text-sm text-base-content/70">
+                    <div className="flex items-center gap-1 justify-center md:justify-end text-sm font-medium text-success">
                       <Clock className="w-3 h-3" />
-                      <span>{arrivalDateTime.time}</span>
+                      <span>{arrivalDateTime.time} SAST</span>
                     </div>
                   </div>
+                ) : (
+                  <div className="text-sm text-base-content/60">TBD</div>
                 )}
               </div>
             </div>

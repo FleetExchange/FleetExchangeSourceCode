@@ -9,13 +9,13 @@ import {
   ArrowRight,
   Truck,
   Package,
-  Calendar,
   Clock,
   Star,
   User,
 } from "lucide-react";
 import Link from "next/link";
 import ProfileImage from "@/components/ProfileImage";
+import { formatDateTimeInSAST, formatDateInSAST } from "@/utils/dateUtils";
 
 export default function TripCard({ tripId }: { tripId: Id<"trip"> }) {
   const router = useRouter();
@@ -41,20 +41,10 @@ export default function TripCard({ tripId }: { tripId: Id<"trip"> }) {
     }).format(amount);
   };
 
-  const formatDate = (date: string | number) => {
-    return new Intl.DateTimeFormat("en-GB", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    }).format(new Date(date));
-  };
-
-  const formatTime = (date: string | number) => {
-    return new Intl.DateTimeFormat("en-GB", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-    }).format(new Date(date));
+  const formatDateTime = (timestamp: string | number) => {
+    if (!timestamp) return "N/A";
+    const formatted = formatDateTimeInSAST(Number(timestamp));
+    return formatted;
   };
 
   if (!trip || !tripOwner || !truck) {
@@ -64,6 +54,14 @@ export default function TripCard({ tripId }: { tripId: Id<"trip"> }) {
       </div>
     );
   }
+
+  // Get formatted departure and arrival in SAST
+  const departureInfo = trip.departureDate
+    ? formatDateTime(trip.departureDate)
+    : null;
+  const arrivalInfo = trip.arrivalDate
+    ? formatDateTime(trip.arrivalDate)
+    : null;
 
   return (
     <div className="bg-base-100 rounded-xl shadow-lg border border-base-300 overflow-hidden transition-all duration-200 hover:shadow-xl cursor-pointer">
@@ -102,7 +100,7 @@ export default function TripCard({ tripId }: { tripId: Id<"trip"> }) {
 
       {/* Main Content */}
       <div className="p-4">
-        {/* Route */}
+        {/* Enhanced Route with SAST formatting */}
         <div className="grid grid-cols-5 gap-2 items-center mb-4">
           {/* Origin */}
           <div className="col-span-2">
@@ -114,8 +112,19 @@ export default function TripCard({ tripId }: { tripId: Id<"trip"> }) {
               {trip.originCity}
             </h4>
             <div className="text-xs text-base-content/60">
-              {formatDate(trip.departureDate)} •{" "}
-              {formatTime(trip.departureDate)}
+              {departureInfo && typeof departureInfo === "object" ? (
+                <>
+                  <div className="flex items-center gap-1">
+                    <Clock className="w-3 h-3" />
+                    <span>{departureInfo.date}</span>
+                  </div>
+                  <div className="text-xs font-medium text-primary mt-0.5">
+                    {departureInfo.time} SAST
+                  </div>
+                </>
+              ) : (
+                "TBD"
+              )}
             </div>
           </div>
 
@@ -134,7 +143,19 @@ export default function TripCard({ tripId }: { tripId: Id<"trip"> }) {
               {trip.destinationCity}
             </h4>
             <div className="text-xs text-base-content/60">
-              {formatDate(trip.arrivalDate)} • {formatTime(trip.arrivalDate)}
+              {arrivalInfo && typeof arrivalInfo === "object" ? (
+                <>
+                  <div className="flex items-center gap-1 justify-end">
+                    <span>{arrivalInfo.date}</span>
+                    <Clock className="w-3 h-3" />
+                  </div>
+                  <div className="text-xs font-medium text-success mt-0.5">
+                    {arrivalInfo.time} SAST
+                  </div>
+                </>
+              ) : (
+                "TBD"
+              )}
             </div>
           </div>
         </div>
@@ -168,7 +189,7 @@ export default function TripCard({ tripId }: { tripId: Id<"trip"> }) {
         >
           <button className="btn btn-primary btn-sm w-full gap-2 hover:bg-primary-focus transition-all duration-200">
             <Package className="w-4 h-4" />
-            View Details
+            View Details & Book
           </button>
         </Link>
       </div>

@@ -3,6 +3,7 @@
 import { TRUCK_TYPES } from "@/shared/truckTypes";
 import React, { useState } from "react";
 import { Filter, Calendar, Truck, Package, X } from "lucide-react";
+import { parseUserDateToUTC } from "@/utils/dateUtils";
 
 const FilterBtn = ({
   onFilter,
@@ -19,7 +20,7 @@ const FilterBtn = ({
     payload: string;
   }) => void;
 }) => {
-  // Local state for form inputs
+  // Local state for form inputs (user sees SAST times)
   const [depDate, setDepDate] = useState("");
   const [depTime, setDepTime] = useState("");
   const [arrDate, setArrDate] = useState("");
@@ -43,9 +44,62 @@ const FilterBtn = ({
     payload: "",
   });
 
+  // Helper function to get today's date in SAST for min date
+  const getTodayInSAST = () => {
+    const now = new Date();
+    const sastDate = new Date(
+      now.toLocaleString("en-US", {
+        timeZone: "Africa/Johannesburg",
+      })
+    );
+    return sastDate.toISOString().split("T")[0];
+  };
+
   const applyFilters = (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Convert SAST date/time inputs to UTC timestamps for filtering
+    let depDateUTC = "";
+    let arrDateUTC = "";
+
+    if (depDate && depTime) {
+      // Combine date and time, then convert SAST to UTC
+      const depDateTime = `${depDate}T${depTime}`;
+      const depTimestamp = parseUserDateToUTC(depDateTime);
+      depDateUTC = depTimestamp.toString();
+    } else if (depDate) {
+      // Just date, assume start of day (00:00) in SAST
+      const depDateTime = `${depDate}T00:00`;
+      const depTimestamp = parseUserDateToUTC(depDateTime);
+      depDateUTC = depTimestamp.toString();
+    }
+
+    if (arrDate && arrTime) {
+      // Combine date and time, then convert SAST to UTC
+      const arrDateTime = `${arrDate}T${arrTime}`;
+      const arrTimestamp = parseUserDateToUTC(arrDateTime);
+      arrDateUTC = arrTimestamp.toString();
+    } else if (arrDate) {
+      // Just date, assume end of day (23:59) in SAST
+      const arrDateTime = `${arrDate}T23:59`;
+      const arrTimestamp = parseUserDateToUTC(arrDateTime);
+      arrDateUTC = arrTimestamp.toString();
+    }
+
     const filters = {
+      depDate: depDateUTC, // Send UTC timestamp for filtering
+      depTime: depTime, // Keep time for additional filtering logic if needed
+      arrDate: arrDateUTC, // Send UTC timestamp for filtering
+      arrTime: arrTime, // Keep time for additional filtering logic if needed
+      truckType,
+      width,
+      length,
+      height,
+      payload,
+    };
+
+    // Update applied filters state (keep original user input for display)
+    setAppliedFilters({
       depDate,
       depTime,
       arrDate,
@@ -55,12 +109,9 @@ const FilterBtn = ({
       length,
       height,
       payload,
-    };
+    });
 
-    // Update applied filters state
-    setAppliedFilters(filters);
-
-    // Call the parent function
+    // Call the parent function with UTC timestamps
     onFilter(filters);
 
     // Close modal after applying
@@ -155,7 +206,7 @@ const FilterBtn = ({
                   Advanced Filters
                 </h2>
                 <p className="text-sm text-base-content/60">
-                  Refine your search results
+                  All times in South African Standard Time (SAST)
                 </p>
               </div>
             </div>
@@ -172,7 +223,7 @@ const FilterBtn = ({
               <div className="flex items-center gap-2 mb-4">
                 <Calendar className="w-4 h-4 text-primary" />
                 <h3 className="font-semibold text-base-content">
-                  Departure Time
+                  Departure Time (SAST)
                 </h3>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -185,7 +236,7 @@ const FilterBtn = ({
                     className="input input-bordered w-full focus:outline-none focus:border-primary"
                     value={depDate}
                     onChange={(e) => setDepDate(e.target.value)}
-                    min={new Date().toISOString().split("T")[0]}
+                    min={getTodayInSAST()}
                   />
                 </div>
                 <div>
@@ -207,7 +258,7 @@ const FilterBtn = ({
               <div className="flex items-center gap-2 mb-4">
                 <Calendar className="w-4 h-4 text-success" />
                 <h3 className="font-semibold text-base-content">
-                  Arrival Time
+                  Arrival Time (SAST)
                 </h3>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -220,7 +271,7 @@ const FilterBtn = ({
                     className="input input-bordered w-full focus:outline-none focus:border-primary"
                     value={arrDate}
                     onChange={(e) => setArrDate(e.target.value)}
-                    min={depDate || new Date().toISOString().split("T")[0]}
+                    min={depDate || getTodayInSAST()}
                   />
                 </div>
                 <div>
@@ -325,6 +376,43 @@ const FilterBtn = ({
                 </div>
               </div>
             </div>
+
+            {/* Active Filters Preview */}
+            {hasActiveFilters && (
+              <div className="bg-info/10 border border-info/20 rounded-xl p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <Filter className="w-4 h-4 text-info" />
+                  <h4 className="font-semibold text-base-content">
+                    Active Filters
+                  </h4>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {appliedFilters.depDate && (
+                    <div className="badge badge-primary gap-1">
+                      Depart: {appliedFilters.depDate} {appliedFilters.depTime}
+                    </div>
+                  )}
+                  {appliedFilters.arrDate && (
+                    <div className="badge badge-success gap-1">
+                      Arrive: {appliedFilters.arrDate} {appliedFilters.arrTime}
+                    </div>
+                  )}
+                  {appliedFilters.truckType && (
+                    <div className="badge badge-warning gap-1">
+                      {appliedFilters.truckType}
+                    </div>
+                  )}
+                  {(appliedFilters.width ||
+                    appliedFilters.length ||
+                    appliedFilters.height ||
+                    appliedFilters.payload) && (
+                    <div className="badge badge-info gap-1">
+                      Custom dimensions
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Footer Actions */}

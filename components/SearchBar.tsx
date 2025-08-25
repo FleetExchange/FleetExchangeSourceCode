@@ -25,6 +25,11 @@ export default function SearchBar({
     citiesOnly: true, // Enable city-only mode
   });
 
+  // Get current date in SAST timezone for min date
+  const getCurrentSASTDate = () => {
+    const today = new Date();
+    return today.toISOString().split("T")[0]; // Returns YYYY-MM-DD format
+  };
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSearch({ from, to, arrival });
@@ -40,7 +45,7 @@ export default function SearchBar({
         <div>
           <h3 className="text-lg font-bold text-base-content">Search Routes</h3>
           <p className="text-sm text-base-content/60">
-            Find available transportation
+            Find available transportation • Dates in SAST
           </p>
         </div>
       </div>
@@ -100,20 +105,21 @@ export default function SearchBar({
             />
           </div>
 
-          {/* Date */}
+          {/* Date - Enhanced with SAST formatting */}
           <div className="flex-1 bg-base-100 rounded-lg p-4 border border-base-300">
             <div className="flex items-center gap-2 mb-2">
               <Calendar className="w-4 h-4 text-info" />
               <label className="text-sm font-medium text-base-content">
-                Latest Arrival
+                Latest Arrival (SAST)
               </label>
             </div>
             <input
               type="date"
               value={arrival}
               onChange={(e) => setArrival(e.target.value)}
-              min={new Date().toISOString().split("T")[0]}
+              min={getCurrentSASTDate()}
               className="w-full text-sm bg-transparent border-none focus:outline-none focus:ring-0"
+              title="Select latest arrival date in South African Standard Time"
             />
           </div>
 
@@ -187,22 +193,23 @@ export default function SearchBar({
             />
           </div>
 
-          {/* Date */}
+          {/* Date - Enhanced with SAST formatting */}
           <div className="bg-base-100 rounded-xl p-4 border border-base-300 shadow-sm">
             <div className="flex items-center gap-2 mb-3">
               <div className="p-1 bg-info/10 rounded-lg border border-info/20">
                 <Calendar className="w-4 h-4 text-info" />
               </div>
               <label className="text-sm font-medium text-base-content">
-                Latest Arrival Date
+                Latest Arrival Date (SAST)
               </label>
             </div>
             <input
               type="date"
               value={arrival}
               onChange={(e) => setArrival(e.target.value)}
-              min={new Date().toISOString().split("T")[0]}
+              min={getCurrentSASTDate()}
               className="w-full text-base bg-transparent border-none focus:outline-none focus:ring-0"
+              title="Select latest arrival date in South African Standard Time"
             />
           </div>
 
@@ -216,7 +223,7 @@ export default function SearchBar({
           </button>
         </div>
 
-        {/* Search Tips */}
+        {/* Enhanced Search Tips */}
         <div className="bg-info/5 border border-info/20 rounded-xl p-4 mt-4">
           <div className="flex items-start gap-3">
             <div className="p-1 bg-info/20 rounded-lg mt-0.5">
@@ -228,8 +235,8 @@ export default function SearchBar({
               </h4>
               <p className="text-xs text-base-content/70 leading-relaxed">
                 Enter your pickup and delivery cities. Use the date filter to
-                find trips arriving by your deadline. Leave fields empty to
-                browse all available routes.
+                find trips arriving by your deadline (South African Standard
+                Time). Leave fields empty to browse all available routes.
               </p>
             </div>
           </div>

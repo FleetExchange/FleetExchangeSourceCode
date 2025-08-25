@@ -12,6 +12,7 @@ import {
   Truck,
   Package,
 } from "lucide-react";
+import { formatDateInSAST } from "@/utils/dateUtils";
 
 const TripsInProgressWidget = () => {
   const { user } = useUser();
@@ -56,13 +57,10 @@ const TripsInProgressWidget = () => {
     router.push(`/tripOwner?tripId=${tripId}`);
   };
 
+  // Updated to use SAST formatting utility
   const formatDate = (date: string | number) => {
-    return new Date(date).toLocaleDateString("en-ZA", {
-      weekday: "short",
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
+    if (!date) return "TBD";
+    return formatDateInSAST(Number(date));
   };
 
   // Helper function to get booker name
@@ -114,7 +112,7 @@ const TripsInProgressWidget = () => {
               Trips in Progress
             </h2>
             <p className="text-sm text-base-content/60">
-              Active and dispatched trips
+              Active and dispatched trips • Dates in SAST
             </p>
           </div>
         </div>
@@ -192,14 +190,14 @@ const TripsInProgressWidget = () => {
                     </div>
                   </div>
 
-                  {/* Departure Date */}
+                  {/* Enhanced Departure Date with SAST context */}
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-success/10 rounded-lg border border-success/20">
                       <Calendar className="w-4 h-4 text-success flex-shrink-0" />
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="text-xs text-base-content/60 mb-1">
-                        Departure
+                        Departure (SAST)
                       </div>
                       <div className="font-medium text-sm text-base-content">
                         {formatDate(trip.departureDate)}

@@ -6,6 +6,7 @@ import { Id } from "@/convex/_generated/dataModel";
 import { useUser } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
 import { Calendar as CalendarIcon, Truck } from "lucide-react";
+import { formatDateTimeInSAST } from "@/utils/dateUtils";
 
 const TransporterCalendarPage = () => {
   const { user } = useUser();
@@ -65,23 +66,50 @@ const TransporterCalendarPage = () => {
   });
 
   const tripEvents =
-    transporterTrips?.map((trip) => ({
-      id: trip._id,
-      title: `${
-        truckForTrip?.find((truck) => truck.id === transporterTrips[0]?.truckId)
-          ?.title
-      } to: ${trip.destinationCity}`,
-      start: new Date(trip.departureDate),
-      end: new Date(trip.arrivalDate),
-    })) ?? [];
+    transporterTrips?.map((trip) => {
+      // Format dates in SAST for calendar display
+      const departureDateTime = formatDateTimeInSAST(trip.departureDate);
+      const arrivalDateTime = formatDateTimeInSAST(trip.arrivalDate);
+
+      return {
+        id: trip._id,
+        title: `${
+          truckForTrip?.find((truck) => truck.id === trip.truckId)?.title
+        } to: ${trip.destinationCity}`,
+        start: new Date(trip.departureDate), // Calendar library expects Date objects
+        end: new Date(trip.arrivalDate),
+        // Add formatted display data for tooltips/popups
+        formattedStart: departureDateTime.fullDateTime,
+        formattedEnd: arrivalDateTime.fullDateTime,
+        departureDate: departureDateTime.date,
+        departureTime: departureDateTime.time,
+        arrivalDate: arrivalDateTime.date,
+        arrivalTime: arrivalDateTime.time,
+        type: "trip", // Identify as trip for styling
+      };
+    }) ?? [];
 
   const bookingEvents =
-    transporterBookings?.map((booking) => ({
-      id: booking._id,
-      title: `Booking: ${booking.destinationCity}`,
-      start: new Date(booking.departureDate),
-      end: new Date(booking.arrivalDate),
-    })) ?? [];
+    transporterBookings?.map((booking) => {
+      // Format dates in SAST for calendar display
+      const departureDateTime = formatDateTimeInSAST(booking.departureDate);
+      const arrivalDateTime = formatDateTimeInSAST(booking.arrivalDate);
+
+      return {
+        id: booking._id,
+        title: `Booking: ${booking.destinationCity}`,
+        start: new Date(booking.departureDate), // Calendar library expects Date objects
+        end: new Date(booking.arrivalDate),
+        // Add formatted display data for tooltips/popups
+        formattedStart: departureDateTime.fullDateTime,
+        formattedEnd: arrivalDateTime.fullDateTime,
+        departureDate: departureDateTime.date,
+        departureTime: departureDateTime.time,
+        arrivalDate: arrivalDateTime.date,
+        arrivalTime: arrivalDateTime.time,
+        type: "booking", // Identify as booking for styling
+      };
+    }) ?? [];
 
   const totalEvents = tripEvents.length + bookingEvents.length;
 
@@ -99,6 +127,10 @@ const TransporterCalendarPage = () => {
                 <p className="text-base-content/60 mt-2">
                   View all your trips and bookings in one place
                 </p>
+              </div>
+              {/* Optional: Add current time display */}
+              <div className="text-sm text-base-content/60">
+                All times shown in South African Standard Time (SAST)
               </div>
             </div>
           </div>
@@ -124,12 +156,14 @@ const TransporterCalendarPage = () => {
               <div className="flex flex-wrap items-center gap-4 lg:gap-6">
                 <div className="flex items-center gap-2">
                   <div className="w-4 h-4 rounded bg-info border-2 border-info-content/20"></div>
-                  <span className="text-sm text-base-content">Your Trips</span>
+                  <span className="text-sm text-base-content">
+                    Your Trips ({tripEvents.length})
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-4 h-4 rounded bg-success border-2 border-success-content/20"></div>
                   <span className="text-sm text-base-content">
-                    Your Bookings
+                    Your Bookings ({bookingEvents.length})
                   </span>
                 </div>
               </div>

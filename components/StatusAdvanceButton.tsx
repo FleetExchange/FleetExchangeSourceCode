@@ -6,6 +6,7 @@ import { useMutation, useQuery } from "convex/react";
 import { release } from "os";
 import React from "react";
 import { useState } from "react";
+import { formatDateInSAST } from "@/utils/dateUtils";
 
 export type TripStatus =
   | "Awaiting Confirmation"
@@ -130,14 +131,9 @@ const StatusAdvanceButton = ({
 
       setStatus(nextStatus); // Update local state immediately
 
-      // Get date and format it
-      const tripdepartureDate = new Date(trip?.departureDate || 0);
-      const formattedDate = tripdepartureDate
-        ? tripdepartureDate.toLocaleDateString("en-ZA", {
-            month: "short",
-            day: "numeric",
-            year: "numeric",
-          })
+      // Updated to use SAST formatting utility
+      const formattedDate = trip?.departureDate
+        ? formatDateInSAST(trip.departureDate)
         : "TBD";
 
       // Send the notification of status change

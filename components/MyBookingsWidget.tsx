@@ -12,6 +12,7 @@ import {
   Package,
   Clock,
 } from "lucide-react";
+import { formatDateTimeInSAST, formatDateInSAST } from "@/utils/dateUtils";
 
 const MyBookingsWidget = () => {
   const { user } = useUser();
@@ -57,15 +58,6 @@ const MyBookingsWidget = () => {
 
   const handleTripClick = (tripId: string) => {
     router.push(`/tripClient?tripId=${tripId}`);
-  };
-
-  const formatDate = (date: string | number) => {
-    return new Date(date).toLocaleDateString("en-ZA", {
-      weekday: "short",
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
   };
 
   // Helper function to get transporter name
@@ -123,7 +115,7 @@ const MyBookingsWidget = () => {
               My Bookings
             </h2>
             <p className="text-sm text-base-content/60">
-              Active and pending bookings
+              Active and pending bookings (SAST)
             </p>
           </div>
         </div>
@@ -151,6 +143,11 @@ const MyBookingsWidget = () => {
             const transporterName = getTransporterName(trip?.userId || "");
             const statusBadge = getStatusBadge(purchasedTrip.status);
             const StatusIcon = statusBadge.icon;
+
+            // Format departure date and time in SAST
+            const departureSAST = trip?.departureDate
+              ? formatDateTimeInSAST(trip.departureDate)
+              : null;
 
             if (!trip) return null;
 
@@ -201,27 +198,40 @@ const MyBookingsWidget = () => {
                     </div>
                   </div>
 
-                  {/* Departure Date */}
+                  {/* Departure Date - Enhanced with SAST formatting */}
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-success/10 rounded-lg border border-success/20">
                       <Calendar className="w-4 h-4 text-success flex-shrink-0" />
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="text-xs text-base-content/60 mb-1">
-                        Departure
+                        Departure (SAST)
                       </div>
                       <div className="font-medium text-sm text-base-content">
-                        {formatDate(trip.departureDate)}
+                        {departureSAST ? departureSAST.date : "N/A"}
                       </div>
+                      {departureSAST && (
+                        <div className="text-xs text-base-content/60">
+                          at {departureSAST.time}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
 
-                {/* Status and Action */}
+                {/* Enhanced Status and Action with timing info */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-base-300">
-                  <div className={`badge ${statusBadge.className} gap-2`}>
-                    <StatusIcon className="w-3 h-3" />
-                    {statusBadge.text}
+                  <div className="flex items-center gap-3">
+                    <div className={`badge ${statusBadge.className} gap-2`}>
+                      <StatusIcon className="w-3 h-3" />
+                      {statusBadge.text}
+                    </div>
+                    {/* Show total amount if available */}
+                    {purchasedTrip.tripTotal && (
+                      <div className="text-xs text-success font-medium">
+                        R{purchasedTrip.tripTotal.toFixed(2)}
+                      </div>
+                    )}
                   </div>
                   <div className="text-xs text-base-content/60 group-hover:text-primary transition-colors">
                     Click to view details →

@@ -15,6 +15,7 @@ import {
   Package,
   DollarSign,
 } from "lucide-react";
+import { formatDateTimeInSAST, formatDateInSAST } from "@/utils/dateUtils";
 
 type SortOption = "Price Asc" | "Price Desc" | "Date Asc" | "Date Desc";
 
@@ -47,9 +48,16 @@ const MyBookingsTable = () => {
     tripIds.length > 0 ? { tripIds: tripIds } : "skip"
   );
 
+  // Updated format function to use SAST formatting
   const formatDate = (timestamp?: number) => {
     if (!timestamp) return "N/A";
-    return new Date(timestamp).toLocaleDateString();
+    return formatDateInSAST(timestamp);
+  };
+
+  const formatDateTime = (timestamp?: number) => {
+    if (!timestamp) return "N/A";
+    const formatted = formatDateTimeInSAST(timestamp);
+    return formatted.fullDateTime;
   };
 
   // define all states for filtering and sorting
@@ -83,7 +91,7 @@ const MyBookingsTable = () => {
 
       if (!trip) return false;
 
-      // Filter by past or upcoming trips
+      // Filter by past or upcoming trips - using current SAST time
       const currentDate = new Date();
       if (pastOrUpcoming === "Upcomming Trips") {
         if (trip.departureDate && new Date(trip.departureDate) < currentDate) {
@@ -156,6 +164,16 @@ const MyBookingsTable = () => {
 
   return (
     <div className="p-6">
+      {/* Header */}
+      <div className="mb-6">
+        <h1 className="text-2xl lg:text-3xl font-bold text-base-content mb-2">
+          My Bookings
+        </h1>
+        <p className="text-base-content/60">
+          All times shown in South African Standard Time (SAST)
+        </p>
+      </div>
+
       {/* Filter Controls */}
       <div className="bg-base-200/50 border border-base-300 rounded-xl p-4 mb-6">
         <div className="flex items-center gap-3 mb-4">
@@ -266,7 +284,7 @@ const MyBookingsTable = () => {
                 <th className="font-semibold text-base-content">
                   <div className="flex items-center gap-2">
                     <Calendar className="w-4 h-4" />
-                    Schedule
+                    Schedule (SAST)
                   </div>
                 </th>
                 <th className="font-semibold text-base-content">
@@ -290,6 +308,14 @@ const MyBookingsTable = () => {
                 currentItems.map((booking, index) => {
                   const trip = trips?.find((t) => t._id === booking.tripId);
 
+                  // Format dates in SAST
+                  const departureSAST = trip?.departureDate
+                    ? formatDateTimeInSAST(trip.departureDate)
+                    : null;
+                  const arrivalSAST = trip?.arrivalDate
+                    ? formatDateTimeInSAST(trip.arrivalDate)
+                    : null;
+
                   return (
                     <tr key={booking._id} className="hover:bg-base-200/50">
                       <td className="font-medium text-base-content/60">
@@ -310,13 +336,17 @@ const MyBookingsTable = () => {
                           <div className="text-sm">
                             <span className="text-base-content/60">Dep:</span>{" "}
                             <span className="font-medium">
-                              {formatDate(trip?.departureDate)}
+                              {departureSAST
+                                ? `${departureSAST.date} at ${departureSAST.time}`
+                                : "N/A"}
                             </span>
                           </div>
                           <div className="text-sm">
                             <span className="text-base-content/60">Arr:</span>{" "}
                             <span className="font-medium">
-                              {formatDate(trip?.arrivalDate)}
+                              {arrivalSAST
+                                ? `${arrivalSAST.date} at ${arrivalSAST.time}`
+                                : "N/A"}
                             </span>
                           </div>
                         </div>

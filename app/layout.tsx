@@ -36,7 +36,6 @@ export default function RootLayout({
         <ClerkProvider>
           <ConvexClientProvider>
             <GoogleMapsProvider>
-              {" "}
               <main className="flex-1">{children}</main>
               <Footer />
             </GoogleMapsProvider>

@@ -24,6 +24,7 @@ import {
   CheckCircle,
   AlertTriangle,
 } from "lucide-react";
+import { parseUserDateToUTC, formatDateTimeInSAST } from "@/utils/dateUtils";
 
 const CreateTripPage = () => {
   const router = useRouter();
@@ -43,8 +44,8 @@ const CreateTripPage = () => {
   const [destinationCity, setDestinationCity] = useState("");
   const [originAddress, setOriginAddress] = useState("");
   const [destinationAddress, setDestinationAddress] = useState("");
-  const [departureDate, setDepartureDate] = useState("");
-  const [arrivalDate, setArrivalDate] = useState("");
+  const [departureDate, setDepartureDate] = useState<string>(""); // Will store UTC timestamp as string
+  const [arrivalDate, setArrivalDate] = useState<string>(""); // Will store UTC timestamp as string
   const [basePrice, setBasePrice] = useState(0);
   const [KMPrice, setKMPrice] = useState(0);
   const [KGPrice, setKGPrice] = useState(0);
@@ -116,20 +117,37 @@ const CreateTripPage = () => {
   const createTrip = useMutation(api.trip.createTrip);
 
   const handleDepartureChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const date = new Date(e.target.value);
-    setDepartureDate(date.toISOString());
+    // User enters datetime assuming SAST, convert to UTC for storage
+    const userInput = e.target.value; // "2024-08-25T14:30"
+    const utcTimestamp = parseUserDateToUTC(userInput);
+    setDepartureDate(utcTimestamp.toString()); // Store as UTC timestamp string
   };
 
   const handleArrivalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const date = new Date(e.target.value);
-    setArrivalDate(date.toISOString());
+    // User enters datetime assuming SAST, convert to UTC for storage
+    const userInput = e.target.value; // "2024-08-25T18:00"
+    const utcTimestamp = parseUserDateToUTC(userInput);
+    setArrivalDate(utcTimestamp.toString()); // Store as UTC timestamp string
   };
 
   // Format ISO date string to local datetime-local input value
-  const formatDateForInput = (isoString: string) => {
-    if (!isoString) return "";
-    const date = new Date(isoString);
-    return new Date(date.getTime() - date.getTimezoneOffset() * 60000)
+  const formatDateForInput = (utcTimestamp: string) => {
+    if (!utcTimestamp) return "";
+
+    // Convert UTC timestamp back to SAST for the datetime-local input
+    const date = new Date(parseInt(utcTimestamp));
+
+    // Get SAST time and format for datetime-local input
+    const sastDateTime = new Date(
+      date.toLocaleString("en-US", {
+        timeZone: "Africa/Johannesburg",
+      })
+    );
+
+    // Format as YYYY-MM-DDTHH:MM for datetime-local input
+    return new Date(
+      sastDateTime.getTime() - sastDateTime.getTimezoneOffset() * 60000
+    )
       .toISOString()
       .slice(0, 16);
   };
@@ -179,8 +197,8 @@ const CreateTripPage = () => {
         truckId: selectedTruckId,
         originCity,
         destinationCity,
-        departureDate,
-        arrivalDate,
+        departureDate: departureDate, // Send as UTC timestamp string
+        arrivalDate: arrivalDate, // Send as UTC timestamp string
         basePrice,
         KMPrice,
         KGPrice,
@@ -194,7 +212,9 @@ const CreateTripPage = () => {
     } catch (error) {
       console.error("Failed to create trip:", error);
       alert(
-        `Failed to create trip: ${error instanceof Error ? error.message : "Unknown error"}`
+        `Failed to create trip: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
       );
     }
   };
@@ -249,8 +269,11 @@ const CreateTripPage = () => {
                     {trip.originCity} → {trip.destinationCity}
                   </div>
                   <div className="text-xs">
-                    {new Date(trip.departureDate).toLocaleString()} -{" "}
-                    {new Date(trip.arrivalDate).toLocaleString()}
+                    {/* Format conflicting trip times in SAST */}
+                    {
+                      formatDateTimeInSAST(trip.departureDate).fullDateTime
+                    } - {formatDateTimeInSAST(trip.arrivalDate).fullDateTime}{" "}
+                    (SAST)
                   </div>
                   <div className="text-xs">
                     Status: {trip.isBooked ? "Booked" : "Available for booking"}
@@ -672,12 +695,22 @@ const CreateTripPage = () => {
                       <div className="space-y-1 text-xs text-base-content/70">
                         {departureDate && (
                           <p>
-                            Depart: {new Date(departureDate).toLocaleString()}
+                            Depart:{" "}
+                            {
+                              formatDateTimeInSAST(parseInt(departureDate))
+                                .fullDateTime
+                            }{" "}
+                            (SAST)
                           </p>
                         )}
                         {arrivalDate && (
                           <p>
-                            Arrive: {new Date(arrivalDate).toLocaleString()}
+                            Arrive:{" "}
+                            {
+                              formatDateTimeInSAST(parseInt(arrivalDate))
+                                .fullDateTime
+                            }{" "}
+                            (SAST)
                           </p>
                         )}
                       </div>
