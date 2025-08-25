@@ -38,9 +38,9 @@ const Page = ({ params }: ProfilePageProps) => {
   return (
     <div className="min-h-screen bg-base-200">
       <div className="p-4 lg:p-6">
-        <div className="w-full max-w-7xl mx-auto">
+        <div className="w-full max-w-4xl mx-auto">
           {/* Header Section */}
-          <div className="mb-8 pl-16 lg:pl-0">
+          <div className="mb-8">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
               <div className="flex items-center gap-4">
                 <button
@@ -62,15 +62,15 @@ const Page = ({ params }: ProfilePageProps) => {
             </div>
           </div>
 
-          {/* Content Section */}
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-            {/* Main Profile Info - Takes 2 columns on large screens */}
-            <div className="xl:col-span-2">
+          {/* Content Section - Stacked Layout */}
+          <div className="space-y-6">
+            {/* Profile Info Section */}
+            <div>
               <TransporterProfileInfo transporterId={id} />
             </div>
 
-            {/* Files Section - Takes 1 column on large screens */}
-            <div className="xl:col-span-1">
+            {/* Files Section */}
+            <div>
               <TransporterProfileFiles transporterId={id} />
             </div>
           </div>

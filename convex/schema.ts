@@ -98,6 +98,13 @@ export default defineSchema({
     fileSize: v.number(),
     uploadedAt: v.number(),
     category: v.optional(v.string()),
+    verificationStatus: v.union(
+      v.literal("pending"),
+      v.literal("approved"),
+      v.literal("rejected"),
+      v.literal("needs_resubmission")
+    ),
+    verifiedAt: v.optional(v.number()),
   }).index("by_user", ["userId"]),
 
   payoutAccount: defineTable({

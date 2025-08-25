@@ -16,6 +16,7 @@ export const uploadFile = mutation({
     const fileRecord = await ctx.db.insert("files", {
       ...args,
       uploadedAt: Date.now(),
+      verificationStatus: "pending",
     });
 
     return fileRecord;
@@ -105,6 +106,8 @@ export const replaceFile = mutation({
       fileType: args.fileType,
       fileSize: args.fileSize,
       uploadedAt: Date.now(),
+      verificationStatus: "pending", // Reset verification status
+      verifiedAt: undefined, // Clear verifiedAt
     });
 
     return await ctx.db.get(args.fileId);
