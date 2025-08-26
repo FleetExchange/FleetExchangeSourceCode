@@ -38,16 +38,17 @@ const Footer = () => {
                 reliable logistic solutions.
               </p>
               {/* Social Links */}
-              <div className="flex gap-3">
-                <a href="#" className="text-base-content/60 hover:text-primary">
-                  <Facebook className="w-5 h-5" />
-                </a>
-                <a href="#" className="text-base-content/60 hover:text-primary">
-                  <Twitter className="w-5 h-5" />
-                </a>
-                <a href="#" className="text-base-content/60 hover:text-primary">
-                  <Linkedin className="w-5 h-5" />
-                </a>
+              <div className="flex gap-4">
+                {/* Social Media Icons */}
+                <div className="w-8 h-8 bg-base-content/10 rounded-lg flex items-center justify-center hover:bg-primary hover:text-white transition-colors cursor-pointer">
+                  <span className="text-xs">f</span>
+                </div>
+                <div className="w-8 h-8 bg-base-content/10 rounded-lg flex items-center justify-center hover:bg-primary hover:text-white transition-colors cursor-pointer">
+                  <span className="text-xs">t</span>
+                </div>
+                <div className="w-8 h-8 bg-base-content/10 rounded-lg flex items-center justify-center hover:bg-primary hover:text-white transition-colors cursor-pointer">
+                  <span className="text-xs">in</span>
+                </div>
               </div>
             </div>
 
