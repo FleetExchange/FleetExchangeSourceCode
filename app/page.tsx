@@ -44,26 +44,26 @@ export default function Home() {
 
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-base-100 to-secondary/5">
-        <div className="container mx-auto px-4 py-20 lg:py-32">
-          <div className="grid lg:grid-cols-2 gap-16 items-center min-h-[600px]">
+        <div className="container mx-auto px-4 py-8 lg:py-16">
+          <div className="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center lg:justify-between">
             {/* Left Content */}
-            <div className="space-y-8 lg:pr-8">
+            <div className="flex-1 space-y-5 lg:pr-8 z-10 lg:max-w-2xl">
               <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium">
                 <Zap className="w-4 h-4" />
                 Free to Join
               </div>
-              <h1 className="text-5xl lg:text-7xl font-extrabold text-base-content leading-tight">
+              <h1 className="text-4xl sm:text-5xl lg:text-5xl xl:text-6xl font-extrabold text-base-content leading-tight">
                 <span className="block">Eliminating Empty Trucks.</span>
                 <span className="text-primary block">
                   Affordable Logistics for All.
                 </span>
               </h1>
-              <p className="text-xl text-base-content/70 leading-relaxed">
+              <p className="text-lg lg:text-xl text-base-content/70 leading-relaxed">
                 South Africa's most innovative logistics solution. The future of
                 connecting transporters with clients through smart technology.
               </p>
               {/* Value Proposition */}
-              <div className="bg-gradient-to-r from-primary/10 to-secondary/10 border border-primary/20 rounded-xl p-6">
+              <div className="bg-gradient-to-r from-primary/10 to-secondary/10 border border-primary/20 rounded-xl p-4">
                 <h3 className="font-semibold text-primary mb-2">Our Promise</h3>
                 <p className="text-base-content/80 italic">
                   "Fast, Instantaneous & Reliable logistics solutions ensuring
@@ -86,8 +86,8 @@ export default function Home() {
                   Schedule a Demo
                 </a>
               </div>
-              {/* Optional: Social Proof */}
-              <div className="flex flex-wrap items-center gap-6 pt-4">
+              {/* Social Proof */}
+              <div className="flex flex-wrap items-center gap-6 pt-2">
                 <div className="flex items-center gap-2">
                   <div className="flex">
                     {[...Array(5)].map((_, i) => (
@@ -106,27 +106,54 @@ export default function Home() {
                 </div>
               </div>
             </div>
-            {/* Right Content - Hero Graphic */}
-            <div className="flex-1 flex items-center justify-center relative min-h-[420px]">
-              <div className="relative w-[340px] h-[220px] sm:w-[420px] sm:h-[270px] lg:w-[650px] lg:h-[420px]">
-                <Image
-                  src="/mockup.png"
-                  alt="Dashboard"
-                  fill
-                  className="object-contain rounded-3xl shadow-2xl border-2 border-base-200"
-                  priority
-                />
-                {/* Subtle glow behind the image */}
-                <div className="absolute -inset-8 rounded-[2rem] bg-gradient-to-br from-primary/10 to-secondary/10 blur-2xl z-[-1]" />
+
+            {/* Right Content - Enhanced Hero Mockup */}
+            <div className="relative flex items-center justify-center flex-shrink-0">
+              {/* Background decorative elements */}
+              <div className="absolute inset-0 -z-10">
+                {/* Primary glow - responsive sizing */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] sm:w-[400px] sm:h-[400px] lg:w-[600px] lg:h-[600px] bg-gradient-to-br from-primary/20 to-secondary/20 rounded-full blur-3xl opacity-60" />
+
+                {/* Floating elements */}
+                <div className="absolute top-10 right-4 sm:top-20 sm:right-20 w-8 h-8 sm:w-16 sm:h-16 bg-primary/10 rounded-full animate-float hidden sm:block" />
+                <div className="absolute bottom-16 left-2 sm:bottom-32 sm:left-8 w-6 h-6 sm:w-12 sm:h-12 bg-secondary/10 rounded-full animate-float animation-delay-1000 hidden sm:block" />
+                <div className="absolute top-1/3 right-2 sm:right-8 w-4 h-4 sm:w-8 sm:h-8 bg-accent/10 rounded-full animate-float animation-delay-2000 hidden sm:block" />
+              </div>
+
+              {/* Main mockup container - fits to image size */}
+              <div className="relative inline-block">
+                {/* Enhanced shadow and glow effect - sized to image */}
+                <div className="absolute -inset-4 sm:-inset-6 lg:-inset-8 bg-gradient-to-br from-primary/5 to-secondary/5 rounded-2xl sm:rounded-3xl blur-xl sm:blur-2xl" />
+
+                {/* Mockup image with improved sizing */}
+                <div className="relative">
+                  <Image
+                    src="/mockup.png"
+                    alt="FleetExchange Dashboard Interface"
+                    width={600}
+                    height={430}
+                    className="w-full h-auto min-w-[280px] max-w-[95vw] sm:max-w-[400px] lg:max-w-[480px] xl:max-w-[520px] object-contain rounded-xl sm:rounded-2xl shadow-xl sm:shadow-2xl transform hover:scale-105 transition-transform duration-700 ease-out"
+                    priority
+                  />
+
+                  {/* Subtle overlay for depth */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent rounded-xl sm:rounded-2xl pointer-events-none" />
+
+                  {/* Animated border glow */}
+                  <div className="absolute inset-0 rounded-xl sm:rounded-2xl ring-1 ring-primary/20 animate-pulse" />
+                </div>
+
+                {/* Floating UI elements for added realism - responsive positioning */}
+                <div className="absolute -top-2 -right-2 sm:-top-4 sm:-right-4 bg-success/90 text-success-content px-2 py-1 sm:px-3 sm:py-1 rounded-full text-xs font-semibold shadow-lg ">
+                  Instant Booking
+                </div>
+
+                <div className="absolute -bottom-2 -left-2 sm:-bottom-4 sm:-left-4 bg-primary/90 text-primary-content px-2 py-1 sm:px-3 sm:py-1 rounded-full text-xs font-semibold shadow-lg ">
+                  Secure Payments
+                </div>
               </div>
             </div>
           </div>
-          {/* Optional: Trusted by row */}
-          {/* <div className="mt-12 flex flex-wrap justify-center gap-8 opacity-70">
-            <img src="/logo1.svg" alt="Logo1" className="h-8" />
-            <img src="/logo2.svg" alt="Logo2" className="h-8" />
-            <img src="/logo3.svg" alt="Logo3" className="h-8" />
-          </div> */}
         </div>
       </section>
 
