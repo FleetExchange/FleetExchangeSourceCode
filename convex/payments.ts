@@ -159,8 +159,8 @@ export const getPaymentByReference = query({
   handler: async (ctx, args) => {
     return await ctx.db
       .query("payments")
-      .withIndex("by_reference", (q) =>
-        q.eq("paystackReference", args.paystackReference)
+      .withIndex("by_init_reference", (q) =>
+        q.eq("paystackInitReference", args.paystackReference)
       )
       .first();
   },
