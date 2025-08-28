@@ -84,21 +84,17 @@ async function handleChargeSuccess(data: any) {
         paystackReference: reference,
       });
 
-      if (Array.isArray(found) && found.length > 0) {
-        const p = found[0];
-        const pid = (p as any)._id || (p as any).id || (p as any)._idString;
-        if (pid) {
-          await convex.mutation(api.payments.updatePaymentStatus, {
-            paymentId: pid,
-            status: "charged",
-            gatewayFee: fees ?? undefined,
-            chargedAt: Date.now(),
-          });
-          console.log(
-            `Payment ${pid} marked charged via init reference ${reference}`
-          );
-          return;
-        }
+      if (found?._id) {
+        await convex.mutation(api.payments.updatePaymentStatus, {
+          paymentId: found?._id,
+          status: "charged",
+          gatewayFee: fees ?? undefined,
+          chargedAt: Date.now(),
+        });
+        console.log(
+          `Payment ${found?._id} marked charged via init reference ${reference}`
+        );
+        return;
       }
     } catch (err) {
       // If generated query name differs, log and continue
