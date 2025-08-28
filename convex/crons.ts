@@ -45,6 +45,13 @@ crons.interval(
   internal.crons.cleanupAbandonedBookings
 );
 
+// Check if payment is past due and mark as forfeited
+crons.interval(
+  "forfeitUnpaidBookings",
+  { minutes: 10 }, // Runs every 10 minutes
+  internal.crons.forfeitUnpaidBookings
+);
+
 // Helper function to format dates in SAST for cron job logs and notifications
 const formatDateTimeInSAST = (dateInput: string | number | Date) => {
   const date = new Date(dateInput);
@@ -470,6 +477,93 @@ export const expiredUnconfirmedTrips = internalMutation({
       `⏰ Processed ${updatedCount} expired unconfirmed trips at ${currentSAST.fullDateTime} (SAST)`
     );
     return updatedCount;
+  },
+});
+
+export const forfeitUnpaidBookings = internalMutation({
+  handler: async (ctx) => {
+    // 1 Get all payments with status 'payment_requested' and past paymentDeadline
+    const payments = await ctx.db
+      .query("payments")
+      .filter((q) =>
+        q.and(
+          q.eq(q.field("status"), "payment_requested"),
+          q.lt(q.field("paymentDeadline"), Date.now())
+        )
+      )
+      .collect();
+
+    // 2. For each payment, mark as forfeited, delete purchaseTrip, set trip to not booked
+    for (const payment of payments) {
+      try {
+        if (!payment || !payment._id) {
+          console.warn("Skipping invalid payment entry", payment);
+          continue;
+        }
+
+        // Ensure still payment_requested (idempotency guard)
+        const freshPayment = await ctx.db.get(payment._id);
+        if (!freshPayment || freshPayment.status !== "payment_requested") {
+          console.log(
+            `Skipping payment ${payment._id} because status is ${freshPayment?.status}`
+          );
+          continue;
+        }
+
+        if (!payment.purchaseTripId || !payment.tripId) {
+          console.warn(
+            `Skipping payment ${payment._id} due to missing related ids`
+          );
+          continue;
+        }
+
+        // Get related records directly
+        const purchaseTrip = await ctx.db.get(payment.purchaseTripId);
+        const trip = await ctx.db.get(payment.tripId);
+
+        if (!purchaseTrip || !trip) {
+          console.warn(
+            `⚠️ Skipping payment ${payment._id} due to missing related records`
+          );
+          continue;
+        }
+
+        // Mark payment forfeited & related updates
+        await ctx.db.patch(payment._id, {
+          status: "forfeited",
+          paymentRequestUrl: undefined,
+        }); // remove the link so UI can't use it
+        await ctx.db.patch(purchaseTrip._id, { status: "Cancelled" });
+        await ctx.db.patch(trip._id, {
+          isBooked: false,
+          destinationAddress: "",
+          originAddress: "",
+        });
+
+        console.log(
+          `⚠️ Forfeited payment ${payment._id}, set purchase trip ${purchaseTrip._id} to cancelled, and set trip ${trip._id} to not booked`
+        );
+
+        // notify
+        await ctx.runMutation(api.notifications.createNotification, {
+          userId: trip.userId,
+          type: "trip",
+          message: `Your trip to ${trip.destinationCity} has been marked as expired due to non-payment by the client. The trip is now available for booking again.`,
+          meta: { tripId: trip._id, action: "payment_forfeited" },
+        });
+
+        await ctx.runMutation(api.notifications.createNotification, {
+          userId: purchaseTrip.userId,
+          type: "booking",
+          message:
+            "Your booking has been forfeited due to non-payment within the deadline. Please book again if you still need the service.",
+          meta: { tripId: trip._id, action: "payment_forfeited" },
+        });
+      } catch (err) {
+        console.error("Error processing forfeited payment", payment._id, err);
+      }
+    }
+    return { ok: true };
   },
 });
 

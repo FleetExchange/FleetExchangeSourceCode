@@ -198,5 +198,6 @@ export default defineSchema({
     .index("by_trip", ["tripId"])
     .index("by_purchase_trip", ["purchaseTripId"])
     .index("by_init_reference", ["paystackInitReference"])
-    .index("by_reference", ["paystackReference"]),
+    .index("by_reference", ["paystackReference"])
+    .index("by_status_deadline", ["status", "paymentDeadline"]),
 });
