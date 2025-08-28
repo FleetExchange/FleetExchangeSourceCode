@@ -13,7 +13,6 @@ export const createPayment = mutation({
     totalAmount: v.number(), // Total amount for the trip including service fees
     transporterAmount: v.number(), // Amount transporter receives
     commissionAmount: v.number(), // Your platform commission
-    paystackReference: v.string(),
   },
   handler: async (ctx, args) => {
     return await ctx.db.insert("payments", {
@@ -21,7 +20,6 @@ export const createPayment = mutation({
       transporterId: args.transporterId,
       tripId: args.tripId,
       purchaseTripId: args.purchaseTripId,
-      paystackReference: args.paystackReference,
       totalAmount: args.totalAmount,
       commissionAmount: args.commissionAmount,
       transporterAmount: args.transporterAmount,
@@ -31,70 +29,63 @@ export const createPayment = mutation({
   },
 });
 
-// Authorize payment (webhook calls this)
-export const authorizePayment = mutation({
-  args: {
-    paystackReference: v.string(),
-    paystackAuthCode: v.string(),
-    paystackCustomerCode: v.optional(v.string()),
-  },
-  handler: async (ctx, args) => {
-    // Find payment by reference
-    const payment = await ctx.db
-      .query("payments")
-      .withIndex("by_reference", (q) =>
-        q.eq("paystackReference", args.paystackReference)
-      )
-      .first();
+export const requestPayment = mutation({
+  args: { paymentId: v.id("payments") },
+  handler: async (ctx, { paymentId }) => {
+    const payment = await ctx.db.get(paymentId);
+    if (!payment) throw new Error("Payment not found");
 
-    if (!payment) {
-      throw new Error("Payment not found");
+    // idempotency guard
+    if (
+      payment.status === "payment_requested" ||
+      payment.status === "charged"
+    ) {
+      return {
+        alreadyRequested: true,
+        paymentRequestUrl: payment.paymentRequestUrl,
+      };
     }
 
-    // Update payment with authorization details
-    await ctx.db.patch(payment._id, {
-      paystackAuthCode: args.paystackAuthCode,
-      paystackCustomerCode: args.paystackCustomerCode,
-      status: "authorized",
-      authorizedAt: Date.now(),
-    });
+    // Look up customer email from users table
+    const user = await ctx.db.get(payment.userId);
+    const customerEmail = user?.email;
+    if (!customerEmail) throw new Error("Customer email not found");
 
-    // Notify transporter
-    await ctx.runMutation(api.notifications.createNotification, {
-      userId: payment.transporterId,
-      type: "trip",
-      message: `New trip booking authorized. Please confirm if you can take this trip.`,
-      meta: {
-        tripId: payment.tripId,
-        action: "trip_awaiting_confirmation",
-      },
-    });
+    // Call your internal Paystack initialize API (must be reachable from Convex runtime)
+    const initApi =
+      process.env.PAYSTACK_INIT_API_URL ||
+      `${process.env.NEXT_PUBLIC_APP_URL || ""}/api/paystack/initialize`;
 
-    return payment._id;
-  },
-});
+    const payload = {
+      paymentId,
+      email: customerEmail,
+      amountKobo: Math.round(payment.totalAmount * 100),
+      metadata: { paymentId, purchaseTripId: payment.purchaseTripId },
+    };
 
-// Charge authorized payment
-export const chargePayment = mutation({
-  args: {
-    paymentId: v.id("payments"),
-  },
-  handler: async (ctx, args) => {
-    const payment = await ctx.db.get(args.paymentId);
-    if (!payment || payment.status !== "authorized") {
-      throw new Error("Payment not found or not authorized");
+    const initResp = await fetch(initApi, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    }).then((r) => r.json());
+
+    if (!initResp || !initResp.authorization_url || !initResp.reference) {
+      throw new Error(initResp?.message || "Paystack initialize failed");
     }
 
-    // Update status to charged (actual charging happens via API)
-    await ctx.db.patch(args.paymentId, {
-      status: "charged",
-      chargedAt: Date.now(),
+    // Persist the initialize response in payments table
+    await ctx.db.patch(paymentId, {
+      paystackInitReference: initResp.reference,
+      paymentRequestUrl: initResp.authorization_url,
+      paymentRequestedAt: Date.now(),
+      paymentDeadline: Date.now() + 24 * 60 * 60 * 1000,
+      status: "payment_requested",
+      paymentAttempts: (payment.paymentAttempts || 0) + 1,
     });
 
-    // Return auth code for API call
     return {
-      authCode: payment.paystackAuthCode,
-      amount: payment.totalAmount,
+      authorization_url: initResp.authorization_url,
+      reference: initResp.reference,
     };
   },
 });
@@ -154,14 +145,17 @@ export const updatePaymentStatus = mutation({
   args: {
     paymentId: v.id("payments"),
     status: v.union(
-      v.literal("pending"),
-      v.literal("authorized"),
-      v.literal("charged"),
-      v.literal("released"),
+      v.literal("pending"), // Payment record created but no request yet
+      v.literal("payment_requested"), // initialize called, waiting for customer to pay
+      v.literal("charged"), // Payment taken from client (capture success)
+      v.literal("released"), // Payment sent to transporter
       v.literal("failed"),
       v.literal("refunded"),
-      v.literal("refund_failed")
+      v.literal("refund_failed"),
+      v.literal("forfeited")
     ),
+    gatewayFee: v.optional(v.number()), // Fee charged by payment gateway
+    chargedAt: v.optional(v.number()), // Timestamp when charged
     transferReference: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
@@ -175,6 +169,8 @@ export const updatePaymentStatus = mutation({
       status: args.status,
       transferReference: args.transferReference,
       transferredAt: args.transferReference ? Date.now() : undefined,
+      gatewayFee: args.gatewayFee ?? payment.gatewayFee,
+      chargedAt: args.chargedAt ?? payment.chargedAt,
     });
 
     return payment;

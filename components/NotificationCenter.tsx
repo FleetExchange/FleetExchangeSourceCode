@@ -72,6 +72,13 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({
       bgColor: "bg-secondary/10",
       borderColor: "border-secondary/20",
     },
+    paymentRequest: {
+      icon: CiDollar,
+      label: "Payment Request",
+      color: "text-success",
+      bgColor: "bg-success/10",
+      borderColor: "border-success/20",
+    },
   };
 
   const unread = notifications.filter((n) => !n.read);
@@ -233,16 +240,38 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({
                         </div>
                       </div>
 
-                      {/* Action Button */}
-                      {!n.read && (
-                        <button
-                          className="btn btn-xs btn-primary btn-outline gap-1 flex-shrink-0"
-                          onClick={() => markAsRead({ notificationId: n._id })}
-                        >
-                          <CiCircleCheck className="w-3 h-3" />
-                          Mark Read
-                        </button>
-                      )}
+                      {/* Action Buttons */}
+                      <div className="flex flex-col gap-2 items-end">
+                        {/* If this is a payment request, show a Pay button linking to the auth URL */}
+                        {n.type === "paymentRequest" &&
+                          (n.meta as any)?.url && (
+                            <a
+                              href={(n.meta as any).url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="btn btn-xs btn-success gap-1"
+                              onClick={() =>
+                                markAsRead({ notificationId: n._id })
+                              }
+                            >
+                              <CiDollar className="w-3 h-3" />
+                              Pay now
+                            </a>
+                          )}
+
+                        {/* Mark as read */}
+                        {!n.read && (
+                          <button
+                            className="btn btn-xs btn-primary btn-outline gap-1 flex-shrink-0"
+                            onClick={() =>
+                              markAsRead({ notificationId: n._id })
+                            }
+                          >
+                            <CiCircleCheck className="w-3 h-3" />
+                            Mark Read
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 );

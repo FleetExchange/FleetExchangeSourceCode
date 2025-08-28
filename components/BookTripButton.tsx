@@ -24,6 +24,8 @@ const BookTripButton = ({
     api.purchasetrip.getPurchaseTripForBooking
   );
   const createPayment = useMutation(api.payments.createPayment);
+  // create mutation
+  const createNotification = useMutation(api.notifications.createNotification);
 
   const handleBookTrip = async () => {
     if (disabled || loading) return;
@@ -49,10 +51,7 @@ const BookTripButton = ({
         purchaseTripId: newPurchaseTripId as Id<"purchaseTrip">,
       });
 
-      // 3. Generate unique reference
-      const reference = `trip-${trip.tripId}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-
-      // 4. Use the loaded data
+      // 3. Use the loaded data to create payment DB object
       const payableAmount = purchaseTripData.clientPayable;
       const comsmissionAmount = purchaseTripData.commissionAmount;
       const transporterAmount = purchaseTripData.transporterAmount;
@@ -65,62 +64,28 @@ const BookTripButton = ({
         totalAmount: payableAmount,
         transporterAmount: transporterAmount,
         commissionAmount: comsmissionAmount,
-        paystackReference: reference,
       });
 
-      // 5. Initialize transaction with Paystack API
-      const initResponse = await fetch("/api/paystack/initialize", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: user.email,
-          amount: Math.round(payableAmount * 100),
-          reference: reference,
-          callback_url: `${window.location.origin}/payment/callback`,
-          tripId: trip.tripId,
-          transporterId: trip.transporterId,
-          purchaseTripId: newPurchaseTripId,
-          userId: user._id,
-        }),
+      // Let the user know the trip is booked and the transporter will confirm or reject.
+      // Tell them they will get an email with payment instructions if transporter confirms
+      // Redirect to "my bookings" page
+      toast.success(
+        "Booking confirmed! Awaiting transporter confirmation. You will receive payment instructions via email once confirmed."
+      );
+
+      await createNotification({
+        userId: trip.transporterId,
+        type: "trip",
+        message:
+          'You have a new booking request. Please review and confirm or reject the booking in "My Trips".',
+        meta: { tripId: trip.tripId, purchaseTripId: newPurchaseTripId },
       });
 
-      const initData = await initResponse.json();
-
-      if (initData.status && initData.data?.authorization_url) {
-        // 6. Redirect to Paystack
-        window.location.href = initData.data.authorization_url;
-      } else {
-        throw new Error(initData.message || "Failed to initialize payment");
-      }
+      window.location.href = "/myBookings";
     } catch (error) {
       console.error("Booking failed:", error);
 
-      if (purchaseTripId) {
-        try {
-          const cleanupResponse = await fetch("/api/booking/cleanup", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              paystackReference: null,
-              purchaseTripId: purchaseTripId,
-              reason: "booking_initialization_failed",
-            }),
-          });
-
-          const cleanupResult = await cleanupResponse.json();
-          console.log("Cleanup result:", cleanupResult);
-        } catch (cleanupError) {
-          console.error("Cleanup API failed:", cleanupError);
-        }
-      }
-      toast.error(`Booking failed: Please try again`);
-
-      // Redirect user
-      window.location.href = "/discover";
-
-      alert(
-        `Failed to initiate booking: ${error instanceof Error ? error.message : "Unknown error"}`
-      );
+      // Cleanup Code
     } finally {
       setLoading(false);
     }

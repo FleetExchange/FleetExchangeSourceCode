@@ -138,7 +138,8 @@ export default defineSchema({
       v.literal("booking"),
       v.literal("payment"),
       v.literal("system"),
-      v.literal("account")
+      v.literal("account"),
+      v.literal("paymentRequest")
     ), // Only these types allowed
     message: v.string(),
     createdAt: v.number(),
@@ -153,36 +154,49 @@ export default defineSchema({
     purchaseTripId: v.id("purchaseTrip"),
 
     // Paystack fields
-    paystackReference: v.string(), // Transaction reference
-    paystackAuthCode: v.optional(v.string()), // For future charges
-    paystackCustomerCode: v.optional(v.string()),
+    // paystackInitReference = reference returned by transaction.initialize (optional until customer pays)
+    paystackInitReference: v.optional(v.string()),
+    // paystackReference = final captured transaction reference (optional until captured)
+    paystackReference: v.optional(v.string()),
+
+    // Payment request / flow metadata
+    paymentRequestUrl: v.optional(v.string()), // authorization_url returned by initialize
+    paymentRequestedAt: v.optional(v.number()), // when request was created (ms)
+    paymentDeadline: v.optional(v.number()), // timestamp (ms) after which request expires
+    paymentAttempts: v.optional(v.number()), // how many charge/init attempts
 
     // Payment amounts (in ZAR)
     totalAmount: v.number(), // Full amount client pays
     commissionAmount: v.number(), // Your platform commission
     transporterAmount: v.number(), // Amount transporter receives
 
-    // Payment status
+    // Accounting fields
+    gatewayFee: v.optional(v.number()), // gateway fees for the transaction (store after capture)
+    refundedAmount: v.optional(v.number()),
+
+    // Payment status (expanded)
     status: v.union(
-      v.literal("pending"), // Payment initiated
-      v.literal("authorized"), // Payment authorized but not charged
-      v.literal("charged"), // Payment taken from client
+      v.literal("pending"), // Payment record created but no request yet
+      v.literal("payment_requested"), // initialize called, waiting for customer to pay
+      v.literal("charged"), // Payment taken from client (capture success)
       v.literal("released"), // Payment sent to transporter
       v.literal("failed"),
       v.literal("refunded"),
-      v.literal("refund_failed")
+      v.literal("refund_failed"),
+      v.literal("forfeited") // customer failed to pay within deadline
     ),
 
     // Transfer tracking
     transferReference: v.optional(v.string()),
     transferredAt: v.optional(v.number()),
 
+    // timestamps
     createdAt: v.number(),
-    authorizedAt: v.optional(v.number()),
     chargedAt: v.optional(v.number()),
     releasedAt: v.optional(v.number()),
   })
     .index("by_trip", ["tripId"])
     .index("by_purchase_trip", ["purchaseTripId"])
+    .index("by_init_reference", ["paystackInitReference"])
     .index("by_reference", ["paystackReference"]),
 });

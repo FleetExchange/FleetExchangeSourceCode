@@ -59,7 +59,6 @@ const StatusAdvanceButton = ({
     api.payments.getPaymentByTrip,
     trip?._id ? { tripId: trip._id } : "skip"
   );
-  const chargePayment = useMutation(api.payments.chargePayment);
 
   // Add these new queries/mutations
   const getPayoutAccount = useQuery(
@@ -67,7 +66,9 @@ const StatusAdvanceButton = ({
     trip?.userId ? { userId: trip.userId } : "skip"
   );
 
+  // Mutations for payment handling
   const updatePaymentStatus = useMutation(api.payments.updatePaymentStatus);
+  const requestPayment = useMutation(api.payments.requestPayment);
 
   // Update local state when database changes
   React.useEffect(() => {
@@ -100,18 +101,57 @@ const StatusAdvanceButton = ({
         newStatus: nextStatus,
       });
 
-      // 2. Handle payment charging for "Booked" status
+      // 2. Handle payment charging for if a trip is accepted and the next status is "Booked"
       if (nextStatus === "Booked") {
         try {
-          // 2. Get payment (Database Query)
+          // 2.1 Get payment (from hook)
           const payment = getPaymentByTrip;
 
-          if (payment && payment.status === "authorized") {
-            // 3. Charge the payment in DB
-            const chargeData = await chargePayment({ paymentId: payment._id });
+          if (!payment) {
+            console.warn("No payment record found for this trip.");
+          } else if (payment.status === "pending") {
+            // 2.2 Call server-side mutation that initializes Paystack and updates the payment row.
+            const res = await requestPayment({ paymentId: payment._id });
+
+            // 2.3 If server returned an authorization_url, send via notification
+            const authUrl = res?.authorization_url as string | undefined;
+            if (authUrl) {
+              // notify customer in-app (server/webhook will mark charged later)
+              await createNotification({
+                userId: payment.userId,
+                type: "paymentRequest",
+                message:
+                  "Your booking was accepted — please complete payment within 24 hours by following the link.",
+                meta: { purchaseTripId, paymentId: payment._id, url: authUrl },
+              });
+            } else {
+              console.warn(
+                "requestPayment succeeded but no authorization_url returned."
+              );
+            }
+          } else if (payment.status === "payment_requested") {
+            // Already requested: re-send notification or open existing link
+            const url = payment.paymentRequestUrl;
+            if (url) {
+              await createNotification({
+                userId: payment.userId,
+                type: "paymentRequest",
+                message:
+                  "Payment is already requested for your booking. Please complete it within 24 hours.",
+                meta: { purchaseTripId, paymentId: payment._id, url },
+              });
+            }
+          } else {
+            // other statuses: authorized/charged/forfeited etc.
+            console.log(
+              "Payment status is",
+              payment.status,
+              "- no payment request needed."
+            );
           }
         } catch (error) {
-          console.error("Failed to confirm trip:", error);
+          console.error("Failed to request payment:", error);
+          // optional: rollback purchaseTrip status or notify admin/transporters
         }
       }
 

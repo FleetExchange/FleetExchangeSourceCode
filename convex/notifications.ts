@@ -12,7 +12,8 @@ export const createNotification = mutation({
       v.literal("booking"),
       v.literal("payment"),
       v.literal("system"),
-      v.literal("account")
+      v.literal("account"),
+      v.literal("paymentRequest")
     ),
     message: v.string(),
     meta: v.optional(v.any()),
