@@ -243,6 +243,8 @@ export const setTripCancelled = mutation({
 
     await ctx.db.patch(tripId, {
       isBooked: false,
+      originAddress: "",
+      destinationAddress: "",
     });
 
     return trip._id;
