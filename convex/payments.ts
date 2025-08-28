@@ -30,8 +30,23 @@ export const createPayment = mutation({
 });
 
 export const requestPayment = mutation({
-  args: { paymentId: v.id("payments") },
-  handler: async (ctx, { paymentId }) => {
+  args: {
+    paymentId: v.id("payments"),
+    authorizationUrl: v.string(),
+    reference: v.string(),
+    paymentRequestedAt: v.optional(v.number()),
+    paymentDeadline: v.optional(v.number()),
+  },
+  handler: async (
+    ctx,
+    {
+      paymentId,
+      authorizationUrl,
+      reference,
+      paymentRequestedAt,
+      paymentDeadline,
+    }
+  ) => {
     const payment = await ctx.db.get(paymentId);
     if (!payment) throw new Error("Payment not found");
 
@@ -46,47 +61,36 @@ export const requestPayment = mutation({
       };
     }
 
-    // Look up customer email from users table
-    const user = await ctx.db.get(payment.userId);
-    const customerEmail = user?.email;
-    if (!customerEmail) throw new Error("Customer email not found");
+    const requestedAt =
+      typeof paymentRequestedAt === "number" ? paymentRequestedAt : Date.now();
+    const deadline =
+      typeof paymentDeadline === "number"
+        ? paymentDeadline
+        : requestedAt + 24 * 60 * 60 * 1000;
 
-    // Call your internal Paystack initialize API (must be reachable from Convex runtime)
-    const initApi =
-      process.env.PAYSTACK_INIT_API_URL ||
-      `${process.env.NEXT_PUBLIC_APP_URL || ""}/api/paystack/initialize`;
-
-    const payload = {
+    // Use existing DB mutation to persist initialize data
+    await ctx.runMutation(api.payments.updatePaymentRecord, {
       paymentId,
-      email: customerEmail,
-      amountKobo: Math.round(payment.totalAmount * 100),
-      metadata: { paymentId, purchaseTripId: payment.purchaseTripId },
-    };
-
-    const initResp = await fetch(initApi, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    }).then((r) => r.json());
-
-    if (!initResp || !initResp.authorization_url || !initResp.reference) {
-      throw new Error(initResp?.message || "Paystack initialize failed");
-    }
-
-    // Persist the initialize response in payments table
-    await ctx.db.patch(paymentId, {
-      paystackInitReference: initResp.reference,
-      paymentRequestUrl: initResp.authorization_url,
-      paymentRequestedAt: Date.now(),
-      paymentDeadline: Date.now() + 24 * 60 * 60 * 1000,
+      paystackInitReference: reference,
+      paymentRequestUrl: authorizationUrl,
+      paymentRequestedAt: requestedAt,
+      paymentDeadline: deadline,
       status: "payment_requested",
       paymentAttempts: (payment.paymentAttempts || 0) + 1,
     });
 
     return {
-      authorization_url: initResp.authorization_url,
-      reference: initResp.reference,
+      success: true,
+      authorization_url: authorizationUrl,
+      reference,
     };
+  },
+});
+
+export const getPaymentById = query({
+  args: { paymentId: v.id("payments") },
+  handler: async (ctx, args) => {
+    return await ctx.db.get(args.paymentId);
   },
 });
 
@@ -124,6 +128,28 @@ export const getPaymentByTrip = query({
       .query("payments")
       .withIndex("by_trip", (q) => q.eq("tripId", args.tripId))
       .first();
+  },
+});
+
+export const updatePaymentRecord = mutation({
+  args: {
+    paymentId: v.id("payments"),
+    paystackInitReference: v.string(),
+    paymentRequestUrl: v.string(),
+    paymentRequestedAt: v.number(),
+    paymentDeadline: v.number(),
+    status: v.literal("payment_requested"),
+    paymentAttempts: v.number(),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.paymentId, {
+      paystackInitReference: args.paystackInitReference,
+      paymentRequestUrl: args.paymentRequestUrl,
+      paymentRequestedAt: args.paymentRequestedAt,
+      paymentDeadline: args.paymentDeadline,
+      status: args.status,
+      paymentAttempts: args.paymentAttempts,
+    });
   },
 });
 

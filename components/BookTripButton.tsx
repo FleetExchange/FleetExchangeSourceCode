@@ -69,9 +69,6 @@ const BookTripButton = ({
       // Let the user know the trip is booked and the transporter will confirm or reject.
       // Tell them they will get an email with payment instructions if transporter confirms
       // Redirect to "my bookings" page
-      toast.success(
-        "Booking confirmed! Awaiting transporter confirmation. You will receive payment instructions via email once confirmed."
-      );
 
       await createNotification({
         userId: trip.transporterId,

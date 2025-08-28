@@ -1,11 +1,6 @@
 // app/api/paystack/initialize/route.ts
 import { NextRequest, NextResponse } from "next/server";
 
-const PAYSTACK = process.env.PAYSTACK_SECRET!;
-if (!PAYSTACK) {
-  console.warn("PAYSTACK_SECRET not configured for /api/paystack/initialize");
-}
-
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -35,7 +30,7 @@ export async function POST(req: NextRequest) {
     const resp = await fetch("https://api.paystack.co/transaction/initialize", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${PAYSTACK}`,
+        Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -59,8 +54,8 @@ export async function POST(req: NextRequest) {
 
     // Return only what Convex needs
     return NextResponse.json({
-      authorization_url: data.data.authorization_url,
-      reference,
+      authorization_url: data.authorization_url,
+      reference: data.reference,
       raw: data.data,
     });
   } catch (err: any) {

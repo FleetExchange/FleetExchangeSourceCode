@@ -2,7 +2,7 @@
 
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
-import { useMutation, useQuery } from "convex/react";
+import { useAction, useMutation, useQuery } from "convex/react";
 import { release } from "os";
 import React from "react";
 import { useState } from "react";
@@ -110,23 +110,65 @@ const StatusAdvanceButton = ({
           if (!payment) {
             console.warn("No payment record found for this trip.");
           } else if (payment.status === "pending") {
-            // 2.2 Call server-side mutation that initializes Paystack and updates the payment row.
-            const res = await requestPayment({ paymentId: payment._id });
+            // Call paystack api
+            const res = await fetch("/api/paystack/initialize", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                paymentId: payment?._id, // Your API expects this
+                email: client?.email || undefined,
+                amountZar: payment.totalAmount, // Use ZAR instead of kobo
+                metadata: {
+                  paymenntId: payment?._id,
+                  purchaseTripId: payment.purchaseTripId,
+                },
+              }),
+            });
 
-            // 2.3 If server returned an authorization_url, send via notification
-            const authUrl = res?.authorization_url as string | undefined;
-            if (authUrl) {
-              // notify customer in-app (server/webhook will mark charged later)
-              await createNotification({
-                userId: payment.userId,
-                type: "paymentRequest",
-                message:
-                  "Your booking was accepted — please complete payment within 24 hours by following the link.",
-                meta: { purchaseTripId, paymentId: payment._id, url: authUrl },
-              });
+            if (res.ok) {
+              const resJson = await res.json();
+              // Support multiple possible shapes returned by the initialize endpoint
+              const authUrl =
+                (resJson as any)?.authorization_url ||
+                (resJson as any)?.data?.authorization_url ||
+                (resJson as any)?.raw?.authorization_url;
+
+              const paystackReference =
+                (resJson as any)?.reference ||
+                (resJson as any)?.data?.reference ||
+                (resJson as any)?.raw?.reference;
+
+              // If server returned an authorization_url, send via notification
+              if (authUrl) {
+                // Call server-side mutation updates the payment row.
+                const requestpayment = await requestPayment({
+                  paymentId: payment._id,
+                  authorizationUrl: authUrl,
+                  reference: paystackReference || "",
+                });
+
+                // notify customer in-app (server/webhook will mark charged later)
+                await createNotification({
+                  userId: payment.userId,
+                  type: "paymentRequest",
+                  message:
+                    "Your booking was accepted — please complete payment within 24 hours by following the link.",
+                  meta: {
+                    purchaseTripId,
+                    paymentId: payment._id,
+                    url: authUrl,
+                  },
+                });
+              } else {
+                console.warn(
+                  "requestPayment succeeded but no authorization_url returned."
+                );
+              }
             } else {
-              console.warn(
-                "requestPayment succeeded but no authorization_url returned."
+              const errorData = await res.json();
+              console.error("Paystack initialization failed:", errorData);
+              throw new Error(
+                errorData?.error || "Paystack initialization failed"
               );
             }
           } else if (payment.status === "payment_requested") {

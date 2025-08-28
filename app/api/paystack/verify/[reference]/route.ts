@@ -6,7 +6,8 @@ export async function GET(
   { params }: { params: { reference: string } }
 ) {
   try {
-    const reference = params.reference;
+    // Await params before using its properties (Next.js App Router requirement)
+    const { reference } = await params;
     if (!reference) {
       return NextResponse.json({ error: "missing reference" }, { status: 400 });
     }
@@ -41,22 +42,17 @@ export async function GET(
       );
     }
 
-    // Normalize important fields for the client
     const paystackStatus = data?.data?.status;
-    const amount = data?.data?.amount;
-    const currency = data?.data?.currency;
-    const customerEmail = data?.data?.customer?.email;
-    const referenceReturned = data?.data?.reference;
-
     const verified = data.status === true && paystackStatus === "success";
 
     return NextResponse.json({
       ok: verified,
       paystackStatus,
-      reference: referenceReturned,
-      amount,
-      currency,
-      customerEmail,
+      reference: data?.data?.reference,
+      amount: data?.data?.amount,
+      currency: data?.data?.currency,
+      customerEmail: data?.data?.customer?.email,
+      raw: data,
     });
   } catch (error) {
     console.error("Verification error:", error);
