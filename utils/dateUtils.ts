@@ -1,8 +1,11 @@
 // utils/dateUtils.ts
+
+/**
+ * Formats a date/timestamp to SAST timezone for display
+ */
 export const formatDateTimeInSAST = (dateInput: string | number | Date) => {
   const date = new Date(dateInput);
 
-  // Format date in SAST
   const sastDate = date.toLocaleDateString("en-ZA", {
     weekday: "short",
     year: "numeric",
@@ -14,7 +17,7 @@ export const formatDateTimeInSAST = (dateInput: string | number | Date) => {
   const sastTime = date.toLocaleTimeString("en-ZA", {
     hour: "2-digit",
     minute: "2-digit",
-    hour12: false, // 24-hour format (standard in SA)
+    hour12: false,
     timeZone: "Africa/Johannesburg",
   });
 
@@ -26,7 +29,94 @@ export const formatDateTimeInSAST = (dateInput: string | number | Date) => {
   };
 };
 
-// Short date format for compact displays
+/**
+ * Converts a datetime-local input value to UTC timestamp (number)
+ * The input is assumed to be in SAST timezone
+ */
+export const convertSASTInputToUTC = (dateTimeLocalValue: string): number => {
+  if (!dateTimeLocalValue) return 0;
+
+  try {
+    // Parse the datetime-local value as if it's in SAST
+    // datetime-local format: "2024-08-25T14:30"
+    const [datePart, timePart] = dateTimeLocalValue.split("T");
+    const [year, month, day] = datePart.split("-").map(Number);
+    const [hour, minute] = timePart.split(":").map(Number);
+
+    // Create date in SAST timezone (UTC+2)
+    // We create the date as if it's UTC, then subtract 2 hours to get actual UTC
+    const sastDate = new Date(year, month - 1, day, hour, minute, 0, 0);
+
+    // Convert SAST to UTC by subtracting 2 hours (SAST is UTC+2)
+    const utcTimestamp = sastDate.getTime() - 2 * 60 * 60 * 1000;
+
+    return utcTimestamp;
+  } catch (error) {
+    console.error("Error converting SAST input to UTC:", error);
+    return 0;
+  }
+};
+
+/**
+ * Converts UTC timestamp to datetime-local input format in SAST
+ */
+export const convertUTCToSASTInput = (utcTimestamp: number): string => {
+  if (!utcTimestamp || utcTimestamp <= 0) return "";
+
+  try {
+    // Convert UTC to SAST by adding 2 hours
+    const sastTimestamp = utcTimestamp + 2 * 60 * 60 * 1000;
+    const sastDate = new Date(sastTimestamp);
+
+    // Format for datetime-local input: YYYY-MM-DDTHH:MM
+    const year = sastDate.getFullYear();
+    const month = String(sastDate.getMonth() + 1).padStart(2, "0");
+    const day = String(sastDate.getDate()).padStart(2, "0");
+    const hour = String(sastDate.getHours()).padStart(2, "0");
+    const minute = String(sastDate.getMinutes()).padStart(2, "0");
+
+    return `${year}-${month}-${day}T${hour}:${minute}`;
+  } catch (error) {
+    console.error("Error converting UTC to SAST input:", error);
+    return "";
+  }
+};
+
+/**
+ * Gets the minimum datetime-local value (current time in SAST)
+ */
+export const getCurrentSASTInputMin = (): string => {
+  const now = new Date();
+  // Add 2 hours to convert UTC to SAST, then format
+  const sastNow = now.getTime() + 2 * 60 * 60 * 1000;
+  return convertUTCToSASTInput(now.getTime());
+};
+
+/**
+ * Validates that a departure date is not in the past (SAST)
+ */
+export const isValidDepartureDate = (utcTimestamp: number): boolean => {
+  const now = new Date();
+  const departureDate = new Date(utcTimestamp);
+
+  // Allow some buffer (5 minutes) for form completion
+  const minTime = now.getTime() - 5 * 60 * 1000;
+
+  return departureDate.getTime() >= minTime;
+};
+
+/**
+ * Validates that arrival is after departure
+ */
+export const isValidArrivalDate = (
+  departureUTC: number,
+  arrivalUTC: number
+): boolean => {
+  if (!departureUTC || !arrivalUTC) return false;
+  return arrivalUTC > departureUTC;
+};
+
+// Keep existing utility functions for backward compatibility
 export const formatDateInSAST = (dateInput: string | number | Date) => {
   const date = new Date(dateInput);
   return date.toLocaleDateString("en-ZA", {
@@ -37,7 +127,6 @@ export const formatDateInSAST = (dateInput: string | number | Date) => {
   });
 };
 
-// Time only in SAST
 export const formatTimeInSAST = (dateInput: string | number | Date) => {
   const date = new Date(dateInput);
   return date.toLocaleTimeString("en-ZA", {
@@ -48,21 +137,17 @@ export const formatTimeInSAST = (dateInput: string | number | Date) => {
   });
 };
 
-// Get current SAST time
 export const getCurrentSASTTime = () => {
   return new Date().toLocaleString("en-ZA", {
     timeZone: "Africa/Johannesburg",
   });
 };
 
-// For form inputs - convert user input to UTC timestamp
+// Legacy function - use convertSASTInputToUTC instead
 export const parseUserDateToUTC = (dateString: string) => {
-  // Assume user input is in SAST and convert to UTC
-  const sastDate = new Date(dateString + " GMT+0200");
-  return sastDate.getTime();
+  return convertSASTInputToUTC(dateString);
 };
 
-// Relative time formatting (e.g., "2 hours ago")
 export const formatRelativeTimeInSAST = (dateInput: string | number | Date) => {
   const date = new Date(dateInput);
   const now = new Date();
@@ -76,14 +161,11 @@ export const formatRelativeTimeInSAST = (dateInput: string | number | Date) => {
   if (diffInHours < 24) return `${diffInHours}h ago`;
   if (diffInDays < 7) return `${diffInDays}d ago`;
 
-  // For older dates, show full date
   return formatDateInSAST(date);
 };
 
-// Debug helper - shows all timezone info
 export const debugTimezone = (dateInput?: string | number | Date) => {
   const date = dateInput ? new Date(dateInput) : new Date();
-
   return {
     browserTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     browserTime: date.toLocaleString(),

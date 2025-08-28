@@ -24,7 +24,14 @@ import {
   CheckCircle,
   AlertTriangle,
 } from "lucide-react";
-import { parseUserDateToUTC, formatDateTimeInSAST } from "@/utils/dateUtils";
+import {
+  formatDateTimeInSAST,
+  convertSASTInputToUTC,
+  convertUTCToSASTInput,
+  getCurrentSASTInputMin,
+  isValidDepartureDate,
+  isValidArrivalDate,
+} from "@/utils/dateUtils";
 
 const CreateTripPage = () => {
   const router = useRouter();
@@ -44,8 +51,8 @@ const CreateTripPage = () => {
   const [destinationCity, setDestinationCity] = useState("");
   const [originAddress, setOriginAddress] = useState("");
   const [destinationAddress, setDestinationAddress] = useState("");
-  const [departureDate, setDepartureDate] = useState<string>(""); // Will store UTC timestamp as string
-  const [arrivalDate, setArrivalDate] = useState<string>(""); // Will store UTC timestamp as string
+  const [departureDate, setDepartureDate] = useState<number>(0); // Store as UTC timestamp (number)
+  const [arrivalDate, setArrivalDate] = useState<number>(0); // Store as UTC timestamp (number)
   const [basePrice, setBasePrice] = useState(0);
   const [KMPrice, setKMPrice] = useState(0);
   const [KGPrice, setKGPrice] = useState(0);
@@ -61,6 +68,14 @@ const CreateTripPage = () => {
     isAvailable: boolean;
     conflictingTrips: any[];
   } | null>(null);
+
+  // Add validation states
+  const [dateValidation, setDateValidation] = useState({
+    departureValid: true,
+    arrivalValid: true,
+    departureMessage: "",
+    arrivalMessage: "",
+  });
 
   // Add Places Autocomplete hooks for origin and destination
   const pickup = usePlacesWithRestrictions({
@@ -90,14 +105,14 @@ const CreateTripPage = () => {
       fleetTruckIds.length > 0 ? { truckIds: fleetTruckIds } : "skip"
     ) ?? [];
 
-  // Check truck availability query
+  // Check truck availability query - now using number timestamps
   const checkTruckAvailability = useQuery(
     api.truck.isTruckAvailable,
-    selectedTruckId && departureDate && arrivalDate
+    selectedTruckId && departureDate > 0 && arrivalDate > 0
       ? {
           truckId: selectedTruckId,
-          departureDate,
-          arrivalDate,
+          departureDate: departureDate.toString(),
+          arrivalDate: arrivalDate.toString(),
         }
       : "skip"
   );
@@ -114,46 +129,69 @@ const CreateTripPage = () => {
     setTruckAvailability(null);
   }, [selectedTruckId, departureDate, arrivalDate]);
 
+  // Validate dates whenever they change
+  useEffect(() => {
+    const validation = {
+      departureValid: true,
+      arrivalValid: true,
+      departureMessage: "",
+      arrivalMessage: "",
+    };
+
+    // Validate departure date
+    if (departureDate > 0) {
+      if (!isValidDepartureDate(departureDate)) {
+        validation.departureValid = false;
+        validation.departureMessage = "Departure date cannot be in the past";
+      }
+    }
+
+    // Validate arrival date
+    if (arrivalDate > 0 && departureDate > 0) {
+      if (!isValidArrivalDate(departureDate, arrivalDate)) {
+        validation.arrivalValid = false;
+        validation.arrivalMessage = "Arrival must be after departure";
+      }
+    }
+
+    setDateValidation(validation);
+  }, [departureDate, arrivalDate]);
+
   const createTrip = useMutation(api.trip.createTrip);
 
+  // Fixed date handlers
   const handleDepartureChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // User enters datetime assuming SAST, convert to UTC for storage
     const userInput = e.target.value; // "2024-08-25T14:30"
-    const utcTimestamp = parseUserDateToUTC(userInput);
-    setDepartureDate(utcTimestamp.toString()); // Store as UTC timestamp string
+
+    if (!userInput) {
+      setDepartureDate(0);
+      return;
+    }
+
+    try {
+      const utcTimestamp = convertSASTInputToUTC(userInput);
+      setDepartureDate(utcTimestamp);
+    } catch (error) {
+      console.error("Error parsing departure date:", error);
+      setDepartureDate(0);
+    }
   };
 
   const handleArrivalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // User enters datetime assuming SAST, convert to UTC for storage
     const userInput = e.target.value; // "2024-08-25T18:00"
-    const utcTimestamp = parseUserDateToUTC(userInput);
-    setArrivalDate(utcTimestamp.toString()); // Store as UTC timestamp string
-  };
 
-  // Format ISO date string to local datetime-local input value
-  const formatDateForInput = (utcTimestamp: string) => {
-    if (!utcTimestamp) return "";
+    if (!userInput) {
+      setArrivalDate(0);
+      return;
+    }
 
-    // Convert UTC timestamp back to SAST for the datetime-local input
-    const date = new Date(parseInt(utcTimestamp));
-
-    // Get SAST time and format for datetime-local input
-    const sastDateTime = new Date(
-      date.toLocaleString("en-US", {
-        timeZone: "Africa/Johannesburg",
-      })
-    );
-
-    // Format as YYYY-MM-DDTHH:MM for datetime-local input
-    return new Date(
-      sastDateTime.getTime() - sastDateTime.getTimezoneOffset() * 60000
-    )
-      .toISOString()
-      .slice(0, 16);
-  };
-
-  const formatNumber = (value: number) => {
-    return value.toFixed(2);
+    try {
+      const utcTimestamp = convertSASTInputToUTC(userInput);
+      setArrivalDate(utcTimestamp);
+    } catch (error) {
+      console.error("Error parsing arrival date:", error);
+      setArrivalDate(0);
+    }
   };
 
   // Simplified price handlers
@@ -183,6 +221,18 @@ const CreateTripPage = () => {
       return;
     }
 
+    // Ensure we have valid timestamps
+    if (departureDate <= 0 || arrivalDate <= 0) {
+      alert("Please select valid departure and arrival dates");
+      return;
+    }
+
+    // Check date validation
+    if (!dateValidation.departureValid || !dateValidation.arrivalValid) {
+      alert("Please fix the date validation errors before proceeding");
+      return;
+    }
+
     // Check availability one more time before creating
     if (truckAvailability && !truckAvailability.isAvailable) {
       alert(
@@ -197,8 +247,8 @@ const CreateTripPage = () => {
         truckId: selectedTruckId,
         originCity,
         destinationCity,
-        departureDate: departureDate, // Send as UTC timestamp string
-        arrivalDate: arrivalDate, // Send as UTC timestamp string
+        departureDate: departureDate.toString(), // Convert number to string for Convex
+        arrivalDate: arrivalDate.toString(), // Convert number to string for Convex
         basePrice,
         KMPrice,
         KGPrice,
@@ -271,8 +321,14 @@ const CreateTripPage = () => {
                   <div className="text-xs">
                     {/* Format conflicting trip times in SAST */}
                     {
-                      formatDateTimeInSAST(trip.departureDate).fullDateTime
-                    } - {formatDateTimeInSAST(trip.arrivalDate).fullDateTime}{" "}
+                      formatDateTimeInSAST(parseInt(trip.departureDate))
+                        .fullDateTime
+                    }{" "}
+                    -{" "}
+                    {
+                      formatDateTimeInSAST(parseInt(trip.arrivalDate))
+                        .fullDateTime
+                    }{" "}
                     (SAST)
                   </div>
                   <div className="text-xs">
@@ -287,6 +343,27 @@ const CreateTripPage = () => {
     }
   };
 
+  // Add date validation message renderer
+  const renderDateValidation = (field: "departure" | "arrival") => {
+    const isValid =
+      field === "departure"
+        ? dateValidation.departureValid
+        : dateValidation.arrivalValid;
+    const message =
+      field === "departure"
+        ? dateValidation.departureMessage
+        : dateValidation.arrivalMessage;
+
+    if (isValid || !message) return null;
+
+    return (
+      <div className="text-error text-xs mt-1 flex items-center gap-1">
+        <AlertTriangle className="w-3 h-3" />
+        {message}
+      </div>
+    );
+  };
+
   // Add loading state handling
   if (!userId || !userFleets) {
     return (
@@ -298,6 +375,11 @@ const CreateTripPage = () => {
       </div>
     );
   }
+
+  // Get minimum datetime values
+  const minDateTime = getCurrentSASTInputMin();
+  const minArrivalDateTime =
+    departureDate > 0 ? convertUTCToSASTInput(departureDate) : minDateTime;
 
   return (
     <div className="min-h-screen bg-base-200">
@@ -405,7 +487,7 @@ const CreateTripPage = () => {
                       Schedule
                     </h2>
                     <p className="text-sm text-base-content/60">
-                      Set your departure and arrival times
+                      Set your departure and arrival times (SAST timezone)
                     </p>
                   </div>
                 </div>
@@ -415,34 +497,42 @@ const CreateTripPage = () => {
                     <label className="label">
                       <span className="label-text font-medium flex items-center gap-2">
                         <Clock className="w-4 h-4 text-info" />
-                        Departure Date & Time
+                        Departure Date & Time (SAST)
                       </span>
                     </label>
                     <input
                       type="datetime-local"
-                      className="input input-bordered w-full focus:outline-none focus:border-primary"
-                      value={formatDateForInput(departureDate)}
+                      className={`input input-bordered w-full focus:outline-none ${
+                        !dateValidation.departureValid
+                          ? "border-error focus:border-error"
+                          : "focus:border-primary"
+                      }`}
+                      value={convertUTCToSASTInput(departureDate)}
                       onChange={handleDepartureChange}
-                      min={formatDateForInput(new Date().toISOString())}
+                      min={minDateTime}
                     />
+                    {renderDateValidation("departure")}
                   </div>
 
                   <div className="space-y-2">
                     <label className="label">
                       <span className="label-text font-medium flex items-center gap-2">
                         <Clock className="w-4 h-4 text-success" />
-                        Arrival Date & Time
+                        Arrival Date & Time (SAST)
                       </span>
                     </label>
                     <input
                       type="datetime-local"
-                      className="input input-bordered w-full focus:outline-none focus:border-primary"
-                      value={formatDateForInput(arrivalDate)}
+                      className={`input input-bordered w-full focus:outline-none ${
+                        !dateValidation.arrivalValid
+                          ? "border-error focus:border-error"
+                          : "focus:border-primary"
+                      }`}
+                      value={convertUTCToSASTInput(arrivalDate)}
                       onChange={handleArrivalChange}
-                      min={formatDateForInput(
-                        departureDate || new Date().toISOString()
-                      )}
+                      min={minArrivalDateTime}
                     />
+                    {renderDateValidation("arrival")}
                   </div>
                 </div>
               </div>
@@ -686,30 +776,24 @@ const CreateTripPage = () => {
                   </div>
 
                   {/* Schedule */}
-                  {(departureDate || arrivalDate) && (
+                  {(departureDate > 0 || arrivalDate > 0) && (
                     <div className="bg-base-200/50 border border-base-300 rounded-lg p-3">
                       <div className="flex items-center gap-2 mb-2">
                         <Calendar className="w-4 h-4 text-info" />
                         <span className="text-sm font-medium">Schedule</span>
                       </div>
                       <div className="space-y-1 text-xs text-base-content/70">
-                        {departureDate && (
+                        {departureDate > 0 && (
                           <p>
                             Depart:{" "}
-                            {
-                              formatDateTimeInSAST(parseInt(departureDate))
-                                .fullDateTime
-                            }{" "}
+                            {formatDateTimeInSAST(departureDate).fullDateTime}{" "}
                             (SAST)
                           </p>
                         )}
-                        {arrivalDate && (
+                        {arrivalDate > 0 && (
                           <p>
                             Arrive:{" "}
-                            {
-                              formatDateTimeInSAST(parseInt(arrivalDate))
-                                .fullDateTime
-                            }{" "}
+                            {formatDateTimeInSAST(arrivalDate).fullDateTime}{" "}
                             (SAST)
                           </p>
                         )}
@@ -771,6 +855,8 @@ const CreateTripPage = () => {
                       !arrivalDate ||
                       !selectedFleetId ||
                       !selectedTruckId ||
+                      !dateValidation.departureValid ||
+                      !dateValidation.arrivalValid ||
                       (truckAvailability !== null &&
                         !truckAvailability.isAvailable)
                     }

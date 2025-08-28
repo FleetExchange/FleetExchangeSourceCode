@@ -292,6 +292,7 @@ export const deleteTripById = mutation({
 });
 
 // Create trip mutation
+// Create trip mutation
 export const createTrip = mutation({
   args: {
     userId: v.id("users"),
@@ -308,10 +309,23 @@ export const createTrip = mutation({
     destinationAddress: v.string(),
   },
   handler: async (ctx, args) => {
+    // Convert string timestamps to numbers
+    const departureTimestamp = parseInt(args.departureDate, 10);
+    const arrivalTimestamp = parseInt(args.arrivalDate, 10);
+
+    // Validate the timestamps
+    if (isNaN(departureTimestamp) || isNaN(arrivalTimestamp)) {
+      throw new Error("Invalid date format provided");
+    }
+
+    if (arrivalTimestamp <= departureTimestamp) {
+      throw new Error("Arrival date must be after departure date");
+    }
+
     // Double-check truck availability on the backend
     const availability = await ctx.runQuery(api.truck.isTruckAvailable, {
       truckId: args.truckId,
-      departureDate: args.departureDate,
+      departureDate: args.departureDate, // Keep as string for the availability query
       arrivalDate: args.arrivalDate,
     });
 
@@ -327,8 +341,8 @@ export const createTrip = mutation({
       truckId: args.truckId,
       originCity: args.originCity,
       destinationCity: args.destinationCity,
-      departureDate: new Date(args.departureDate).getTime(),
-      arrivalDate: new Date(args.arrivalDate).getTime(),
+      departureDate: departureTimestamp, // Store as number (UTC timestamp)
+      arrivalDate: arrivalTimestamp, // Store as number (UTC timestamp)
       basePrice: args.basePrice,
       KMPrice: args.KMPrice,
       KGPrice: args.KGPrice,
