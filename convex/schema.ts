@@ -173,6 +173,7 @@ export default defineSchema({
     // Accounting fields
     gatewayFee: v.optional(v.number()), // gateway fees for the transaction (store after capture)
     refundedAmount: v.optional(v.number()),
+    refundProcessedAt: v.optional(v.number()),
 
     // Payment status (expanded)
     status: v.union(

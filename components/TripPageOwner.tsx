@@ -800,20 +800,13 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
                             currentStatus={purchaseTrip.status as TripStatus}
                             purchaseTripId={purchaseTrip._id}
                           />
-
-                          {purchaseTrip.status === "Awaiting Confirmation" ? (
-                            <TripRejectButton
-                              purchaseTripId={purchaseTrip._id}
-                              tripId={trip._id}
-                              currentStatus={purchaseTrip.status}
-                            />
-                          ) : (
-                            <TripCancelButton
-                              purchaseTripId={purchaseTrip._id}
-                              tripId={trip._id}
-                              currentStatus={purchaseTrip.status}
-                            />
-                          )}
+                          {purchaseTrip.status === "Awaiting Confirmation"} (
+                          <TripRejectButton
+                            purchaseTripId={purchaseTrip._id}
+                            tripId={trip._id}
+                            currentStatus={purchaseTrip.status}
+                          />
+                          )
                         </div>
                       )}
                     </>

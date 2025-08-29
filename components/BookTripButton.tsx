@@ -1,7 +1,8 @@
+"use client";
+
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { use, useState } from "react";
-import toast from "react-hot-toast";
 import { Id } from "@/convex/_generated/dataModel";
 
 interface BookTripButtonProps {
