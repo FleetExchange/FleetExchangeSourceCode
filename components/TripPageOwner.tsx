@@ -38,6 +38,7 @@ import {
   Mail,
 } from "lucide-react";
 import { formatDateTimeInSAST, formatDateInSAST } from "@/utils/dateUtils";
+import { useUser } from "@clerk/nextjs";
 
 interface TripPageClientProps {
   tripId: string;
@@ -45,6 +46,13 @@ interface TripPageClientProps {
 
 const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
   const router = useRouter();
+  // Get the logged in user identity
+  const { user } = useUser();
+
+  // Get user's Convex ID
+  const userId = useQuery(api.users.getUserByClerkId, {
+    clerkId: user?.id ?? "skip",
+  })?._id;
 
   // Use States
   const [pickupAddress, setPickupAddress] = useState("");
@@ -756,7 +764,7 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
 
                 {/* Action Buttons */}
                 <div className="space-y-4">
-                  {trip?.isBooked === true && purchaseTrip ? (
+                  {trip?.isBooked === true && purchaseTrip && userId ? (
                     <>
                       {purchaseTrip.status === "Delivered" ? (
                         <div className="space-y-4">
@@ -809,6 +817,11 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
                           )
                         </div>
                       )}
+                      <TripCancelButton
+                        userId={userId}
+                        tripId={trip._id}
+                        currentStatus={purchaseTrip.status}
+                      />
                     </>
                   ) : (
                     <button

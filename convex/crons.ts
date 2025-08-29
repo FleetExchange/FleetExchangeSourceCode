@@ -447,12 +447,12 @@ export const expiredUnconfirmedTrips = internalMutation({
 
           if (payment && payment.paystackReference) {
             // Schedule the refund processing action to run immediately
-            await ctx.scheduler.runAfter(0, api.payments.processRefund, {
-              paystackReference: payment.paystackReference,
-              paymentId: payment._id,
-              userId: payment.userId,
-              tripId: tripId,
-            });
+            //await ctx.scheduler.runAfter(0, api.payments.processRefund, {
+            //  paystackReference: payment.paystackReference,
+            //paymentId: payment._id,
+            //userId: payment.userId,
+            //tripId: tripId,
+            //});
           }
 
           // Delete the purchase trip

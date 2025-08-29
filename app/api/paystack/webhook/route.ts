@@ -64,12 +64,17 @@ async function handleChargeSuccess(data: any) {
     const metadata = data.metadata ?? {};
     const paymentId = metadata.paymentId ?? metadata.payment_id ?? null;
 
+    // Convert fee to ZAR
+    let feesInRand: number | undefined = undefined;
+    if (fees) {
+      const feesInRand = fees / 100;
+    }
     if (paymentId) {
       // Update known payment by id
       await convex.mutation(api.payments.updatePaymentStatus, {
         paymentId,
         status: "charged",
-        gatewayFee: fees ?? undefined,
+        gatewayFee: feesInRand ?? undefined,
         chargedAt: Date.now(),
       });
       console.log(
@@ -88,7 +93,7 @@ async function handleChargeSuccess(data: any) {
         await convex.mutation(api.payments.updatePaymentStatus, {
           paymentId: found?._id,
           status: "charged",
-          gatewayFee: fees ?? undefined,
+          gatewayFee: feesInRand ?? undefined,
           chargedAt: Date.now(),
         });
         console.log(

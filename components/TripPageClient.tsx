@@ -880,7 +880,7 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
                       />
                     ) : (
                       <TripCancelButton
-                        purchaseTripId={purchaseTripDetails._id}
+                        userId={userId}
                         tripId={trip._id}
                         currentStatus={purchaseTripDetails.status}
                       />

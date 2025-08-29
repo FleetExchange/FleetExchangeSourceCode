@@ -127,8 +127,8 @@ const TripCancelButton = ({
             // Full amount to client
             refundAmount = payment.totalAmount; // in ZAR
           } else {
-            // Amount minus service fee to client
-            refundAmount = payment.totalAmount - purchTrip?.tripTotal; // in ZAR
+            // Price before service fee was added
+            refundAmount = purchTrip?.tripTotal; // in ZAR
           }
 
           // Refund client with api call to paystack refund endpoint

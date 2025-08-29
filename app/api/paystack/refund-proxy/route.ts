@@ -10,14 +10,17 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const res = await fetch(`/api/paystack/refund`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-server-secret": secret,
-    },
-    body: JSON.stringify(body),
-  });
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_APP_URL || ""}/api/paystack/refund`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-server-secret": secret,
+      },
+      body: JSON.stringify(body),
+    }
+  );
 
   const data = await res.json().catch(() => null);
   return NextResponse.json(data ?? { error: "no response" }, {

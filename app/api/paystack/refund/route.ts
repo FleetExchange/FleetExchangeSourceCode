@@ -1,12 +1,10 @@
 // app/api/paystack/refund/route.ts
 import { NextRequest, NextResponse } from "next/server";
 // @ts-ignore: missing type declarations for 'convex/http'
-import { ConvexHttpClient } from "convex/http";
 import { api } from "@/convex/_generated/api";
+import { ConvexHttpClient } from "convex/browser";
 
-const CONVEX_URL =
-  process.env.CONVEX_HTTP_URL || process.env.NEXT_PUBLIC_CONVEX_URL || "";
-const convex = new ConvexHttpClient(CONVEX_URL);
+const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
 export async function POST(req: NextRequest) {
   try {
@@ -37,8 +35,8 @@ export async function POST(req: NextRequest) {
     const paidCents =
       typeof payment.totalAmount === "number"
         ? Math.round(payment.totalAmount * 100)
-        : typeof payment.amount === "number"
-          ? Math.round(payment.amount)
+        : typeof payment.totalAmount === "number"
+          ? Math.round(payment.totalAmount)
           : null;
 
     if (
@@ -54,10 +52,7 @@ export async function POST(req: NextRequest) {
 
     // Validate reference matches known transaction reference if available
     const knownRef =
-      payment.paystackReference ||
-      payment.paystackInitReference ||
-      payment.reference ||
-      null;
+      payment.paystackReference || payment.paystackInitReference || null;
     if (reference && knownRef && reference !== knownRef) {
       return NextResponse.json(
         { error: "reference does not match payment record" },
@@ -110,7 +105,7 @@ export async function POST(req: NextRequest) {
       if (api.payments.processRefund) {
         await convex.mutation(api.payments.processRefund, {
           paymentId,
-          refundedAmount: typeof amount === "number" ? amount / 100 : undefined, // store as ZAR if your mutation expects that
+          refundedAmount: amount / 100, // store as ZAR if your mutation expects that
           paystackReference: reference || knownRef,
         });
       } else {
