@@ -9,13 +9,7 @@ const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
 export async function POST(request: NextRequest) {
   try {
-    const { paystackReference, purchaseTripId, reason } = await request.json();
-
-    console.log("🧹 Starting cleanup:", {
-      paystackReference,
-      purchaseTripId,
-      reason,
-    });
+    const { paymentId, purchaseTripId, reason } = await request.json();
 
     let cleanupCount = 0;
     let payment = null;

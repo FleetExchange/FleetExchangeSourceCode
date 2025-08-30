@@ -20,11 +20,17 @@ const BookTripButton = ({
 }: BookTripButtonProps) => {
   const [loading, setLoading] = useState(false);
   const [purchaseTripId, setPurchaseTripId] = useState<string | null>(null);
+  const [paymentId, setPaymentId] = useState<string | null>(null);
 
   const getPurchaseTripById = useMutation(
     api.purchasetrip.getPurchaseTripForBooking
   );
   const createPayment = useMutation(api.payments.createPayment);
+  const deletePayment = useMutation(api.payments.deletePayment);
+  const deletePurchaseTrip = useMutation(
+    api.purchasetrip.deletePurchaseTripByPurchaseTripId
+  );
+  const setTripCancelled = useMutation(api.trip.setTripCancelled);
   // create mutation
   const createNotification = useMutation(api.notifications.createNotification);
 
@@ -36,6 +42,7 @@ const BookTripButton = ({
 
       // 1. Create booking and get the ID back
       let newPurchaseTripId: string | null = null;
+      let createdPaymentId: string | null = null;
       if (onBookTrip) {
         newPurchaseTripId = await onBookTrip();
       }
@@ -57,7 +64,7 @@ const BookTripButton = ({
       const comsmissionAmount = purchaseTripData.commissionAmount;
       const transporterAmount = purchaseTripData.transporterAmount;
 
-      await createPayment({
+      const payment = await createPayment({
         userId: user._id,
         transporterId: trip.transporterId,
         tripId: trip.tripId,
@@ -66,6 +73,11 @@ const BookTripButton = ({
         transporterAmount: transporterAmount,
         commissionAmount: comsmissionAmount,
       });
+
+      // createPayment returns the payment ID string, so assign it directly
+      createdPaymentId = payment as string;
+
+      setPaymentId(createdPaymentId);
 
       // Let the user know the trip is booked and the transporter will confirm or reject.
       // Tell them they will get an email with payment instructions if transporter confirms
@@ -79,11 +91,40 @@ const BookTripButton = ({
         meta: { tripId: trip.tripId, purchaseTripId: newPurchaseTripId },
       });
 
+      const bookingConfirm = window.confirm(
+        "Your booking request has been sent. You will receive an email with payment instructions if the transporter confirms your booking. Click OK to go to My Bookings."
+      );
+
       window.location.href = "/myBookings";
     } catch (error) {
+      // Rollback: if payment was created but something failed later, delete it
+      try {
+        if (paymentId) {
+          await deletePayment({ paymentId: paymentId as Id<"payments"> });
+        }
+      } catch (e) {
+        console.error("Failed to rollback payment:", e);
+      }
+      // Rollback: delete the purchaseTrip if it was created
+      try {
+        if (purchaseTripId) {
+          await deletePurchaseTrip({
+            purchaseTripId: purchaseTripId as Id<"purchaseTrip">,
+          });
+        }
+      } catch (e) {
+        console.error("Failed to rollback purchaseTrip:", e);
+      }
+      // Set trip to not booked
+      try {
+        if (trip && trip.tripId) {
+          await setTripCancelled({ tripId: trip.tripId as Id<"trip"> });
+        }
+      } catch (e) {
+        console.error("Failed to set trip to not booked:", e);
+      }
       console.error("Booking failed:", error);
-
-      // Cleanup Code
+      alert("Booking failed. Your request was not completed.");
     } finally {
       setLoading(false);
     }

@@ -95,6 +95,8 @@ const StatusAdvanceButton = ({
     try {
       const nextStatus = getNextStatus(status);
 
+      // capture previous status so we can rollback on failure
+      const prevStatus = status;
       // 1. Update status in database
       await updateStatus({
         purchaseTripId,
@@ -165,11 +167,53 @@ const StatusAdvanceButton = ({
                 );
               }
             } else {
-              const errorData = await res.json();
-              console.error("Paystack initialization failed:", errorData);
-              throw new Error(
-                errorData?.error || "Paystack initialization failed"
+              // Read response text for better logs
+              const raw = await res.text().catch(() => "");
+              console.error("Paystack initialization failed:", res.status, raw);
+              // mark payment as failed (best-effort)
+              try {
+                await updatePaymentStatus({
+                  paymentId: payment._id,
+                  status: "pending",
+                });
+              } catch (e) {
+                console.warn("Failed to mark payment request_failed:", e);
+              }
+              // rollback purchaseTrip status
+              try {
+                await updateStatus({
+                  purchaseTripId,
+                  newStatus: prevStatus,
+                });
+              } catch (e) {
+                console.warn("Failed to rollback purchaseTrip status:", e);
+              }
+
+              // notify both parties
+              try {
+                await createNotification({
+                  userId: purchaseTrip?.userId as Id<"users">,
+                  type: "booking",
+                  message:
+                    "We could not create a payment request for your booking. Please try again or contact support.",
+                  meta: { purchaseTripId, action: "payment_request_failed" },
+                });
+                await createNotification({
+                  userId: trip?.userId as Id<"users">,
+                  type: "trip",
+                  message:
+                    "Payment request for your booking failed. Please retry creating the payment link.",
+                  meta: { purchaseTripId, action: "payment_request_failed" },
+                });
+              } catch (e) {
+                console.warn("Failed to send failure notifications:", e);
+              }
+
+              // surface to UI
+              alert(
+                "Failed to create payment request. The booking status has been reverted. Please try again."
               );
+              return;
             }
           } else if (payment.status === "payment_requested") {
             // Already requested: re-send notification or open existing link
@@ -193,7 +237,28 @@ const StatusAdvanceButton = ({
           }
         } catch (error) {
           console.error("Failed to request payment:", error);
-          // optional: rollback purchaseTrip status or notify admin/transporters
+          // best-effort rollback & notify
+          try {
+            // mark payment if available
+            const payment = getPaymentByTrip;
+            if (payment?._id) {
+              await updatePaymentStatus({
+                paymentId: payment._id,
+                status: "pending",
+              });
+            }
+            await updateStatus({
+              purchaseTripId,
+              newStatus: prevStatus,
+            });
+            alert("Failed to create payment request. Please try again.");
+          } catch (e) {
+            console.warn(
+              "Rollback after payment request failure also failed:",
+              e
+            );
+          }
+          return;
         }
       }
 

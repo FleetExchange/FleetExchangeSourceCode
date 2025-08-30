@@ -15,7 +15,7 @@ export const createPayment = mutation({
     commissionAmount: v.number(), // Your platform commission
   },
   handler: async (ctx, args) => {
-    return await ctx.db.insert("payments", {
+    const payment = await ctx.db.insert("payments", {
       userId: args.userId,
       transporterId: args.transporterId,
       tripId: args.tripId,
@@ -26,6 +26,8 @@ export const createPayment = mutation({
       status: "pending",
       createdAt: Date.now(),
     });
+
+    return payment;
   },
 });
 
@@ -285,5 +287,17 @@ export const processRefund = mutation({
     }
 
     return { ok: true };
+  },
+});
+
+export const getPaymentByPurchaseTrip = query({
+  args: { purchaseTripId: v.id("purchaseTrip") },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("payments")
+      .withIndex("by_purchase_trip", (q) =>
+        q.eq("purchaseTripId", args.purchaseTripId)
+      )
+      .first();
   },
 });
