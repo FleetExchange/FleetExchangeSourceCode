@@ -59,6 +59,10 @@ const TripCancelButton = ({
       const purchaserUserId = purchTrip?.userId ?? null;
       const transporterUserId = trip?.userId ?? null;
 
+      // Capture display strings before mutating
+      const originCity = trip?.originCity ?? "";
+      const destinationCity = trip?.destinationCity ?? "";
+
       // Show Button if trip us not cancelled,refunded,dispatched,delivered
       // Only show awaiting confirmation and booked status
       if (
@@ -96,8 +100,8 @@ const TripCancelButton = ({
         // Set the trip to available again
         await setTripCancelled({ tripId: tripId });
         // Notify both parties
-        await notifyClient(purchaserUserId);
-        await notifyTransporter(transporterUserId);
+        await notifyClient(purchaserUserId, originCity, destinationCity);
+        await notifyTransporter(transporterUserId, originCity, destinationCity);
       }
       // 2. Trip is booked but no payment has been made and transporter or client cancels trip
       if (
@@ -112,8 +116,8 @@ const TripCancelButton = ({
         // Set the trip to available again
         await setTripCancelled({ tripId: tripId });
         // Notify both parties
-        await notifyClient(purchaserUserId);
-        await notifyTransporter(transporterUserId);
+        await notifyClient(purchaserUserId, originCity, destinationCity);
+        await notifyTransporter(transporterUserId, originCity, destinationCity);
       }
       // 3. Trip is booked but AND payment has been made and transporter or client cancels trip
       if (currentStatus === "Booked" && payment?.status === "charged") {
@@ -145,8 +149,12 @@ const TripCancelButton = ({
           const respJson = await response.json().catch(() => null);
           if (response.ok && respJson?.ok) {
             // Notify both parties
-            await notifyClient(purchaserUserId);
-            await notifyTransporterNoRelist(transporterUserId);
+            await notifyClient(purchaserUserId, originCity, destinationCity);
+            await notifyTransporterNoRelist(
+              transporterUserId,
+              originCity,
+              destinationCity
+            );
           } else {
             console.error("Refund API failed", respJson);
             alert(
@@ -172,39 +180,51 @@ const TripCancelButton = ({
   };
 
   // Notify both parties of the cancellation
-  const notifyClient = async (userId: Id<"users"> | null) => {
+  const notifyClient = async (
+    userId: Id<"users"> | null,
+    origin: string,
+    dest: string
+  ) => {
     try {
       if (!userId) return;
       await createNotification({
         type: "booking",
         userId: userId,
-        message: `Your booking from ${trip?.originCity} to ${trip?.destinationCity} has been cancelled. If you made a payment a refund will be processed shortly.`,
+        message: `Your booking from ${origin} to ${dest} has been cancelled. If you made a payment a refund will be processed shortly.`,
         meta: { tripId: tripId, action: "cancel_booking" },
       });
     } catch (error) {
       console.error("Failed to send cancellation notifications:", error);
     }
   };
-  const notifyTransporter = async (userId: Id<"users"> | null) => {
+  const notifyTransporter = async (
+    userId: Id<"users"> | null,
+    origin: string,
+    dest: string
+  ) => {
     try {
       if (!userId) return;
       await createNotification({
         type: "trip",
         userId: userId,
-        message: `Your trip from ${trip?.originCity} to ${trip?.destinationCity} has been cancelled. You trip will be made available for booking again.`,
+        message: `Your trip from ${origin} to ${dest} has been cancelled. You trip will be made available for booking again.`,
         meta: { tripId: tripId, action: "cancel_booking" },
       });
     } catch (error) {
       console.error("Failed to send cancellation notifications:", error);
     }
   };
-  const notifyTransporterNoRelist = async (userId: Id<"users"> | null) => {
+  const notifyTransporterNoRelist = async (
+    userId: Id<"users"> | null,
+    origin: string,
+    dest: string
+  ) => {
     try {
       if (!userId) return;
       await createNotification({
         type: "trip",
         userId: userId,
-        message: `Your trip from ${trip?.originCity} to ${trip?.destinationCity} has been cancelled. You trip will NOT be available for booking, please reslist it if you wish to.`,
+        message: `Your trip from ${origin} to ${dest} has been cancelled. You trip will NOT be available for booking, please reslist it if you wish to.`,
         meta: { tripId: tripId, action: "cancel_booking" },
       });
     } catch (error) {
