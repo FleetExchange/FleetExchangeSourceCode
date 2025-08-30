@@ -321,7 +321,7 @@ const StatusAdvanceButton = ({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          amount: payment.transporterAmount * 100, // Convert to kobo
+          amount: payment.transporterAmount * 100,
           recipientCode: payoutAccount.paystackRecipientCode,
           reason: `Payment for trip from ${trip?.originCity} to ${trip?.destinationCity}`,
           reference: `transfer-${payment._id}-${Date.now()}`,

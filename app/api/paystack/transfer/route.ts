@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
         recipient: recipientCode,
         reason: reason,
         reference: reference,
-        currency: "NGN", // Or whatever currency you're using
+        currency: "ZAR", // Or whatever currency you're using
         metadata: metadata,
       }),
     });
@@ -33,6 +33,8 @@ export async function POST(req: NextRequest) {
     const data = await response.json();
 
     console.log("Paystack transfer response:", data);
+
+    // Notify Transporter
 
     return NextResponse.json(data);
   } catch (error) {
