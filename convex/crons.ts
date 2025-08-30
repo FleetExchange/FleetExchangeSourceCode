@@ -38,14 +38,7 @@ crons.interval(
   internal.crons.deleteOldNotifications
 );
 
-// Cleanup abandoned bookings
-crons.interval(
-  "cleanupAbandonedBookings",
-  { minutes: 10 }, // Every 10 minutes
-  internal.crons.cleanupAbandonedBookings
-);
-
-// Check if payment is past due and mark as forfeited
+// Check if payment is past due and mark as forfeited and cleanup
 crons.interval(
   "forfeitUnpaidBookings",
   { minutes: 10 }, // Runs every 10 minutes
@@ -347,135 +340,133 @@ export const deleteOldNotifications = internalMutation({
   },
 });
 
-export const cleanupAbandonedBookings = internalMutation({
-  handler: async (ctx) => {
-    const cutoffTime = Date.now() - 10 * 60 * 1000; // 10 minutes ago
-    const currentSAST = formatDateTimeInSAST(Date.now());
-    const cutoffSAST = formatDateTimeInSAST(cutoffTime);
-    let cleanupCount = 0;
-
-    console.log(
-      `🧹 Cleaning up abandoned bookings older than ${cutoffSAST.fullDateTime} (SAST) at ${currentSAST.fullDateTime} (SAST)`
-    );
-
-    // Find payments with pending status older than 10 minutes
-    const abandonedPayments = await ctx.db
-      .query("payments")
-      .filter((q) =>
-        q.and(
-          q.eq(q.field("status"), "pending"),
-          q.lt(q.field("createdAt"), cutoffTime)
-        )
-      )
-      .collect();
-
-    // Cleanup each abandoned payment and its related records
-    for (const payment of abandonedPayments) {
-      try {
-        // Find related purchase trip
-        const purchaseTrip = await ctx.db
-          .query("purchaseTrip")
-          .filter((q) => q.eq(q.field("_id"), payment.purchaseTripId))
-          .first();
-
-        if (purchaseTrip) {
-          // Set trip as not booked (available again)
-          await ctx.runMutation(api.trip.setTripCancelled, {
-            tripId: purchaseTrip.tripId,
-          });
-
-          // Delete purchase trip
-          await ctx.db.delete(purchaseTrip._id);
-        }
-
-        // Delete payment
-        await ctx.db.delete(payment._id);
-        cleanupCount++;
-
-        const paymentCreatedSAST = formatDateTimeInSAST(payment.createdAt);
-        console.log(
-          `🧹 Cleaned up abandoned payment created at ${paymentCreatedSAST.fullDateTime} (SAST)`
-        );
-      } catch (error) {
-        console.error("Failed to cleanup abandoned booking:", error);
-      }
-    }
-
-    console.log(
-      `🧹 Cleaned up ${cleanupCount} abandoned bookings at ${currentSAST.fullDateTime} (SAST)`
-    );
-    return cleanupCount;
-  },
-});
-
 export const expiredUnconfirmedTrips = internalMutation({
   handler: async (ctx) => {
-    const currentDate = new Date().getTime();
+    const currentDate = Date.now();
     const currentSAST = formatDateTimeInSAST(currentDate);
 
     console.log(
       `⏰ Checking for expired unconfirmed trips at ${currentSAST.fullDateTime} (SAST)`
     );
 
-    // Find purchase Trips that are awaiting confirmation
+    // Find purchaseTrips that are awaiting confirmation
     const purchaseTrips = await ctx.db
       .query("purchaseTrip")
       .filter((q) => q.eq(q.field("status"), "Awaiting Confirmation"))
       .collect();
 
-    // Extract trip IDs from purchase trips
-    const tripIds = purchaseTrips.map((trip) => trip.tripId as Id<"trip">);
-
-    if (tripIds.length === 0) {
+    if (purchaseTrips.length === 0) {
       console.log(
         `⏰ No unconfirmed trips found at ${currentSAST.fullDateTime} (SAST)`
       );
       return 0;
     }
 
+    // Safety: limit work per run to avoid long-running cron jobs
+    const BATCH_LIMIT = 100;
+    const toProcess = purchaseTrips.slice(0, BATCH_LIMIT);
+
     let updatedCount = 0;
-    for (const tripId of tripIds) {
-      const trip = await ctx.db.get(tripId);
-      if (trip && trip.departureDate < currentDate && !trip.isExpired) {
+    for (const purchaseTrip of toProcess) {
+      try {
+        // Defensive: ensure IDs exist
+        if (!purchaseTrip || !purchaseTrip.tripId) {
+          console.warn("Skipping invalid purchaseTrip entry", purchaseTrip);
+          continue;
+        }
+
+        // Load the trip and verify it has passed and is not already expired
+        const trip = await ctx.db.get(purchaseTrip.tripId as Id<"trip">);
+        if (!trip) {
+          console.warn(
+            `Trip ${purchaseTrip.tripId} not found for purchaseTrip ${purchaseTrip._id}`
+          );
+          continue;
+        }
+        if (!(trip.departureDate < currentDate) || trip.isExpired) {
+          // Not expired yet or already handled
+          continue;
+        }
+
+        const tripDeparture = formatDateTimeInSAST(trip.departureDate);
+
+        // Find the payment specifically for this purchaseTrip + trip
+        const payment = await ctx.db
+          .query("payments")
+          .filter((q) =>
+            q.and(
+              q.eq(q.field("tripId"), trip._id),
+              q.eq(q.field("purchaseTripId"), purchaseTrip._id)
+            )
+          )
+          .first();
+
+        // Safety checks before deleting financial records:
+        // - If a payment exists and is in a terminal charged/refunded state, skip destructive cleanup and log
+        const terminalPayment =
+          payment &&
+          ["charged", "refunded", "forfeited"].includes(payment.status);
+        if (payment && terminalPayment) {
+          console.warn(
+            `Skipping cleanup for purchaseTrip ${purchaseTrip._id} because payment ${payment._id} is in terminal state (${payment.status}). Manual review required.`
+          );
+          continue;
+        }
+
+        // Delete payment (only if safe: not charged/refunded)
+        if (payment) {
+          try {
+            await ctx.db.delete(payment._id);
+            console.log(
+              `🧹 Deleted payment ${payment._id} for expired unconfirmed trip (created at ${formatDateTimeInSAST(payment.createdAt).fullDateTime})`
+            );
+          } catch (err) {
+            console.error(`Failed to delete payment ${payment._id}:`, err);
+            // Continue to next item - avoid half-steps
+            continue;
+          }
+        }
+
+        // Delete the purchaseTrip (safe: payment removed or absent)
         try {
-          const tripDeparture = formatDateTimeInSAST(trip.departureDate);
+          await ctx.db.delete(purchaseTrip._id);
+        } catch (err) {
+          console.error(
+            `Failed to delete purchaseTrip ${purchaseTrip._id}:`,
+            err
+          );
+          // If we couldn't delete the purchaseTrip, do not mark the trip expired to avoid inconsistent state
+          continue;
+        }
 
-          const payment = await ctx.db
-            .query("payments")
-            .filter((q) => q.eq(q.field("tripId"), tripId))
-            .first();
-
-          if (payment && payment.paystackReference) {
-            // Schedule the refund processing action to run immediately
-            //await ctx.scheduler.runAfter(0, api.payments.processRefund, {
-            //  paystackReference: payment.paystackReference,
-            //paymentId: payment._id,
-            //userId: payment.userId,
-            //tripId: tripId,
-            //});
-          }
-
-          // Delete the purchase trip
-          const purchaseTrip = purchaseTrips.find((pt) => pt.tripId === tripId);
-          if (purchaseTrip) {
-            await ctx.db.delete(purchaseTrip._id);
-          }
-
-          // Update the trip to mark it as expired
+        // Mark the trip as expired / not booked
+        try {
           await ctx.db.patch(trip._id, { isExpired: true, isBooked: false });
           updatedCount++;
           console.log(
             `⏰ Marked unconfirmed trip ${trip._id} as expired (was scheduled for ${tripDeparture.fullDateTime} SAST)`
           );
-        } catch (error) {
-          console.error(`❌ Failed to process expired trip ${tripId}:`, error);
+        } catch (err) {
+          console.error(`Failed to patch trip ${trip._id} after cleanup:`, err);
         }
+      } catch (error) {
+        console.error(
+          `❌ Failed to process expired purchaseTrip ${purchaseTrip._id}:`,
+          error
+        );
       }
     }
 
-    console.log(
-      `⏰ Processed ${updatedCount} expired unconfirmed trips at ${currentSAST.fullDateTime} (SAST)`
-    );
+    if (purchaseTrips.length > BATCH_LIMIT) {
+      console.log(
+        `⏰ Processed ${toProcess.length} expired unconfirmed trips (batch limit ${BATCH_LIMIT}). More remain and will be processed in subsequent runs.`
+      );
+    } else {
+      console.log(
+        `⏰ Processed ${updatedCount} expired unconfirmed trips at ${currentSAST.fullDateTime} (SAST)`
+      );
+    }
+
     return updatedCount;
   },
 });

@@ -42,7 +42,10 @@ export async function POST(req: NextRequest) {
         await handleChargeSuccess(event.data);
         break;
       case "charge.failed":
-        console.log("Payment failed, cleaning up:", event.data.reference);
+        console.log(
+          "Payment failed, cleaning for retry:",
+          event.data.reference
+        );
         await handleChargeFailed(event.data);
         break;
       default:
@@ -119,66 +122,5 @@ async function handleChargeSuccess(data: any) {
 }
 
 async function handleChargeFailed(data: any) {
-  try {
-    const reference: string = data.reference;
-    const metadata = data.metadata ?? {};
-    const paymentId = metadata.paymentId ?? null;
-
-    if (paymentId) {
-      await convex.mutation(api.payments.updatePaymentStatus, {
-        paymentId,
-        status: "failed",
-      });
-      // attempt cleanup of booking tied to this payment
-      await cleanupFailedBooking(reference, "payment_failed");
-      return;
-    }
-
-    // fallback attempt to find payment by init reference
-    try {
-      const found = await convex.query(api.payments.getPaymentByReference, {
-        paystackReference: reference,
-      });
-      if (Array.isArray(found) && found.length > 0) {
-        const pid = (found[0] as any)._id || (found[0] as any).id;
-        if (pid) {
-          await convex.mutation(api.payments.updatePaymentStatus, {
-            paymentId: pid,
-            status: "failed",
-          });
-          await cleanupFailedBooking(reference, "payment_failed");
-          return;
-        }
-      }
-    } catch (err) {
-      console.warn(
-        "Fallback query by init reference failed or not available:",
-        err
-      );
-    }
-
-    console.warn(
-      "Charge.failed received but no matching payment found for reference:",
-      reference
-    );
-  } catch (error) {
-    console.error("Error handling charge failed:", error);
-  }
-}
-
-async function cleanupFailedBooking(reference: string, reason: string) {
-  try {
-    // Call your existing cleanup endpoint which will find the payment/purchaseTrip by reference
-    const base = process.env.NEXT_PUBLIC_APP_URL || "";
-    await fetch(`${base}/api/booking/cleanup`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        paystackReference: reference,
-        reason,
-      }),
-    });
-  } catch (error) {
-    console.error("Webhook cleanup failed:", error);
-  }
+  console.warn("Charge failed!");
 }

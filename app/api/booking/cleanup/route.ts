@@ -1,4 +1,7 @@
 // app/api/booking/cleanup/route.ts
+// Complete clenup and eletion of payment and purchase trip records
+// Also sets the main trip as not booked (available again)
+
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { getCurrentSASTTime } from "@/utils/dateUtils";
@@ -15,15 +18,15 @@ export async function POST(request: NextRequest) {
     let payment = null;
     let purchaseTrip = null;
 
-    // 1. Find payment by reference if provided
-    if (paystackReference) {
+    // 1. Find payment by id if provided
+    if (paymentId) {
       try {
-        payment = await convex.query(api.payments.getPaymentByReference, {
-          paystackReference,
+        payment = await convex.query(api.payments.getPaymentById, {
+          paymentId: paymentId as Id<"payments">,
         });
         console.log("📄 Found payment:", payment?._id);
       } catch (error) {
-        console.warn("⚠️ Payment not found by reference:", paystackReference);
+        console.warn("⚠️ Payment not found by id:", paymentId);
       }
     }
 
@@ -103,7 +106,7 @@ export async function POST(request: NextRequest) {
       details: {
         paymentCleaned: !!payment,
         purchaseTripCleaned: !!purchaseTrip,
-        paystackReference,
+        paymentId: payment?._id || paymentId,
         purchaseTripId,
       },
     };
