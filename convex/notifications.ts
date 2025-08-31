@@ -99,21 +99,36 @@ export const checkTransporterAccountSetup = mutation({
     }
 
     // Check documents
+    const companyReg = await ctx.runQuery(api.files.getFilesByCategory, {
+      userId,
+      category: "companyReg",
+    });
+    const directorId = await ctx.runQuery(api.files.getFilesByCategory, {
+      userId,
+      category: "directorId",
+    });
     const terms = await ctx.runQuery(api.files.getFilesByCategory, {
       userId,
-      category: "terms",
+      category: "transporterTerms",
     });
     const insurance = await ctx.runQuery(api.files.getFilesByCategory, {
       userId,
       category: "insurance",
     });
-    const companyReg = await ctx.runQuery(api.files.getFilesByCategory, {
-      userId,
-      category: "companyReg",
-    });
     const roadworthy = await ctx.runQuery(api.files.getFilesByCategory, {
       userId,
       category: "roadworthy",
+    });
+    const professionalLicense = await ctx.runQuery(
+      api.files.getFilesByCategory,
+      {
+        userId,
+        category: "professionalLicense",
+      }
+    );
+    const operatingLicense = await ctx.runQuery(api.files.getFilesByCategory, {
+      userId,
+      category: "operatingLicense",
     });
 
     if (
@@ -121,6 +136,9 @@ export const checkTransporterAccountSetup = mutation({
         terms?.length > 0 &&
         insurance?.length > 0 &&
         companyReg?.length > 0 &&
+        directorId?.length > 0 &&
+        professionalLicense?.length > 0 &&
+        operatingLicense?.length > 0 &&
         roadworthy?.length > 0
       )
     ) {
@@ -162,9 +180,9 @@ export const checkClientAccountSetup = mutation({
   args: { userId: v.id("users") },
   handler: async (ctx, { userId }) => {
     // Check documents
-    const terms = await ctx.runQuery(api.files.getFilesByCategory, {
+    const directorId = await ctx.runQuery(api.files.getFilesByCategory, {
       userId,
-      category: "terms",
+      category: "directorId",
     });
 
     const companyReg = await ctx.runQuery(api.files.getFilesByCategory, {
@@ -172,7 +190,7 @@ export const checkClientAccountSetup = mutation({
       category: "companyReg",
     });
 
-    if (!(terms?.length > 0 && companyReg?.length > 0)) {
+    if (!(directorId?.length > 0 && companyReg?.length > 0)) {
       // Check if document notification already exists and is unread
       const existingDocNotif = await ctx.db
         .query("notifications")
