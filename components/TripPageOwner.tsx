@@ -37,7 +37,12 @@ import {
   Phone,
   Mail,
 } from "lucide-react";
-import { formatDateTimeInSAST, formatDateInSAST } from "@/utils/dateUtils";
+import {
+  formatDateInSAST,
+  formatTimeInSAST,
+  formatDateTimeInSAST,
+  formatFullDateTimeInSAST,
+} from "@/utils/dateUtils";
 import { useUser } from "@clerk/nextjs";
 
 interface TripPageClientProps {
@@ -80,32 +85,6 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
     purchaseTrip?.userId ? { userId: purchaseTrip.userId } : "skip"
   );
 
-  // Updated to use SAST formatting utility
-  const formatDateTime = (dateInput: string | number) => {
-    if (!dateInput) return null;
-    return formatDateTimeInSAST(Number(dateInput));
-  };
-
-  const departureDateTime = trip?.departureDate
-    ? formatDateTime(trip.departureDate)
-    : null;
-  const arrivalDateTime = trip?.arrivalDate
-    ? formatDateTime(trip.arrivalDate)
-    : null;
-
-  // Google Maps API Section
-  const getCityCoordinates = async (cityName: string) => {
-    try {
-      const results = await getGeocode({
-        address: `${cityName}, South Africa`,
-      });
-      return getLatLng(results[0]);
-    } catch (error) {
-      console.error("Error getting coordinates for city:", error);
-      return { lat: -26.2041, lng: 28.0473 }; // Fallback to Johannesburg
-    }
-  };
-
   const [pickupCoords, setPickupCoords] = useState({
     lat: -26.2041,
     lng: 28.0473,
@@ -114,6 +93,21 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
     lat: -26.2041,
     lng: 28.0473,
   });
+
+  // Function to get city coordinates using Google Places API
+  const getCityCoordinates = async (cityName: string) => {
+    try {
+      const results = await getGeocode({
+        address: `${cityName}, South Africa`,
+      });
+      const { lat, lng } = await getLatLng(results[0]);
+      return { lat, lng };
+    } catch (error) {
+      console.error("Error getting city coordinates:", error);
+      // Return default coordinates (Johannesburg) if geocoding fails
+      return { lat: -26.2041, lng: 28.0473 };
+    }
+  };
 
   useEffect(() => {
     if (trip?.originCity) {
@@ -212,15 +206,15 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
                 <h3 className="text-lg font-bold text-base-content mb-2">
                   {trip?.originCity}
                 </h3>
-                {departureDateTime ? (
+                {trip?.departureDate ? (
                   <div className="space-y-1">
                     <div className="flex items-center gap-1 justify-center md:justify-start text-sm text-base-content/70">
                       <Calendar className="w-3 h-3" />
-                      <span>{departureDateTime.date}</span>
+                      <span>{formatDateInSAST(trip.departureDate)}</span>
                     </div>
                     <div className="flex items-center gap-1 justify-center md:justify-start text-sm font-medium text-primary">
                       <Clock className="w-3 h-3" />
-                      <span>{departureDateTime.time} SAST</span>
+                      <span>{formatTimeInSAST(trip.departureDate)} SAST</span>
                     </div>
                   </div>
                 ) : (
@@ -248,15 +242,15 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
                 <h3 className="text-lg font-bold text-base-content mb-2">
                   {trip?.destinationCity}
                 </h3>
-                {arrivalDateTime ? (
+                {trip?.arrivalDate ? (
                   <div className="space-y-1">
                     <div className="flex items-center gap-1 justify-center md:justify-end text-sm text-base-content/70">
                       <Calendar className="w-3 h-3" />
-                      <span>{arrivalDateTime.date}</span>
+                      <span>{formatDateInSAST(trip.arrivalDate)}</span>
                     </div>
                     <div className="flex items-center gap-1 justify-center md:justify-end text-sm font-medium text-success">
                       <Clock className="w-3 h-3" />
-                      <span>{arrivalDateTime.time} SAST</span>
+                      <span>{formatTimeInSAST(trip.arrivalDate)} SAST</span>
                     </div>
                   </div>
                 ) : (

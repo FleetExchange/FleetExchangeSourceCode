@@ -18,7 +18,11 @@ import {
   Clock,
 } from "lucide-react";
 import Link from "next/link";
-import { formatDateTimeInSAST, formatDateInSAST } from "@/utils/dateUtils";
+import {
+  formatDateTimeInSAST,
+  formatDateInSAST,
+  formatTimeInSAST,
+} from "@/utils/dateUtils";
 
 const MyTripsCardList = () => {
   // Get the logged in user identity
@@ -230,14 +234,6 @@ const MyTripsCardList = () => {
             );
             const truck = userTrucks?.find((t) => t._id === trip.truckId);
 
-            // Format dates in SAST
-            const departureSAST = trip.departureDate
-              ? formatDateTimeInSAST(trip.departureDate)
-              : null;
-            const arrivalSAST = trip.arrivalDate
-              ? formatDateTimeInSAST(trip.arrivalDate)
-              : null;
-
             return (
               <div
                 key={trip._id}
@@ -280,10 +276,14 @@ const MyTripsCardList = () => {
                       </div>
                       <div className="text-right">
                         <p className="text-xs font-medium">
-                          {departureSAST ? departureSAST.date : "N/A"}
+                          {trip.departureDate
+                            ? formatDateInSAST(trip.departureDate)
+                            : "N/A"}
                         </p>
                         <p className="text-xs text-base-content/60">
-                          {departureSAST ? departureSAST.time : ""}
+                          {trip.departureDate
+                            ? formatTimeInSAST(trip.departureDate)
+                            : ""}
                         </p>
                       </div>
                     </div>
@@ -298,10 +298,14 @@ const MyTripsCardList = () => {
                       </div>
                       <div className="text-right">
                         <p className="text-xs font-medium">
-                          {arrivalSAST ? arrivalSAST.date : "N/A"}
+                          {trip.arrivalDate
+                            ? formatDateInSAST(trip.arrivalDate)
+                            : "N/A"}
                         </p>
                         <p className="text-xs text-base-content/60">
-                          {arrivalSAST ? arrivalSAST.time : ""}
+                          {trip.arrivalDate
+                            ? formatTimeInSAST(trip.arrivalDate)
+                            : ""}
                         </p>
                       </div>
                     </div>

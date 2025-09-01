@@ -4,6 +4,7 @@ import { usePlacesWithRestrictions } from "@/hooks/usePlacesWithRestrictions";
 import { useState } from "react";
 import { Search, MapPin, Calendar } from "lucide-react";
 import { AddressAutocomplete } from "./AddressAutocomplete";
+import { getCurrentSASTInputMin } from "@/utils/dateUtils";
 
 export default function SearchBar({
   onSearch,
@@ -27,8 +28,8 @@ export default function SearchBar({
 
   // Get current date in SAST timezone for min date
   const getCurrentSASTDate = () => {
-    const today = new Date();
-    return today.toISOString().split("T")[0]; // Returns YYYY-MM-DD format
+    const today = getCurrentSASTInputMin();
+    return today.split("T")[0]; // Returns YYYY-MM-DD format
   };
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

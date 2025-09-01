@@ -17,7 +17,11 @@ import {
   DollarSign,
   Receipt,
 } from "lucide-react";
-import { formatDateTimeInSAST, formatDateInSAST } from "@/utils/dateUtils";
+import {
+  formatDateTimeInSAST,
+  formatDateInSAST,
+  formatTimeInSAST,
+} from "@/utils/dateUtils";
 
 type SortOption = "Price Asc" | "Price Desc" | "Date Asc" | "Date Desc";
 
@@ -240,14 +244,6 @@ const MyUnbookedTripsTable = () => {
                 currentItems.map((trip, index) => {
                   const truck = trucks?.find((t) => t._id === trip.truckId);
 
-                  // Format dates in SAST
-                  const departureSAST = trip.departureDate
-                    ? formatDateTimeInSAST(trip.departureDate)
-                    : null;
-                  const arrivalSAST = trip.arrivalDate
-                    ? formatDateTimeInSAST(trip.arrivalDate)
-                    : null;
-
                   return (
                     <tr key={trip._id} className="hover:bg-base-200/50">
                       <td className="font-medium text-base-content/60">
@@ -268,16 +264,16 @@ const MyUnbookedTripsTable = () => {
                           <div className="text-sm">
                             <span className="text-base-content/60">Dep:</span>{" "}
                             <span className="font-medium">
-                              {departureSAST
-                                ? `${departureSAST.date} at ${departureSAST.time}`
+                              {trip.departureDate
+                                ? `${formatDateInSAST(trip.departureDate)} at ${formatTimeInSAST(trip.departureDate)}`
                                 : "N/A"}
                             </span>
                           </div>
                           <div className="text-sm">
                             <span className="text-base-content/60">Arr:</span>{" "}
                             <span className="font-medium">
-                              {arrivalSAST
-                                ? `${arrivalSAST.date} at ${arrivalSAST.time}`
+                              {trip.arrivalDate
+                                ? `${formatDateInSAST(trip.arrivalDate)} at ${formatTimeInSAST(trip.arrivalDate)}`
                                 : "N/A"}
                             </span>
                           </div>

@@ -30,11 +30,6 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({
   const markAsRead = useMutation(api.notifications.markAsRead);
   const [tab, setTab] = useState<"unread" | "all">("unread");
 
-  // Updated to use the existing utility
-  const formatNotificationDate = (timestamp: number) => {
-    return formatRelativeTimeInSAST(timestamp);
-  };
-
   // Type configurations matching your schema
   const typeConfig = {
     trip: {
@@ -233,7 +228,7 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({
                         {/* Simplified Timestamp using existing utility */}
                         <div className="flex items-center gap-2">
                           <p className="text-xs text-base-content/60">
-                            {formatNotificationDate(n.createdAt)}
+                            {formatRelativeTimeInSAST(n.createdAt)}
                           </p>
                           <div className="w-1 h-1 bg-base-content/30 rounded-full"></div>
                           <p className="text-xs text-base-content/50">SAST</p>

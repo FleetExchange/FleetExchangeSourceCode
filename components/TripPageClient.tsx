@@ -35,7 +35,11 @@ import {
   ArrowRight,
   ArrowLeft,
 } from "lucide-react";
-import { formatDateTimeInSAST, formatDateInSAST } from "@/utils/dateUtils";
+import {
+  formatDateTimeInSAST,
+  formatDateInSAST,
+  formatTimeInSAST,
+} from "@/utils/dateUtils";
 
 type DirectionsResult = google.maps.DirectionsResult;
 
@@ -110,13 +114,6 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
     if (!dateInput) return null;
     return formatDateTimeInSAST(Number(dateInput));
   };
-
-  const departureDateTime = trip?.departureDate
-    ? formatDateTime(trip.departureDate)
-    : null;
-  const arrivalDateTime = trip?.arrivalDate
-    ? formatDateTime(trip.arrivalDate)
-    : null;
 
   // Google Maps helper functions
   const getCityCoordinates = async (cityName: string) => {
@@ -324,15 +321,15 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
                 <h3 className="text-lg font-bold text-base-content mb-2">
                   {trip?.originCity}
                 </h3>
-                {departureDateTime ? (
+                {trip?.departureDate ? (
                   <div className="space-y-1">
                     <div className="flex items-center gap-1 justify-center md:justify-start text-sm text-base-content/70">
                       <Calendar className="w-3 h-3" />
-                      <span>{departureDateTime.date}</span>
+                      <span>{formatDateInSAST(trip.departureDate)}</span>
                     </div>
                     <div className="flex items-center gap-1 justify-center md:justify-start text-sm font-medium text-primary">
                       <Clock className="w-3 h-3" />
-                      <span>{departureDateTime.time} SAST</span>
+                      <span>{formatTimeInSAST(trip.departureDate)} SAST</span>
                     </div>
                   </div>
                 ) : (
@@ -360,15 +357,15 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
                 <h3 className="text-lg font-bold text-base-content mb-2">
                   {trip?.destinationCity}
                 </h3>
-                {arrivalDateTime ? (
+                {trip?.arrivalDate ? (
                   <div className="space-y-1">
                     <div className="flex items-center gap-1 justify-center md:justify-end text-sm text-base-content/70">
                       <Calendar className="w-3 h-3" />
-                      <span>{arrivalDateTime.date}</span>
+                      <span>{formatDateInSAST(trip.arrivalDate)}</span>
                     </div>
                     <div className="flex items-center gap-1 justify-center md:justify-end text-sm font-medium text-success">
                       <Clock className="w-3 h-3" />
-                      <span>{arrivalDateTime.time} SAST</span>
+                      <span>{formatTimeInSAST(trip.arrivalDate)} SAST</span>
                     </div>
                   </div>
                 ) : (
