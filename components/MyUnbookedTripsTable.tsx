@@ -33,18 +33,6 @@ const MyUnbookedTripsTable = () => {
   >("All Trips");
   const [sortBy, setSortBy] = useState<SortOption>("Date Asc");
 
-  // Updated to use SAST formatting
-  const formatDate = (timestamp?: number) => {
-    if (!timestamp) return "N/A";
-    return formatDateInSAST(timestamp);
-  };
-
-  const formatDateTime = (timestamp?: number) => {
-    if (!timestamp) return "N/A";
-    const formatted = formatDateTimeInSAST(timestamp);
-    return formatted.fullDateTime;
-  };
-
   // Get the logged in user identity
   const { user } = useUser();
 

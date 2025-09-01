@@ -31,6 +31,8 @@ import {
   getCurrentSASTInputMin,
   isValidDepartureDate,
   isValidArrivalDate,
+  debugTimestamp,
+  testConversion,
 } from "@/utils/dateUtils";
 
 const CreateTripPage = () => {
@@ -61,6 +63,13 @@ const CreateTripPage = () => {
   );
   const [selectedTruckId, setSelectedTruckId] = useState<Id<"truck"> | null>(
     null
+  );
+
+  // Check if a payout account exsists
+
+  const payoutAccount = useQuery(
+    api.payoutAccount.getByUser,
+    userId ? { userId } : "skip"
   );
 
   // Add availability state
@@ -168,11 +177,11 @@ const CreateTripPage = () => {
       return;
     }
 
-    try {
-      const utcTimestamp = convertSASTInputToUTC(userInput);
+    const utcTimestamp = convertSASTInputToUTC(userInput);
+    if (utcTimestamp > 0) {
       setDepartureDate(utcTimestamp);
-    } catch (error) {
-      console.error("Error parsing departure date:", error);
+    } else {
+      console.error("Error parsing departure date:", userInput);
       setDepartureDate(0);
     }
   };
@@ -185,11 +194,11 @@ const CreateTripPage = () => {
       return;
     }
 
-    try {
-      const utcTimestamp = convertSASTInputToUTC(userInput);
+    const utcTimestamp = convertSASTInputToUTC(userInput);
+    if (utcTimestamp > 0) {
       setArrivalDate(utcTimestamp);
-    } catch (error) {
-      console.error("Error parsing arrival date:", error);
+    } else {
+      console.error("Error parsing arrival date:", userInput);
       setArrivalDate(0);
     }
   };
@@ -211,6 +220,13 @@ const CreateTripPage = () => {
   };
 
   const handleCreateTrip = async () => {
+    // Require payout account before allowing trip creation
+    if (!payoutAccount) {
+      alert(
+        "You must set up a payout account before creating a trip. Please add a payout account in Settings > Payouts."
+      );
+      return;
+    }
     if (!userId || !selectedFleetId || !selectedTruckId) {
       alert("Please select a fleet and truck");
       return;
@@ -247,8 +263,8 @@ const CreateTripPage = () => {
         truckId: selectedTruckId,
         originCity,
         destinationCity,
-        departureDate: departureDate.toString(), // Convert number to string for Convex
-        arrivalDate: arrivalDate.toString(), // Convert number to string for Convex
+        departureDate: departureDate.toString(),
+        arrivalDate: arrivalDate.toString(),
         basePrice,
         KMPrice,
         KGPrice,
@@ -320,16 +336,8 @@ const CreateTripPage = () => {
                   </div>
                   <div className="text-xs">
                     {/* Format conflicting trip times in SAST */}
-                    {
-                      formatDateTimeInSAST(parseInt(trip.departureDate))
-                        .fullDateTime
-                    }{" "}
-                    -{" "}
-                    {
-                      formatDateTimeInSAST(parseInt(trip.arrivalDate))
-                        .fullDateTime
-                    }{" "}
-                    (SAST)
+                    {formatDateTimeInSAST(trip.departureDate)} -{" "}
+                    {formatDateTimeInSAST(trip.arrivalDate)} (SAST)
                   </div>
                   <div className="text-xs">
                     Status: {trip.isBooked ? "Booked" : "Available for booking"}
@@ -785,16 +793,12 @@ const CreateTripPage = () => {
                       <div className="space-y-1 text-xs text-base-content/70">
                         {departureDate > 0 && (
                           <p>
-                            Depart:{" "}
-                            {formatDateTimeInSAST(departureDate).fullDateTime}{" "}
-                            (SAST)
+                            Depart: {formatDateTimeInSAST(departureDate)} (SAST)
                           </p>
                         )}
                         {arrivalDate > 0 && (
                           <p>
-                            Arrive:{" "}
-                            {formatDateTimeInSAST(arrivalDate).fullDateTime}{" "}
-                            (SAST)
+                            Arrive: {formatDateTimeInSAST(arrivalDate)} (SAST)
                           </p>
                         )}
                       </div>
