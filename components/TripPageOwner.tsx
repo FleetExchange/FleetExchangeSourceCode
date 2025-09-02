@@ -59,6 +59,9 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
     clerkId: user?.id ?? "skip",
   })?._id;
 
+  if (!userId) {
+    return;
+  }
   // Use States
   const [pickupAddress, setPickupAddress] = useState("");
   const [deliveryAddress, setDeliveryAddress] = useState("");
@@ -758,66 +761,8 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
 
                 {/* Action Buttons */}
                 <div className="space-y-4">
-                  {trip?.isBooked === true && purchaseTrip && userId ? (
-                    <>
-                      {purchaseTrip.status === "Delivered" ? (
-                        <div className="space-y-4">
-                          <div className="bg-success/10 border border-success/20 rounded-lg p-4 text-center">
-                            <div className="flex items-center justify-center gap-2 text-success font-semibold">
-                              <Star className="w-5 h-5 fill-success" />
-                              <span>Trip Delivered</span>
-                            </div>
-                          </div>
-
-                          <TripRatingComponent
-                            purchaseTripId={purchaseTrip._id}
-                            readOnly={true}
-                          />
-
-                          <div className="bg-info/10 border border-info/20 rounded-lg p-4">
-                            <p className="text-sm text-base-content/70 text-center">
-                              For any queries, refunds, or assistance:
-                            </p>
-                            <div className="flex flex-col gap-2 mt-2">
-                              <a
-                                href="tel:+27000000000"
-                                className="btn btn-outline btn-sm gap-2"
-                              >
-                                <Phone className="w-4 h-4" />
-                                0800 123 456
-                              </a>
-                              <a
-                                href="mailto:support@freightconnect.com"
-                                className="btn btn-outline btn-sm gap-2"
-                              >
-                                <Mail className="w-4 h-4" />
-                                Support Email
-                              </a>
-                            </div>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="space-y-3">
-                          <StatusAdvanceButton
-                            currentStatus={purchaseTrip.status as TripStatus}
-                            purchaseTripId={purchaseTrip._id}
-                          />
-                          {purchaseTrip.status === "Awaiting Confirmation"} (
-                          <TripRejectButton
-                            purchaseTripId={purchaseTrip._id}
-                            tripId={trip._id}
-                            currentStatus={purchaseTrip.status}
-                          />
-                          )
-                        </div>
-                      )}
-                      <TripCancelButton
-                        userId={userId}
-                        tripId={trip._id}
-                        currentStatus={purchaseTrip.status}
-                      />
-                    </>
-                  ) : (
+                  {!trip?.isBooked ? (
+                    // Trip not booked - show delete button
                     <button
                       onClick={handleDeleteTrip}
                       className="btn btn-error btn-wide gap-2"
@@ -825,6 +770,102 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
                       <Trash2 className="w-4 h-4" />
                       Delete Trip
                     </button>
+                  ) : !purchaseTrip ? (
+                    // Trip marked as booked but no purchaseTrip found (edge case)
+                    <div className="bg-warning/10 border border-warning/20 rounded-lg p-4 text-center">
+                      <p className="text-sm text-base-content/70">
+                        Trip booking data not found
+                      </p>
+                    </div>
+                  ) : purchaseTrip.status === "Delivered" ? (
+                    // Delivered - show rating and support info
+                    <div className="space-y-4">
+                      <div className="bg-success/10 border border-success/20 rounded-lg p-4 text-center">
+                        <div className="flex items-center justify-center gap-2 text-success font-semibold">
+                          <Star className="w-5 h-5 fill-success" />
+                          <span>Trip Delivered</span>
+                        </div>
+                      </div>
+
+                      <TripRatingComponent
+                        purchaseTripId={purchaseTrip._id}
+                        readOnly={true}
+                      />
+
+                      <div className="bg-info/10 border border-info/20 rounded-lg p-4">
+                        <p className="text-sm text-base-content/70 text-center">
+                          For any queries, refunds, or assistance:
+                        </p>
+                        <div className="flex flex-col gap-2 mt-2">
+                          <a
+                            href="tel:+27000000000"
+                            className="btn btn-outline btn-sm gap-2"
+                          >
+                            <Phone className="w-4 h-4" />
+                            0800 123 456
+                          </a>
+                          <a
+                            href="mailto:support@freightconnect.com"
+                            className="btn btn-outline btn-sm gap-2"
+                          >
+                            <Mail className="w-4 h-4" />
+                            Support Email
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  ) : purchaseTrip.status === "Awaiting Confirmation" ? (
+                    // Awaiting Confirmation - show accept/reject buttons
+                    <div className="space-y-3">
+                      <StatusAdvanceButton
+                        currentStatus={purchaseTrip.status as TripStatus}
+                        purchaseTripId={purchaseTrip._id}
+                      />
+                      <TripRejectButton
+                        purchaseTripId={purchaseTrip._id}
+                        tripId={trip._id}
+                        currentStatus={purchaseTrip.status}
+                      />
+                    </div>
+                  ) : purchaseTrip.status === "Booked" ? (
+                    // Booked - show cancel and status advance
+                    <div className="space-y-3">
+                      <StatusAdvanceButton
+                        currentStatus={purchaseTrip.status as TripStatus}
+                        purchaseTripId={purchaseTrip._id}
+                      />
+                      <TripCancelButton
+                        userId={userId}
+                        tripId={trip._id}
+                        currentStatus={purchaseTrip.status}
+                      />
+                    </div>
+                  ) : purchaseTrip.status === "Dispatched" ? (
+                    // Dispatched - only status advance (no cancel)
+                    <div className="space-y-3">
+                      <StatusAdvanceButton
+                        currentStatus={purchaseTrip.status as TripStatus}
+                        purchaseTripId={purchaseTrip._id}
+                      />
+                      <div className="bg-warning/10 border border-warning/20 rounded-lg p-4 text-center">
+                        <p className="text-sm text-base-content/70">
+                          Trip is in transit - cannot be cancelled
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    // Other statuses - show status and basic actions
+                    <>
+                      <StatusAdvanceButton
+                        currentStatus={purchaseTrip.status as TripStatus}
+                        purchaseTripId={purchaseTrip._id}
+                      />
+                      <TripCancelButton
+                        userId={userId}
+                        tripId={trip._id}
+                        currentStatus={purchaseTrip.status}
+                      />
+                    </>
                   )}
                 </div>
               </div>

@@ -189,16 +189,14 @@ const MyBookedTripsTable = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
           {/* Search Bar */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-base-content/60" />
-            <input
-              type="search"
-              placeholder="Search cities..."
-              className="input input-bordered w-full pl-10 focus:outline-none focus:border-primary"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
+
+          <input
+            type="search"
+            placeholder="Search cities..."
+            className="input input-bordered w-full pl-10 focus:outline-none focus:border-primary"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
 
           {/* Status Selection */}
           <select

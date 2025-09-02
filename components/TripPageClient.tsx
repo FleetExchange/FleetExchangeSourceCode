@@ -265,6 +265,86 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
     }
   }, [trip, purchaseTripDetails]);
 
+  // Extract action button logic into a helper function
+  const renderActionButton = () => {
+    // Loading state
+    if (!trip || !userId) {
+      return (
+        <div className="flex justify-center py-4">
+          <div className="loading loading-spinner loading-lg"></div>
+        </div>
+      );
+    }
+
+    // Trip owner
+    if (userId === trip.userId) {
+      return (
+        <div className="bg-info/10 border border-info/20 rounded-lg p-4 text-center">
+          <p className="text-sm text-base-content/70">
+            You are the trip issuer
+          </p>
+        </div>
+      );
+    }
+
+    // Trip is booked by current user
+    if (booked && purchaseTripDetails) {
+      // Delivered - show rating
+      if (purchaseTripDetails.status === "Delivered") {
+        return <TripRatingComponent purchaseTripId={purchaseTripDetails._id} />;
+      }
+
+      // Dispatched - cannot cancel
+      if (purchaseTripDetails.status === "Dispatched") {
+        return (
+          <div className="bg-warning/10 border border-warning/20 rounded-lg p-4 text-center">
+            <p className="text-sm text-base-content/70">
+              Trip is in transit - cannot be cancelled
+            </p>
+          </div>
+        );
+      }
+
+      // Can cancel (Awaiting Confirmation, Booked)
+      if (
+        ["Awaiting Confirmation", "Booked"].includes(purchaseTripDetails.status)
+      ) {
+        return (
+          <TripCancelButton
+            userId={userId}
+            tripId={trip._id}
+            currentStatus={purchaseTripDetails.status}
+          />
+        );
+      }
+
+      // Other statuses
+      return (
+        <div className="bg-base-200/50 border border-base-300 rounded-lg p-4 text-center">
+          <p className="text-sm text-base-content/70">
+            Status: {purchaseTripDetails.status}
+          </p>
+        </div>
+      );
+    }
+
+    // Available for booking
+    return (
+      <BookTripButton
+        trip={{
+          tripId: trip?._id as Id<"trip">,
+          price: tripPriceWithoutFees,
+          transporterId: trip?.userId,
+        }}
+        user={{
+          _id: userId,
+          email: user?.emailAddresses[0]?.emailAddress,
+        }}
+        onBookTrip={handleBookTrip}
+      />
+    );
+  };
+
   return (
     <div className="min-h-screen bg-base-200">
       <div className="p-4 lg:p-6">
@@ -859,44 +939,7 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
                 </div>
 
                 {/* Action Button */}
-                <div className="mt-6">
-                  {!trip || !userId ? (
-                    <div className="flex justify-center py-4">
-                      <div className="loading loading-spinner loading-lg"></div>
-                    </div>
-                  ) : userId === trip.userId ? (
-                    <div className="bg-info/10 border border-info/20 rounded-lg p-4 text-center">
-                      <p className="text-sm text-base-content/70">
-                        You are the trip issuer
-                      </p>
-                    </div>
-                  ) : booked && purchaseTripDetails ? (
-                    purchaseTripDetails.status === "Delivered" ? (
-                      <TripRatingComponent
-                        purchaseTripId={purchaseTripDetails._id}
-                      />
-                    ) : (
-                      <TripCancelButton
-                        userId={userId}
-                        tripId={trip._id}
-                        currentStatus={purchaseTripDetails.status}
-                      />
-                    )
-                  ) : (
-                    <BookTripButton
-                      trip={{
-                        tripId: trip?._id as Id<"trip">,
-                        price: tripPriceWithoutFees,
-                        transporterId: trip?.userId,
-                      }}
-                      user={{
-                        _id: userId,
-                        email: user?.emailAddresses[0]?.emailAddress,
-                      }}
-                      onBookTrip={handleBookTrip}
-                    />
-                  )}
-                </div>
+                <div className="mt-6">{renderActionButton()}</div>
               </div>
             </div>
           </div>
