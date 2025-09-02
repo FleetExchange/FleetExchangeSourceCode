@@ -16,7 +16,11 @@ import {
   MoreHorizontal,
   Package,
 } from "lucide-react";
-import { formatDateTimeInSAST, formatDateInSAST } from "@/utils/dateUtils";
+import {
+  formatDateTimeInSAST,
+  formatDateInSAST,
+  formatTimeInSAST,
+} from "@/utils/dateUtils";
 
 type SortOption = "Price Asc" | "Price Desc" | "Date Asc" | "Date Desc";
 
@@ -40,18 +44,6 @@ const MyBookedTripsTable = () => {
     "All Trips" | "Upcomming Trips" | "Past Trips"
   >("All Trips");
   const [sortBy, setSortBy] = useState<SortOption>("Date Asc");
-
-  // Updated format function to use SAST formatting
-  const formatDate = (timestamp?: number) => {
-    if (!timestamp) return "N/A";
-    return formatDateInSAST(timestamp);
-  };
-
-  const formatDateTime = (timestamp?: number) => {
-    if (!timestamp) return "N/A";
-    const formatted = formatDateTimeInSAST(timestamp);
-    return formatted.fullDateTime;
-  };
 
   // Get the logged in user identity
   const { user } = useUser();
@@ -318,14 +310,6 @@ const MyBookedTripsTable = () => {
                   );
                   const truck = trucks?.find((t) => t._id === booking.truckId);
 
-                  // Format dates in SAST
-                  const departureSAST = booking.departureDate
-                    ? formatDateTimeInSAST(booking.departureDate)
-                    : null;
-                  const arrivalSAST = booking.arrivalDate
-                    ? formatDateTimeInSAST(booking.arrivalDate)
-                    : null;
-
                   return (
                     <tr key={booking._id} className="hover:bg-base-200/50">
                       <td className="font-medium text-base-content/60">
@@ -346,16 +330,16 @@ const MyBookedTripsTable = () => {
                           <div className="text-sm">
                             <span className="text-base-content/60">Dep:</span>{" "}
                             <span className="font-medium">
-                              {departureSAST
-                                ? `${departureSAST.date} at ${departureSAST.time}`
+                              {booking.departureDate
+                                ? `${formatDateInSAST(booking.departureDate)} at ${formatTimeInSAST(booking.departureDate)}`
                                 : "N/A"}
                             </span>
                           </div>
                           <div className="text-sm">
                             <span className="text-base-content/60">Arr:</span>{" "}
                             <span className="font-medium">
-                              {arrivalSAST
-                                ? `${arrivalSAST.date} at ${arrivalSAST.time}`
+                              {booking.arrivalDate
+                                ? `${formatDateInSAST(booking.arrivalDate)} at ${formatTimeInSAST(booking.arrivalDate)}`
                                 : "N/A"}
                             </span>
                           </div>

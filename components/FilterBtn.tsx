@@ -3,7 +3,11 @@
 import { TRUCK_TYPES } from "@/shared/truckTypes";
 import React, { useState } from "react";
 import { Filter, Calendar, Truck, Package, X } from "lucide-react";
-import { parseUserDateToUTC } from "@/utils/dateUtils";
+import {
+  convertSASTInputToUTC,
+  getCurrentSASTInputMin,
+  getEndOfSASTDay,
+} from "@/utils/dateUtils";
 
 const FilterBtn = ({
   onFilter,
@@ -46,13 +50,7 @@ const FilterBtn = ({
 
   // Helper function to get today's date in SAST for min date
   const getTodayInSAST = () => {
-    const now = new Date();
-    const sastDate = new Date(
-      now.toLocaleString("en-US", {
-        timeZone: "Africa/Johannesburg",
-      })
-    );
-    return sastDate.toISOString().split("T")[0];
+    return getCurrentSASTInputMin().split("T")[0]; // Extract just the date part
   };
 
   const applyFilters = (e: React.FormEvent) => {
@@ -65,24 +63,24 @@ const FilterBtn = ({
     if (depDate && depTime) {
       // Combine date and time, then convert SAST to UTC
       const depDateTime = `${depDate}T${depTime}`;
-      const depTimestamp = parseUserDateToUTC(depDateTime);
+      const depTimestamp = convertSASTInputToUTC(depDateTime);
       depDateUTC = depTimestamp.toString();
     } else if (depDate) {
       // Just date, assume start of day (00:00) in SAST
       const depDateTime = `${depDate}T00:00`;
-      const depTimestamp = parseUserDateToUTC(depDateTime);
+      const depTimestamp = convertSASTInputToUTC(depDateTime);
       depDateUTC = depTimestamp.toString();
     }
 
     if (arrDate && arrTime) {
       // Combine date and time, then convert SAST to UTC
       const arrDateTime = `${arrDate}T${arrTime}`;
-      const arrTimestamp = parseUserDateToUTC(arrDateTime);
+      const arrTimestamp = convertSASTInputToUTC(arrDateTime);
       arrDateUTC = arrTimestamp.toString();
     } else if (arrDate) {
-      // Just date, assume end of day (23:59) in SAST
-      const arrDateTime = `${arrDate}T23:59`;
-      const arrTimestamp = parseUserDateToUTC(arrDateTime);
+      // Just date, use end of day utility for precise end-of-day calculation
+      const startOfDay = convertSASTInputToUTC(`${arrDate}T00:00`);
+      const arrTimestamp = getEndOfSASTDay(startOfDay);
       arrDateUTC = arrTimestamp.toString();
     }
 

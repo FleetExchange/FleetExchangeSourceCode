@@ -4,7 +4,7 @@
 
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
-import { getCurrentSASTTime } from "@/utils/dateUtils";
+import { formatDateTimeInSAST, getCurrentUTC } from "@/utils/dateUtils";
 import { ConvexHttpClient } from "convex/browser";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -101,8 +101,8 @@ export async function POST(request: NextRequest) {
       success: true,
       cleaned: cleanupCount,
       reason: reason || "unknown",
-      timestamp: new Date().toISOString(),
-      sastTimeStamp: getCurrentSASTTime(),
+      timestamp: new Date().toISOString(), // Keep UTC ISO for API consistency
+      sastTimestamp: formatDateTimeInSAST(getCurrentUTC()), // SAST display format
       details: {
         paymentCleaned: !!payment,
         purchaseTripCleaned: !!purchaseTrip,
@@ -119,7 +119,8 @@ export async function POST(request: NextRequest) {
       {
         success: false,
         error: "Cleanup failed",
-        timestamp: new Date().toISOString(),
+        timestamp: new Date().toISOString(), // Keep UTC ISO for API consistency
+        sastTimestamp: formatDateTimeInSAST(getCurrentUTC()), // Add SAST for logging
       },
       { status: 500 }
     );

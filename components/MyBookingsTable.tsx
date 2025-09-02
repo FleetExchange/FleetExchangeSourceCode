@@ -15,7 +15,11 @@ import {
   Package,
   DollarSign,
 } from "lucide-react";
-import { formatDateTimeInSAST, formatDateInSAST } from "@/utils/dateUtils";
+import {
+  formatDateTimeInSAST,
+  formatDateInSAST,
+  formatTimeInSAST,
+} from "@/utils/dateUtils";
 
 type SortOption = "Price Asc" | "Price Desc" | "Date Asc" | "Date Desc";
 
@@ -47,18 +51,6 @@ const MyBookingsTable = () => {
     api.trip.getTripByIdArray,
     tripIds.length > 0 ? { tripIds: tripIds } : "skip"
   );
-
-  // Updated format function to use SAST formatting
-  const formatDate = (timestamp?: number) => {
-    if (!timestamp) return "N/A";
-    return formatDateInSAST(timestamp);
-  };
-
-  const formatDateTime = (timestamp?: number) => {
-    if (!timestamp) return "N/A";
-    const formatted = formatDateTimeInSAST(timestamp);
-    return formatted.fullDateTime;
-  };
 
   // define all states for filtering and sorting
   const [searchTerm, setSearchTerm] = useState("");
@@ -308,14 +300,6 @@ const MyBookingsTable = () => {
                 currentItems.map((booking, index) => {
                   const trip = trips?.find((t) => t._id === booking.tripId);
 
-                  // Format dates in SAST
-                  const departureSAST = trip?.departureDate
-                    ? formatDateTimeInSAST(trip.departureDate)
-                    : null;
-                  const arrivalSAST = trip?.arrivalDate
-                    ? formatDateTimeInSAST(trip.arrivalDate)
-                    : null;
-
                   return (
                     <tr key={booking._id} className="hover:bg-base-200/50">
                       <td className="font-medium text-base-content/60">
@@ -336,16 +320,16 @@ const MyBookingsTable = () => {
                           <div className="text-sm">
                             <span className="text-base-content/60">Dep:</span>{" "}
                             <span className="font-medium">
-                              {departureSAST
-                                ? `${departureSAST.date} at ${departureSAST.time}`
+                              {trip?.departureDate
+                                ? `${formatDateInSAST(trip.departureDate)} at ${formatTimeInSAST(trip.departureDate)}`
                                 : "N/A"}
                             </span>
                           </div>
                           <div className="text-sm">
                             <span className="text-base-content/60">Arr:</span>{" "}
                             <span className="font-medium">
-                              {arrivalSAST
-                                ? `${arrivalSAST.date} at ${arrivalSAST.time}`
+                              {trip?.arrivalDate
+                                ? `${formatDateInSAST(trip.arrivalDate)} at ${formatTimeInSAST(trip.arrivalDate)}`
                                 : "N/A"}
                             </span>
                           </div>

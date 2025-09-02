@@ -18,7 +18,11 @@ import {
   Clock,
 } from "lucide-react";
 import Link from "next/link";
-import { formatDateTimeInSAST, formatDateInSAST } from "@/utils/dateUtils";
+import {
+  formatDateTimeInSAST,
+  formatDateInSAST,
+  formatTimeInSAST,
+} from "@/utils/dateUtils";
 
 const MyBookingsCardList = () => {
   // Get the logged in user identity
@@ -44,18 +48,6 @@ const MyBookingsCardList = () => {
     api.trip.getTripByIdArray,
     tripIds.length > 0 ? { tripIds: tripIds } : "skip"
   );
-
-  // Updated format date function to use SAST formatting
-  const formatDate = (timestamp?: number) => {
-    if (!timestamp) return "N/A";
-    const formatted = formatDateInSAST(timestamp);
-    return formatted;
-  };
-
-  const formatDateTime = (timestamp?: number) => {
-    if (!timestamp) return { date: "N/A", time: "N/A" };
-    return formatDateTimeInSAST(timestamp);
-  };
 
   // define all states for filtering and sorting
   const [originSearchTerm, setOriginSearchTerm] = useState("");
@@ -224,14 +216,6 @@ const MyBookingsCardList = () => {
           sortedBookings.map((booking) => {
             const trip = trips?.find((t) => t._id === booking.tripId);
 
-            // Format dates in SAST
-            const departureSAST = trip?.departureDate
-              ? formatDateTime(trip.departureDate)
-              : { date: "N/A", time: "N/A" };
-            const arrivalSAST = trip?.arrivalDate
-              ? formatDateTime(trip.arrivalDate)
-              : { date: "N/A", time: "N/A" };
-
             return (
               <div
                 key={booking._id}
@@ -278,10 +262,10 @@ const MyBookingsCardList = () => {
                       </div>
                       <div className="text-right">
                         <p className="text-xs font-medium">
-                          {departureSAST.date}
+                          {formatDateInSAST(trip?.departureDate)}
                         </p>
                         <p className="text-xs text-base-content/60">
-                          {departureSAST.time}
+                          {formatTimeInSAST(trip?.departureDate)}
                         </p>
                       </div>
                     </div>
@@ -296,10 +280,10 @@ const MyBookingsCardList = () => {
                       </div>
                       <div className="text-right">
                         <p className="text-xs font-medium">
-                          {arrivalSAST.date}
+                          {formatDateInSAST(trip?.arrivalDate)}
                         </p>
                         <p className="text-xs text-base-content/60">
-                          {arrivalSAST.time}
+                          {formatTimeInSAST(trip?.arrivalDate)}
                         </p>
                       </div>
                     </div>

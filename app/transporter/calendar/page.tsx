@@ -6,7 +6,11 @@ import { Id } from "@/convex/_generated/dataModel";
 import { useUser } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
 import { Calendar as CalendarIcon, Truck } from "lucide-react";
-import { formatDateTimeInSAST } from "@/utils/dateUtils";
+import {
+  formatDateTimeInSAST,
+  formatDateInSAST,
+  formatTimeInSAST,
+} from "@/utils/dateUtils";
 
 const TransporterCalendarPage = () => {
   const { user } = useUser();
@@ -67,46 +71,38 @@ const TransporterCalendarPage = () => {
 
   const tripEvents =
     transporterTrips?.map((trip) => {
-      // Format dates in SAST for calendar display
-      const departureDateTime = formatDateTimeInSAST(trip.departureDate);
-      const arrivalDateTime = formatDateTimeInSAST(trip.arrivalDate);
-
       return {
         id: trip._id,
         title: `${
           truckForTrip?.find((truck) => truck.id === trip.truckId)?.title
         } to: ${trip.destinationCity}`,
-        start: new Date(trip.departureDate), // Calendar library expects Date objects
-        end: new Date(trip.arrivalDate),
+        start: new Date(Number(trip.departureDate)), // Ensure numeric UTC timestamp
+        end: new Date(Number(trip.arrivalDate)),
         // Add formatted display data for tooltips/popups
-        formattedStart: departureDateTime.fullDateTime,
-        formattedEnd: arrivalDateTime.fullDateTime,
-        departureDate: departureDateTime.date,
-        departureTime: departureDateTime.time,
-        arrivalDate: arrivalDateTime.date,
-        arrivalTime: arrivalDateTime.time,
+        formattedStart: formatDateTimeInSAST(trip.departureDate),
+        formattedEnd: formatDateTimeInSAST(trip.arrivalDate),
+        departureDate: formatDateInSAST(trip.departureDate),
+        departureTime: formatTimeInSAST(trip.departureDate),
+        arrivalDate: formatDateInSAST(trip.arrivalDate),
+        arrivalTime: formatTimeInSAST(trip.arrivalDate),
         type: "trip", // Identify as trip for styling
       };
     }) ?? [];
 
   const bookingEvents =
     transporterBookings?.map((booking) => {
-      // Format dates in SAST for calendar display
-      const departureDateTime = formatDateTimeInSAST(booking.departureDate);
-      const arrivalDateTime = formatDateTimeInSAST(booking.arrivalDate);
-
       return {
         id: booking._id,
         title: `Booking: ${booking.destinationCity}`,
-        start: new Date(booking.departureDate), // Calendar library expects Date objects
-        end: new Date(booking.arrivalDate),
+        start: new Date(Number(booking.departureDate)), // Ensure numeric UTC timestamp
+        end: new Date(Number(booking.arrivalDate)),
         // Add formatted display data for tooltips/popups
-        formattedStart: departureDateTime.fullDateTime,
-        formattedEnd: arrivalDateTime.fullDateTime,
-        departureDate: departureDateTime.date,
-        departureTime: departureDateTime.time,
-        arrivalDate: arrivalDateTime.date,
-        arrivalTime: arrivalDateTime.time,
+        formattedStart: formatDateTimeInSAST(booking.departureDate),
+        formattedEnd: formatDateTimeInSAST(booking.arrivalDate),
+        departureDate: formatDateInSAST(booking.departureDate),
+        departureTime: formatTimeInSAST(booking.departureDate),
+        arrivalDate: formatDateInSAST(booking.arrivalDate),
+        arrivalTime: formatTimeInSAST(booking.arrivalDate),
         type: "booking", // Identify as booking for styling
       };
     }) ?? [];

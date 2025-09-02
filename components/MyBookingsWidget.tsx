@@ -12,7 +12,11 @@ import {
   Package,
   Clock,
 } from "lucide-react";
-import { formatDateTimeInSAST, formatDateInSAST } from "@/utils/dateUtils";
+import {
+  formatDateTimeInSAST,
+  formatDateInSAST,
+  formatTimeInSAST,
+} from "@/utils/dateUtils";
 
 const MyBookingsWidget = () => {
   const { user } = useUser();
@@ -144,11 +148,6 @@ const MyBookingsWidget = () => {
             const statusBadge = getStatusBadge(purchasedTrip.status);
             const StatusIcon = statusBadge.icon;
 
-            // Format departure date and time in SAST
-            const departureSAST = trip?.departureDate
-              ? formatDateTimeInSAST(trip.departureDate)
-              : null;
-
             if (!trip) return null;
 
             return (
@@ -208,11 +207,13 @@ const MyBookingsWidget = () => {
                         Departure (SAST)
                       </div>
                       <div className="font-medium text-sm text-base-content">
-                        {departureSAST ? departureSAST.date : "N/A"}
+                        {trip.departureDate
+                          ? formatDateInSAST(trip.departureDate)
+                          : "N/A"}
                       </div>
-                      {departureSAST && (
+                      {trip.departureDate && (
                         <div className="text-xs text-base-content/60">
-                          at {departureSAST.time}
+                          at {formatTimeInSAST(trip.departureDate)}
                         </div>
                       )}
                     </div>
