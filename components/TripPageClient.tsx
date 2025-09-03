@@ -878,45 +878,52 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
                 </div>
 
                 <div className="space-y-3">
-                  {trip?.basePrice && trip.basePrice > 0 && (
+                  {/* Base Price */}
+                  {Number(trip?.basePrice) > 0 && (
                     <div className="flex justify-between text-sm">
                       <span className="text-base-content/70">Base Price:</span>
                       <span className="font-medium">
-                        R{trip.basePrice.toFixed(2)}
+                        R{Number(trip?.basePrice).toFixed(2)}
                       </span>
                     </div>
                   )}
 
-                  {trip?.KGPrice && trip.KGPrice > 0 && (
+                  {/* KG pricing */}
+                  {Number(trip?.KGPrice) > 0 && cargoWeight > 0 && (
                     <>
                       <div className="flex justify-between text-sm">
                         <span className="text-base-content/70">
                           Rate per KG:
                         </span>
-                        <span>R{trip.KGPrice}</span>
+                        <span>R{Number(trip?.KGPrice).toFixed(2)}</span>
                       </div>
                       <div className="flex justify-between text-sm">
                         <span className="text-base-content/70">
                           Weight ({cargoWeight}kg):
                         </span>
-                        <span>R{variableKGPrice.toFixed(2)}</span>
+                        <span>
+                          R{(Number(trip?.KGPrice) * cargoWeight).toFixed(2)}
+                        </span>
                       </div>
                     </>
                   )}
 
-                  {trip?.KMPrice && trip.KMPrice > 0 && (
+                  {/* KM pricing */}
+                  {Number(trip?.KMPrice) > 0 && distance > 0 && (
                     <>
                       <div className="flex justify-between text-sm">
                         <span className="text-base-content/70">
                           Rate per KM:
                         </span>
-                        <span>R{trip.KMPrice}</span>
+                        <span>R{Number(trip?.KMPrice).toFixed(2)}</span>
                       </div>
                       <div className="flex justify-between text-sm">
                         <span className="text-base-content/70">
                           Distance ({distance.toFixed(1)}km):
                         </span>
-                        <span>R{variableKMPrice.toFixed(2)}</span>
+                        <span>
+                          R{(Number(trip?.KMPrice) * distance).toFixed(2)}
+                        </span>
                       </div>
                     </>
                   )}

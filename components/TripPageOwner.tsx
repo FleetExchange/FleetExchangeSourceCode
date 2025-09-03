@@ -36,6 +36,8 @@ import {
   Trash2,
   Phone,
   Mail,
+  X,
+  CheckCircle,
 } from "lucide-react";
 import {
   formatDateInSAST,
@@ -853,6 +855,70 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
                         </p>
                       </div>
                     </div>
+                  ) : purchaseTrip.status === "Cancelled" ? (
+                    // Cancelled - show cancelled status with support info
+                    <div className="space-y-4">
+                      <div className="bg-error/10 border border-error/20 rounded-lg p-4 text-center">
+                        <div className="flex items-center justify-center gap-2 text-error font-semibold">
+                          <X className="w-5 h-5" />
+                          <span>Trip Cancelled</span>
+                        </div>
+                      </div>
+
+                      <div className="bg-info/10 border border-info/20 rounded-lg p-4">
+                        <p className="text-sm text-base-content/70 text-center">
+                          For any queries or assistance:
+                        </p>
+                        <div className="flex flex-col gap-2 mt-2">
+                          <a
+                            href="tel:+27000000000"
+                            className="btn btn-outline btn-sm gap-2"
+                          >
+                            <Phone className="w-4 h-4" />
+                            0800 123 456
+                          </a>
+                          <a
+                            href="mailto:support@freightconnect.com"
+                            className="btn btn-outline btn-sm gap-2"
+                          >
+                            <Mail className="w-4 h-4" />
+                            Support Email
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  ) : purchaseTrip.status === "Refunded" ? (
+                    // Refunded - show refunded status with support info
+                    <div className="space-y-4">
+                      <div className="bg-info/10 border border-info/20 rounded-lg p-4 text-center">
+                        <div className="flex items-center justify-center gap-2 text-info font-semibold">
+                          <CheckCircle className="w-5 h-5" />
+                          <span>Trip Refunded</span>
+                        </div>
+                      </div>
+
+                      <div className="bg-info/10 border border-info/20 rounded-lg p-4">
+                        <p className="text-sm text-base-content/70 text-center">
+                          For any queries or assistance:
+                        </p>
+                        <div className="flex flex-col gap-2 mt-2">
+                          <a
+                            href="tel:+27000000000"
+                            className="btn btn-outline btn-sm gap-2"
+                          >
+                            <Phone className="w-4 h-4" />
+                            0800 123 456
+                          </a>
+                          <a
+                            href="mailto:support@freightconnect.com"
+                            className="btn btn-outline btn-sm gap-2"
+                          >
+                            <Mail className="w-4 h-4" />
+                            Support Email
+                          </a>
+                        </div>
+                      </div>
+                    </div>
                   ) : (
                     // Other statuses - show status and basic actions
                     <>
@@ -860,11 +926,11 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
                         currentStatus={purchaseTrip.status as TripStatus}
                         purchaseTripId={purchaseTrip._id}
                       />
-                      <TripCancelButton
-                        userId={userId}
-                        tripId={trip._id}
-                        currentStatus={purchaseTrip.status}
-                      />
+                      <div className="bg-base-200/50 border border-base-300 rounded-lg p-4 text-center">
+                        <p className="text-sm text-base-content/70">
+                          Status: {purchaseTrip.status}
+                        </p>
+                      </div>
                     </>
                   )}
                 </div>

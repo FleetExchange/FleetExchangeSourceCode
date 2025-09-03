@@ -1,67 +1,72 @@
 // app/api/paystack/initialize/route.ts
 import { NextRequest, NextResponse } from "next/server";
 
+// Generate simple reference: FC-<timestamp>-<4chars>
+function generateReference() {
+  const timestamp = Date.now().toString().slice(-8); // last 8 digits
+  const random = Math.random().toString(36).slice(2, 6).toUpperCase(); // 4 chars
+  return `FE-${timestamp}-${random}`; // e.g., FC-12345678-A3B9
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const { paymentId, email, amountZar, amountKobo, metadata } = body;
 
-    // Accept either a ZAR amount (float) or a smallest-unit amount (cents/kobo)
-    let amountInSmallestUnit: number | null = null;
+    // Convert to cents
+    let amountInCents: number | null = null;
     if (typeof amountZar === "number") {
-      amountInSmallestUnit = Math.round(amountZar * 100); // ZAR -> cents
+      amountInCents = Math.round(amountZar * 100);
     } else if (typeof amountKobo === "number") {
-      amountInSmallestUnit = Math.round(amountKobo); // already in smallest unit
+      amountInCents = Math.round(amountKobo);
     }
 
-    if (!email || !paymentId || amountInSmallestUnit === null) {
+    if (!email || !paymentId || amountInCents === null) {
       return NextResponse.json(
-        { error: "missing parameters" },
+        { error: "Missing required fields" },
         { status: 400 }
       );
     }
 
-    const reference = `payment_${paymentId}_${Date.now()}`;
+    const reference = generateReference();
+    const callbackUrl = `${process.env.NEXT_PUBLIC_APP_URL}/payment/callback?paymentId=${paymentId}&reference=${reference}`;
 
-    // build callback URL that Paystack will redirect the customer to after payment
-    const appBase = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-    const callbackUrl = `${appBase}/payment/callback?paymentId=${encodeURIComponent(paymentId)}&reference=${encodeURIComponent(reference)}`;
+    const response = await fetch(
+      "https://api.paystack.co/transaction/initialize",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          amount: amountInCents,
+          reference,
+          currency: "ZAR",
+          metadata: { ...metadata, paymentId },
+          callback_url: callbackUrl,
+        }),
+      }
+    );
 
-    const resp = await fetch("https://api.paystack.co/transaction/initialize", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        email,
-        amount: amountInSmallestUnit,
-        reference,
-        currency: "ZAR", // ensure Paystack treats this as South African Rand
-        metadata,
-        callback_url: callbackUrl,
-      }),
-    });
+    const data = await response.json();
 
-    const data = await resp.json();
-
-    if (!data || !data.status) {
+    if (!data?.status) {
       return NextResponse.json(
-        { error: data?.message || "paystack initialize failed", details: data },
+        { error: data?.message || "Payment initialization failed" },
         { status: 502 }
       );
     }
 
-    // Return only what Convex needs
     return NextResponse.json({
-      authorization_url: data.authorization_url,
-      reference: data.reference,
-      raw: data.data,
+      authorization_url: data.data.authorization_url,
+      reference: data.data.reference,
     });
-  } catch (err: any) {
-    console.error("Paystack initialize error:", err);
+  } catch (error: any) {
+    console.error("Payment initialization error:", error);
     return NextResponse.json(
-      { error: err?.message || "unknown error" },
+      { error: "Payment initialization failed" },
       { status: 500 }
     );
   }
