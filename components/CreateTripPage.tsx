@@ -3,7 +3,7 @@
 import { api } from "@/convex/_generated/api";
 import { useUser } from "@clerk/nextjs";
 import { useQuery, useMutation } from "convex/react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { usePlacesWithRestrictions } from "@/hooks/usePlacesWithRestrictions";
 import { AddressAutocomplete } from "./AddressAutocomplete";
 import { Id } from "@/convex/_generated/dataModel";
@@ -86,15 +86,57 @@ const CreateTripPage = () => {
     arrivalMessage: "",
   });
 
+  // Add debounce refs
+  const pickupDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const deliveryDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  );
+
+  // Debounced input handlers
+  const handleOriginInputChange = (value: string) => {
+    if (pickupDebounceRef.current) {
+      clearTimeout(pickupDebounceRef.current);
+    }
+
+    pickupDebounceRef.current = setTimeout(() => {
+      if (value.length >= 3 || value.length === 0) {
+        pickup.setValue(value);
+      }
+    }, 400);
+  };
+
+  const handleDestinationInputChange = (value: string) => {
+    if (deliveryDebounceRef.current) {
+      clearTimeout(deliveryDebounceRef.current);
+    }
+
+    deliveryDebounceRef.current = setTimeout(() => {
+      if (value.length >= 3 || value.length === 0) {
+        delivery.setValue(value);
+      }
+    }, 400);
+  };
+
+  // Cleanup timeouts on unmount
+  useEffect(() => {
+    return () => {
+      if (pickupDebounceRef.current) clearTimeout(pickupDebounceRef.current);
+      if (deliveryDebounceRef.current)
+        clearTimeout(deliveryDebounceRef.current);
+    };
+  }, []);
+
   // Add Places Autocomplete hooks for origin and destination
   const pickup = usePlacesWithRestrictions({
     cityName: originCity,
     citiesOnly: true, // Enable city-only mode
+    debounceMs: 500, // Add debouncing at hook level too
   });
 
   const delivery = usePlacesWithRestrictions({
     cityName: destinationCity,
     citiesOnly: true, // Enable city-only mode
+    debounceMs: 500, // Add debouncing at hook level too
   });
 
   const userFleets = useQuery(api.fleet.getFleetForCurrentUser, {
@@ -447,11 +489,11 @@ const CreateTripPage = () => {
                       value={originCity}
                       onChange={(city) => {
                         setOriginCity(city);
-                        pickup.setValue(city);
+                        // Don't call setValue here - only on selection
                       }}
                       ready={pickup.ready}
                       inputValue={pickup.value}
-                      onInputChange={pickup.setValue}
+                      onInputChange={handleOriginInputChange}
                       suggestions={pickup.suggestions}
                       status={pickup.status}
                       clearSuggestions={pickup.clearSuggestions}
@@ -470,11 +512,11 @@ const CreateTripPage = () => {
                       value={destinationCity}
                       onChange={(city) => {
                         setDestinationCity(city);
-                        delivery.setValue(city);
+                        // Don't call setValue here - only on selection
                       }}
                       ready={delivery.ready}
                       inputValue={delivery.value}
-                      onInputChange={delivery.setValue}
+                      onInputChange={handleDestinationInputChange}
                       suggestions={delivery.suggestions}
                       status={delivery.status}
                       clearSuggestions={delivery.clearSuggestions}
