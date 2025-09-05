@@ -184,7 +184,7 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({
                         : `${config.bgColor} ${config.borderColor} hover:opacity-80`
                     }`}
                   >
-                    <div className="flex items-start gap-3">
+                    <div className="flex items-start gap-3 min-w-0">
                       {/* Type Icon */}
                       <div
                         className={`p-2 rounded-lg ${config.bgColor} ${config.borderColor} border flex-shrink-0`}
@@ -192,7 +192,7 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({
                         <TypeIcon className={`w-4 h-4 ${config.color}`} />
                       </div>
 
-                      <div className="flex-grow">
+                      <div className="flex-grow min-w-0">
                         {/* Type Label & Status */}
                         <div className="flex items-center gap-2 mb-2">
                           <span
@@ -235,8 +235,22 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({
                         </div>
                       </div>
 
-                      {/* Action Buttons */}
-                      <div className="flex flex-col gap-2 items-end">
+                      {/* Action Buttons - Horizontal Layout */}
+                      <div className="flex flex-row gap-1 items-start flex-shrink-0 ml-2">
+                        {/* Mark as read */}
+                        {!n.read && (
+                          <button
+                            className="btn btn-xs btn-primary btn-outline gap-1"
+                            onClick={() =>
+                              markAsRead({ notificationId: n._id })
+                            }
+                          >
+                            <CiCircleCheck className="w-3 h-3" />
+                            <span className="hidden sm:inline">Mark Read</span>
+                            <span className="sm:hidden">Read</span>
+                          </button>
+                        )}
+
                         {/* If this is a payment request, show a Pay button linking to the auth URL */}
                         {n.type === "paymentRequest" &&
                           (n.meta as any)?.url && (
@@ -250,22 +264,9 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({
                               }
                             >
                               <CiDollar className="w-3 h-3" />
-                              Pay now
+                              Pay
                             </a>
                           )}
-
-                        {/* Mark as read */}
-                        {!n.read && (
-                          <button
-                            className="btn btn-xs btn-primary btn-outline gap-1 flex-shrink-0"
-                            onClick={() =>
-                              markAsRead({ notificationId: n._id })
-                            }
-                          >
-                            <CiCircleCheck className="w-3 h-3" />
-                            Mark Read
-                          </button>
-                        )}
                       </div>
                     </div>
                   </div>
