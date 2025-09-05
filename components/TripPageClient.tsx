@@ -3,7 +3,7 @@
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
   GoogleMap,
@@ -40,6 +40,7 @@ import {
   formatDateInSAST,
   formatTimeInSAST,
 } from "@/utils/dateUtils";
+import { getCachedCityCoordinates } from "../utils/cityCoordinatesCache";
 
 type DirectionsResult = google.maps.DirectionsResult;
 
@@ -93,6 +94,9 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
   const [cargoDescription, setCargoDescription] = useState("");
   const [directions, setDirections] = useState<DirectionsResult | null>(null);
   const [distance, setDistance] = useState<number>(0);
+  const [directionsKey, setDirectionsKey] = useState<string>("");
+  const [hasDirectionsBeenFetched, setHasDirectionsBeenFetched] =
+    useState(false);
 
   // Trip pricing calculations
   const variableKMPrice = (trip?.KMPrice ?? 0) * distance;
@@ -116,17 +120,6 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
   };
 
   // Google Maps helper functions
-  const getCityCoordinates = async (cityName: string) => {
-    try {
-      const results = await getGeocode({
-        address: `${cityName}, South Africa`,
-      });
-      return getLatLng(results[0]);
-    } catch (error) {
-      console.error("Error getting coordinates for city:", error);
-      return { lat: -26.2041, lng: 28.0473 };
-    }
-  };
 
   // Coordinates state
   const [pickupCoords, setPickupCoords] = useState({
@@ -141,10 +134,10 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
   // Update coordinates when trip data loads
   useEffect(() => {
     if (trip?.originCity) {
-      getCityCoordinates(trip.originCity).then(setPickupCoords);
+      getCachedCityCoordinates(trip.originCity).then(setPickupCoords);
     }
     if (trip?.destinationCity) {
-      getCityCoordinates(trip.destinationCity).then(setDeliveryCoords);
+      getCachedCityCoordinates(trip.destinationCity).then(setDeliveryCoords);
     }
   }, [trip?.originCity, trip?.destinationCity]);
 
@@ -345,6 +338,67 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
     );
   };
 
+  // Only create new directions request when addresses actually change
+  const directionsOptions = useMemo(() => {
+    if (!trip?.originCity && !pickupAddress) return null;
+    if (!trip?.destinationCity && !deliveryAddress) return null;
+
+    const origin = pickupAddress || `${trip?.originCity}, South Africa`;
+    const destination =
+      deliveryAddress || `${trip?.destinationCity}, South Africa`;
+    const newKey = `${origin}-${destination}`;
+
+    // Don't create new request if addresses haven't changed
+    if (newKey === directionsKey || hasDirectionsBeenFetched) return null;
+
+    console.log("🚨 NEW DIRECTIONS API CALL:", newKey); // Remove after testing
+
+    return {
+      origin,
+      destination,
+      travelMode: google.maps.TravelMode.DRIVING,
+    };
+  }, [
+    trip?.originCity,
+    trip?.destinationCity,
+    pickupAddress,
+    deliveryAddress,
+    directionsKey,
+    hasDirectionsBeenFetched,
+  ]);
+
+  const handleDirectionsCallback = useCallback(
+    (response: any, status: string) => {
+      if (response !== null && status === "OK") {
+        setDirections(response);
+        const distanceInKm =
+          response.routes?.[0]?.legs?.[0]?.distance?.value != null
+            ? response.routes[0].legs[0].distance.value / 1000
+            : 0;
+        setDistance(distanceInKm);
+
+        // Mark as fetched and update key
+        const origin = pickupAddress || `${trip?.originCity}, South Africa`;
+        const destination =
+          deliveryAddress || `${trip?.destinationCity}, South Africa`;
+        setDirectionsKey(`${origin}-${destination}`);
+        setHasDirectionsBeenFetched(true);
+
+        console.log(
+          "✅ DIRECTIONS API SUCCESS:",
+          response.routes[0].legs[0].distance.text
+        );
+      }
+    },
+    [trip?.originCity, trip?.destinationCity, pickupAddress, deliveryAddress]
+  );
+
+  // Reset when trip changes
+  useEffect(() => {
+    setHasDirectionsBeenFetched(false);
+    setDirectionsKey("");
+  }, [tripId]);
+
   return (
     <div className="min-h-screen bg-base-200">
       <div className="p-4 lg:p-6">
@@ -497,7 +551,7 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
                           value={pickupAddress || ""}
                           onChange={(address) => {
                             setPickupAddress(address || "");
-                            pickup.setValue(address || "");
+                            pickup.setValue(address || ""); // KEEP: only on select
                           }}
                           disabled={booked}
                           ready={pickup.ready}
@@ -509,19 +563,6 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
                           status={pickup.status}
                           clearSuggestions={pickup.clearSuggestions}
                           label="Pickup Address"
-                          onBlur={async () => {
-                            if (pickupAddress) {
-                              const isValid = await validateAddress(
-                                pickupAddress,
-                                trip?.originCity || "",
-                                "pickup"
-                              );
-                              if (!isValid) {
-                                setPickupAddress("");
-                                pickup.setValue("");
-                              }
-                            }
-                          }}
                         />
                       </div>
 
@@ -567,7 +608,7 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
                           value={deliveryAddress || ""}
                           onChange={(address) => {
                             setDeliveryAddress(address || "");
-                            delivery.setValue(address || "");
+                            delivery.setValue(address || ""); // KEEP: only on select
                           }}
                           disabled={booked}
                           ready={delivery.ready}
@@ -579,19 +620,6 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
                           status={delivery.status}
                           clearSuggestions={delivery.clearSuggestions}
                           label="Delivery Address"
-                          onBlur={async () => {
-                            if (deliveryAddress) {
-                              const isValid = await validateAddress(
-                                deliveryAddress,
-                                trip?.destinationCity || "",
-                                "delivery"
-                              );
-                              if (!isValid) {
-                                setDeliveryAddress("");
-                                delivery.setValue("");
-                              }
-                            }
-                          }}
                         />
                       </div>
 
@@ -821,32 +849,12 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
                       window.google.maps.event.trigger(map, "resize");
                     }}
                   >
-                    {(trip?.originCity || pickupAddress) &&
-                      (trip?.destinationCity || deliveryAddress) && (
-                        <DirectionsService
-                          options={{
-                            origin:
-                              pickupAddress ||
-                              `${trip?.originCity}, South Africa`,
-                            destination:
-                              deliveryAddress ||
-                              `${trip?.destinationCity}, South Africa`,
-                            travelMode: google.maps.TravelMode.DRIVING,
-                          }}
-                          callback={(response, status) => {
-                            if (response !== null && status === "OK") {
-                              setDirections(response);
-                              const distanceInKm =
-                                response.routes?.[0]?.legs?.[0]?.distance
-                                  ?.value != null
-                                  ? response.routes[0].legs[0].distance.value /
-                                    1000
-                                  : 0;
-                              setDistance(distanceInKm);
-                            }
-                          }}
-                        />
-                      )}
+                    {directionsOptions && (
+                      <DirectionsService
+                        options={directionsOptions}
+                        callback={handleDirectionsCallback}
+                      />
+                    )}
                     {directions && (
                       <DirectionsRenderer
                         options={{

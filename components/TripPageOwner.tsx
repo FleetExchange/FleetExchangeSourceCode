@@ -12,7 +12,7 @@ import {
 // @ts-ignore
 import { DirectionsResult } from "@types/googlemaps";
 import { useMutation, useQuery } from "convex/react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { getGeocode, getLatLng } from "use-places-autocomplete";
 import { useRouter } from "next/navigation";
 import StatusAdvanceButton from "./StatusAdvanceButton";
@@ -46,6 +46,7 @@ import {
   formatFullDateTimeInSAST,
 } from "@/utils/dateUtils";
 import { useUser } from "@clerk/nextjs";
+import { getCachedCityCoordinates } from "../utils/cityCoordinatesCache";
 
 interface TripPageClientProps {
   tripId: string;
@@ -69,6 +70,9 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
   const [deliveryAddress, setDeliveryAddress] = useState("");
   const [directions, setDirections] = useState<DirectionsResult | null>(null);
   const [distance, setDistance] = useState<number>(0);
+  const [directionsKey, setDirectionsKey] = useState<string>("");
+  const [hasDirectionsBeenFetched, setHasDirectionsBeenFetched] =
+    useState(false);
 
   // Get the trip object
   const trip = useQuery(
@@ -99,27 +103,12 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
     lng: 28.0473,
   });
 
-  // Function to get city coordinates using Google Places API
-  const getCityCoordinates = async (cityName: string) => {
-    try {
-      const results = await getGeocode({
-        address: `${cityName}, South Africa`,
-      });
-      const { lat, lng } = await getLatLng(results[0]);
-      return { lat, lng };
-    } catch (error) {
-      console.error("Error getting city coordinates:", error);
-      // Return default coordinates (Johannesburg) if geocoding fails
-      return { lat: -26.2041, lng: 28.0473 };
-    }
-  };
-
   useEffect(() => {
     if (trip?.originCity) {
-      getCityCoordinates(trip.originCity).then(setPickupCoords);
+      getCachedCityCoordinates(trip.originCity).then(setPickupCoords);
     }
     if (trip?.destinationCity) {
-      getCityCoordinates(trip.destinationCity).then(setDeliveryCoords);
+      getCachedCityCoordinates(trip.destinationCity).then(setDeliveryCoords);
     }
   }, [trip?.originCity, trip?.destinationCity]);
 
@@ -154,6 +143,53 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
       alert("Failed to delete trip. Please try again.");
     }
   };
+
+  const directionsOptions = useMemo(() => {
+    if (!trip?.originCity || !trip?.destinationCity) return null;
+
+    const origin = `${trip.originCity}, South Africa`;
+    const destination = `${trip.destinationCity}, South Africa`;
+    const newKey = `${origin}-${destination}`;
+
+    if (newKey === directionsKey || hasDirectionsBeenFetched) return null;
+
+    console.log("🚨 OWNER DIRECTIONS API CALL:", newKey);
+
+    return {
+      origin,
+      destination,
+      travelMode: google.maps.TravelMode.DRIVING,
+    };
+  }, [
+    trip?.originCity,
+    trip?.destinationCity,
+    directionsKey,
+    hasDirectionsBeenFetched,
+  ]);
+
+  const handleDirectionsCallback = useCallback(
+    (response: any, status: string) => {
+      if (response !== null && status === "OK") {
+        setDirections(response);
+        const distanceInKm =
+          response.routes?.[0]?.legs?.[0]?.distance?.value != null
+            ? response.routes[0].legs[0].distance.value / 1000
+            : 0;
+        setDistance(distanceInKm);
+
+        const origin = `${trip?.originCity}, South Africa`;
+        const destination = `${trip?.destinationCity}, South Africa`;
+        setDirectionsKey(`${origin}-${destination}`);
+        setHasDirectionsBeenFetched(true);
+      }
+    },
+    [trip?.originCity, trip?.destinationCity]
+  );
+
+  useEffect(() => {
+    setHasDirectionsBeenFetched(false);
+    setDirectionsKey("");
+  }, [tripId]);
 
   return (
     <div className="min-h-screen bg-base-200">
@@ -563,32 +599,12 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
                       window.google.maps.event.trigger(map, "resize");
                     }}
                   >
-                    {(trip?.originCity || pickupAddress) &&
-                      (trip?.destinationCity || deliveryAddress) && (
-                        <DirectionsService
-                          options={{
-                            origin:
-                              pickupAddress ||
-                              `${trip?.originCity}, South Africa`,
-                            destination:
-                              deliveryAddress ||
-                              `${trip?.destinationCity}, South Africa`,
-                            travelMode: google.maps.TravelMode.DRIVING,
-                          }}
-                          callback={(response, status) => {
-                            if (response !== null && status === "OK") {
-                              setDirections(response);
-                              const distanceInKm =
-                                response.routes?.[0]?.legs?.[0]?.distance
-                                  ?.value != null
-                                  ? response.routes[0].legs[0].distance.value /
-                                    1000
-                                  : 0;
-                              setDistance(distanceInKm);
-                            }
-                          }}
-                        />
-                      )}
+                    {directionsOptions && (
+                      <DirectionsService
+                        options={directionsOptions}
+                        callback={handleDirectionsCallback}
+                      />
+                    )}
                     {directions && (
                       <DirectionsRenderer
                         options={{
