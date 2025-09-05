@@ -145,13 +145,17 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
   };
 
   const directionsOptions = useMemo(() => {
-    if (!trip?.originCity || !trip?.destinationCity) return null;
+    if (!trip?.originCity && !trip?.originAddress) return null;
+    if (!trip?.destinationCity && !trip?.destinationAddress) return null;
 
-    const origin = `${trip.originCity}, South Africa`;
-    const destination = `${trip.destinationCity}, South Africa`;
+    // Use specific addresses if available, otherwise fall back to cities
+    const origin = trip?.originAddress || `${trip?.originCity}, South Africa`;
+    const destination =
+      trip?.destinationAddress || `${trip?.destinationCity}, South Africa`;
     const newKey = `${origin}-${destination}`;
 
-    if (newKey === directionsKey || hasDirectionsBeenFetched) return null;
+    // Only skip if the exact same route has been calculated
+    if (newKey === directionsKey) return null;
 
     console.log("🚨 OWNER DIRECTIONS API CALL:", newKey);
 
@@ -163,8 +167,9 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
   }, [
     trip?.originCity,
     trip?.destinationCity,
+    trip?.originAddress, // Add these dependencies
+    trip?.destinationAddress, // Add these dependencies
     directionsKey,
-    hasDirectionsBeenFetched,
   ]);
 
   const handleDirectionsCallback = useCallback(
@@ -177,17 +182,23 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
             : 0;
         setDistance(distanceInKm);
 
-        const origin = `${trip?.originCity}, South Africa`;
-        const destination = `${trip?.destinationCity}, South Africa`;
+        // Use the same logic as directionsOptions
+        const origin =
+          trip?.originAddress || `${trip?.originCity}, South Africa`;
+        const destination =
+          trip?.destinationAddress || `${trip?.destinationCity}, South Africa`;
         setDirectionsKey(`${origin}-${destination}`);
-        setHasDirectionsBeenFetched(true);
       }
     },
-    [trip?.originCity, trip?.destinationCity]
+    [
+      trip?.originCity,
+      trip?.destinationCity,
+      trip?.originAddress,
+      trip?.destinationAddress,
+    ]
   );
 
   useEffect(() => {
-    setHasDirectionsBeenFetched(false);
     setDirectionsKey("");
   }, [tripId]);
 

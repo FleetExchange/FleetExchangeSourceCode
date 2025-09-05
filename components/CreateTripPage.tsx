@@ -65,6 +65,10 @@ const CreateTripPage = () => {
     null
   );
 
+  // Add local input state for immediate display
+  const [originInputValue, setOriginInputValue] = useState("");
+  const [destinationInputValue, setDestinationInputValue] = useState("");
+
   // Check if a payout account exsists
 
   const payoutAccount = useQuery(
@@ -92,8 +96,11 @@ const CreateTripPage = () => {
     null
   );
 
-  // Debounced input handlers
+  // Fixed debounced input handlers
   const handleOriginInputChange = (value: string) => {
+    // Update display immediately
+    setOriginInputValue(value);
+
     if (pickupDebounceRef.current) {
       clearTimeout(pickupDebounceRef.current);
     }
@@ -106,6 +113,9 @@ const CreateTripPage = () => {
   };
 
   const handleDestinationInputChange = (value: string) => {
+    // Update display immediately
+    setDestinationInputValue(value);
+
     if (deliveryDebounceRef.current) {
       clearTimeout(deliveryDebounceRef.current);
     }
@@ -115,6 +125,19 @@ const CreateTripPage = () => {
         delivery.setValue(value);
       }
     }, 400);
+  };
+
+  // Sync local state when selection is made
+  const handleOriginSelection = (city: string) => {
+    setOriginCity(city);
+    setOriginInputValue(city);
+    pickup.clearSuggestions();
+  };
+
+  const handleDestinationSelection = (city: string) => {
+    setDestinationCity(city);
+    setDestinationInputValue(city);
+    delivery.clearSuggestions();
   };
 
   // Cleanup timeouts on unmount
@@ -487,12 +510,9 @@ const CreateTripPage = () => {
                     </label>
                     <AddressAutocomplete
                       value={originCity}
-                      onChange={(city) => {
-                        setOriginCity(city);
-                        // Don't call setValue here - only on selection
-                      }}
+                      onChange={handleOriginSelection}
                       ready={pickup.ready}
-                      inputValue={pickup.value}
+                      inputValue={originInputValue}
                       onInputChange={handleOriginInputChange}
                       suggestions={pickup.suggestions}
                       status={pickup.status}
@@ -510,12 +530,9 @@ const CreateTripPage = () => {
                     </label>
                     <AddressAutocomplete
                       value={destinationCity}
-                      onChange={(city) => {
-                        setDestinationCity(city);
-                        // Don't call setValue here - only on selection
-                      }}
+                      onChange={handleDestinationSelection}
                       ready={delivery.ready}
-                      inputValue={delivery.value}
+                      inputValue={destinationInputValue}
                       onInputChange={handleDestinationInputChange}
                       suggestions={delivery.suggestions}
                       status={delivery.status}

@@ -138,18 +138,27 @@ export const isAddressWithinRangeCached = async (
   const normalizedCity = toKey(cityName);
   const cacheKey = `${normalizedAddress}|${normalizedCity}|${maxDistanceKm}`;
 
+  console.log("🔍 Validation cache called:", {
+    address,
+    cityName,
+    maxDistanceKm,
+  });
+
   if (ADDRESS_VALIDATION_CACHE.has(cacheKey)) {
-    // console.log(`📍 Using cached address validation for ${address}`);
+    console.log(`📍 Using cached address validation for ${address}`);
     return ADDRESS_VALIDATION_CACHE.get(cacheKey)!;
   }
 
   try {
-    // console.log(`🚨 ADDRESS VALIDATION DISTANCE CHECK for ${address} in ${cityName}`);
+    console.log(
+      `🚨 ADDRESS VALIDATION DISTANCE CHECK for ${address} in ${cityName}`
+    );
     const result = await isAddressWithinRange(address, cityName, maxDistanceKm);
+    console.log(`🚨 Distance check result: ${result}`);
     ADDRESS_VALIDATION_CACHE.set(cacheKey, result);
     return result;
   } catch (error) {
-    console.error("Error validating address:", error);
+    console.error("❌ Error validating address:", error);
     ADDRESS_VALIDATION_CACHE.set(cacheKey, false);
     return false;
   }

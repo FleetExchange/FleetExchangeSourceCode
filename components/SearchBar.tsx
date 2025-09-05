@@ -15,6 +15,10 @@ export default function SearchBar({
   const [to, setTo] = useState("");
   const [arrival, setArrival] = useState("");
 
+  // Add local input state for immediate display
+  const [fromInputValue, setFromInputValue] = useState("");
+  const [toInputValue, setToInputValue] = useState("");
+
   // Track screen size to render only one layout
   const [isDesktop, setIsDesktop] = useState(false);
 
@@ -32,21 +36,24 @@ export default function SearchBar({
   const pickup = usePlacesWithRestrictions({
     cityName: from,
     citiesOnly: true, // Enable city-only mode
-    debounceMs: 500, // Add debouncing
+    debounceMs: 0, // Disable hook debouncing
   });
 
   const delivery = usePlacesWithRestrictions({
     cityName: to,
     citiesOnly: true, // Enable city-only mode
-    debounceMs: 500, // Add debouncing
+    debounceMs: 0, // Disable hook debouncing
   });
 
   // Debounce refs for input handling
   const pickupDebounceRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const deliveryDebounceRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
-  // Debounced input handlers
+  // Fixed debounced input handlers
   const handlePickupInputChange = (value: string) => {
+    // Update display immediately
+    setFromInputValue(value);
+
     if (pickupDebounceRef.current) {
       clearTimeout(pickupDebounceRef.current);
     }
@@ -55,10 +62,13 @@ export default function SearchBar({
       if (value.length >= 3 || value.length === 0) {
         pickup.setValue(value);
       }
-    }, 300);
+    }, 400); // Single debounce point
   };
 
   const handleDeliveryInputChange = (value: string) => {
+    // Update display immediately
+    setToInputValue(value);
+
     if (deliveryDebounceRef.current) {
       clearTimeout(deliveryDebounceRef.current);
     }
@@ -67,7 +77,7 @@ export default function SearchBar({
       if (value.length >= 3 || value.length === 0) {
         delivery.setValue(value);
       }
-    }, 300);
+    }, 400); // Single debounce point
   };
 
   // Cleanup timeouts on unmount
@@ -90,15 +100,25 @@ export default function SearchBar({
     onSearch({ from, to, arrival });
   };
 
+  // Handle selections (when user clicks on suggestion)
+  const handlePickupSelection = (address: string) => {
+    setFrom(address || "");
+    setFromInputValue(address || "");
+    pickup.clearSuggestions();
+  };
+
+  const handleDeliverySelection = (address: string) => {
+    setTo(address || "");
+    setToInputValue(address || "");
+    delivery.clearSuggestions();
+  };
+
   // Shared AddressAutocomplete props to avoid duplication
   const getPickupProps = () => ({
     value: from,
-    onChange: (address: string) => {
-      setFrom(address || "");
-      // Don't call pickup.setValue here - only on selection
-    },
+    onChange: handlePickupSelection,
     ready: pickup.ready,
-    inputValue: pickup.value,
+    inputValue: fromInputValue,
     onInputChange: handlePickupInputChange,
     suggestions: pickup.suggestions,
     status: pickup.status,
@@ -107,12 +127,9 @@ export default function SearchBar({
 
   const getDeliveryProps = () => ({
     value: to,
-    onChange: (address: string) => {
-      setTo(address || "");
-      // Don't call delivery.setValue here - only on selection
-    },
+    onChange: handleDeliverySelection,
     ready: delivery.ready,
-    inputValue: delivery.value,
+    inputValue: toInputValue,
     onInputChange: handleDeliveryInputChange,
     suggestions: delivery.suggestions,
     status: delivery.status,

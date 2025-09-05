@@ -3,22 +3,25 @@
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
-import React, { useEffect, useState, useMemo, useCallback } from "react";
+import React, {
+  useEffect,
+  useState,
+  useMemo,
+  useCallback,
+  useRef,
+} from "react";
 import { useRouter } from "next/navigation";
 import {
   GoogleMap,
   DirectionsService,
   DirectionsRenderer,
 } from "@react-google-maps/api";
-import usePlacesAutocomplete, {
-  getGeocode,
-  getLatLng,
-} from "use-places-autocomplete";
+
 import { usePlacesWithRestrictions } from "@/hooks/usePlacesWithRestrictions";
 import { AddressAutocomplete } from "./AddressAutocomplete";
 import { useUser } from "@clerk/nextjs";
 import TripCancelButton from "./TripCancelButton";
-import { isAddressWithinRange } from "@/utils/geocoding";
+import { isAddressWithinRangeCached } from "@/utils/addressValidationCache";
 import TripRatingComponent from "./TripRatingComponent";
 import ProfileImage from "./ProfileImage";
 import BookTripButton from "./BookTripButton";
@@ -98,6 +101,32 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
   const [hasDirectionsBeenFetched, setHasDirectionsBeenFetched] =
     useState(false);
 
+  // Add local input state for immediate display
+  const [pickupInputValue, setPickupInputValue] = useState("");
+  const [deliveryInputValue, setDeliveryInputValue] = useState("");
+
+  // Add debounce refs
+  const pickupDebounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined
+  );
+  const deliveryDebounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined
+  );
+
+  // Add validation state
+  const [pickupValidation, setPickupValidation] = useState<{
+    isValid: boolean | null;
+    message: string;
+  }>({ isValid: null, message: "" });
+
+  const [deliveryValidation, setDeliveryValidation] = useState<{
+    isValid: boolean | null;
+    message: string;
+  }>({ isValid: null, message: "" });
+
+  // Add a ref to prevent duplicate validation calls
+  const validationInProgressRef = useRef<Set<string>>(new Set());
+
   // Trip pricing calculations
   const variableKMPrice = (trip?.KMPrice ?? 0) * distance;
   const variableKGPrice = (trip?.KGPrice ?? 0) * cargoWeight;
@@ -142,10 +171,133 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
   }, [trip?.originCity, trip?.destinationCity]);
 
   // Places autocomplete hooks
-  const pickup = usePlacesWithRestrictions({ cityName: trip?.originCity });
+  const pickup = usePlacesWithRestrictions({
+    cityName: trip?.originCity,
+    debounceMs: 0, // Disable hook debouncing, handle manually
+  });
   const delivery = usePlacesWithRestrictions({
     cityName: trip?.destinationCity,
+    debounceMs: 0, // Disable hook debouncing, handle manually
   });
+
+  // Debounced input handlers
+  const handlePickupInputChange = (value: string) => {
+    setPickupInputValue(value);
+
+    if (pickupDebounceRef.current) {
+      clearTimeout(pickupDebounceRef.current);
+    }
+
+    pickupDebounceRef.current = setTimeout(() => {
+      if (value.length >= 3 || value.length === 0) {
+        pickup.setValue(value);
+      }
+    }, 400);
+  };
+
+  const handleDeliveryInputChange = (value: string) => {
+    setDeliveryInputValue(value);
+
+    if (deliveryDebounceRef.current) {
+      clearTimeout(deliveryDebounceRef.current);
+    }
+
+    deliveryDebounceRef.current = setTimeout(() => {
+      if (value.length >= 3 || value.length === 0) {
+        delivery.setValue(value);
+      }
+    }, 400);
+  };
+
+  // Handle selections with validation
+  const handlePickupSelection = async (address: string) => {
+    console.log("🔍 handlePickupSelection called with:", address);
+
+    // Prevent duplicate calls
+    const validationKey = `pickup-${address}-${trip?.originCity}`;
+    if (validationInProgressRef.current.has(validationKey)) {
+      console.log("🔍 Validation already in progress, skipping");
+      return;
+    }
+
+    setPickupAddress(address || "");
+    setPickupInputValue(address || "");
+    pickup.clearSuggestions();
+
+    if (address && trip?.originCity) {
+      validationInProgressRef.current.add(validationKey);
+      setPickupValidation({ isValid: null, message: "Validating..." });
+
+      const isValid = await validateAddress(address, trip.originCity, "pickup");
+      validationInProgressRef.current.delete(validationKey);
+
+      console.log("🔍 Validation result:", isValid);
+
+      // ADD THE MISSING VALIDATION LOGIC:
+      setPickupValidation({
+        isValid,
+        message: isValid
+          ? "✓ Address is within range"
+          : `✗ Address is too far from ${trip.originCity} (max 100km)`,
+      });
+
+      if (!isValid) {
+        console.log("🔍 Clearing invalid address");
+        // Clear invalid address
+        setPickupAddress("");
+        setPickupInputValue("");
+      }
+    } else {
+      console.log("🔍 VALIDATION SKIPPED - Missing address or city");
+    }
+  };
+
+  const handleDeliverySelection = async (address: string) => {
+    console.log("🔍 handleDeliverySelection called with:", address);
+    setDeliveryAddress(address || "");
+    setDeliveryInputValue(address || "");
+    delivery.clearSuggestions();
+
+    // Validate address immediately
+    console.log("🔍 Checking validation conditions:", {
+      hasAddress: !!address,
+      hasDestinationCity: !!trip?.destinationCity,
+      destinationCity: trip?.destinationCity,
+    });
+
+    if (address && trip?.destinationCity) {
+      console.log(
+        "🔍 Starting validation for:",
+        address,
+        "in",
+        trip.destinationCity
+      );
+      setDeliveryValidation({ isValid: null, message: "Validating..." });
+
+      const isValid = await validateAddress(
+        address,
+        trip.destinationCity,
+        "delivery"
+      );
+      console.log("🔍 Validation result:", isValid);
+
+      setDeliveryValidation({
+        isValid,
+        message: isValid
+          ? "✓ Address is within range"
+          : `✗ Address is too far from ${trip.destinationCity} (max 100km)`,
+      });
+
+      if (!isValid) {
+        console.log("🔍 Clearing invalid address");
+        // Clear invalid address
+        setDeliveryAddress("");
+        setDeliveryInputValue("");
+      }
+    } else {
+      console.log("🔍 DELIVERY VALIDATION SKIPPED - Missing address or city");
+    }
+  };
 
   // Mutations
   const bookTrip = useMutation(api.trip.setTripBooked);
@@ -158,14 +310,21 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
     cityName: string,
     type: "pickup" | "delivery"
   ): Promise<boolean> => {
-    const isValid = await isAddressWithinRange(address, cityName);
+    console.log("🚨 validateAddress called:", { address, cityName, type });
+
+    const isValid = await isAddressWithinRangeCached(address, cityName, 100);
+
+    console.log("🚨 isAddressWithinRangeCached returned:", isValid);
 
     if (!isValid) {
-      alert(
-        `The selected ${type} address is too far from ${cityName}. Please select an address within 100km of the city.`
+      console.log(
+        `Address validation failed: ${address} is too far from ${cityName}`
       );
       return false;
     }
+    console.log(
+      `Address validation passed: ${address} is within range of ${cityName}`
+    );
     return true;
   };
 
@@ -188,23 +347,23 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
       return "";
     }
 
-    if (cargoWeight > truck.maxLoadCapacity) {
-      alert("The cargo weight exceeds the truck's maximum load capacity.");
+    // Check validation states first
+    if (pickupValidation.isValid !== true) {
+      alert(
+        "Please select a valid pickup address within range of the origin city."
+      );
       return "";
     }
 
-    const isPickupValid = await validateAddress(
-      pickupAddress,
-      trip?.originCity || "",
-      "pickup"
-    );
-    const isDeliveryValid = await validateAddress(
-      deliveryAddress,
-      trip?.destinationCity || "",
-      "delivery"
-    );
+    if (deliveryValidation.isValid !== true) {
+      alert(
+        "Please select a valid delivery address within range of the destination city."
+      );
+      return "";
+    }
 
-    if (!isPickupValid || !isDeliveryValid) {
+    if (cargoWeight > truck.maxLoadCapacity) {
+      alert("The cargo weight exceeds the truck's maximum load capacity.");
       return "";
     }
 
@@ -348,10 +507,10 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
       deliveryAddress || `${trip?.destinationCity}, South Africa`;
     const newKey = `${origin}-${destination}`;
 
-    // Don't create new request if addresses haven't changed
-    if (newKey === directionsKey || hasDirectionsBeenFetched) return null;
+    // Only skip if the exact same route has been calculated
+    if (newKey === directionsKey) return null;
 
-    console.log("🚨 NEW DIRECTIONS API CALL:", newKey); // Remove after testing
+    console.log("🚨 NEW DIRECTIONS API CALL:", newKey);
 
     return {
       origin,
@@ -364,7 +523,6 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
     pickupAddress,
     deliveryAddress,
     directionsKey,
-    hasDirectionsBeenFetched,
   ]);
 
   const handleDirectionsCallback = useCallback(
@@ -382,7 +540,6 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
         const destination =
           deliveryAddress || `${trip?.destinationCity}, South Africa`;
         setDirectionsKey(`${origin}-${destination}`);
-        setHasDirectionsBeenFetched(true);
 
         console.log(
           "✅ DIRECTIONS API SUCCESS:",
@@ -549,21 +706,34 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
                         </label>
                         <AddressAutocomplete
                           value={pickupAddress || ""}
-                          onChange={(address) => {
-                            setPickupAddress(address || "");
-                            pickup.setValue(address || ""); // KEEP: only on select
-                          }}
+                          onChange={handlePickupSelection}
                           disabled={booked}
                           ready={pickup.ready}
-                          inputValue={pickup.value || ""}
-                          onInputChange={(value) =>
-                            pickup.setValue(value || "")
-                          }
+                          inputValue={pickupInputValue}
+                          onInputChange={handlePickupInputChange}
                           suggestions={pickup.suggestions}
                           status={pickup.status}
                           clearSuggestions={pickup.clearSuggestions}
                           label="Pickup Address"
                         />
+
+                        {/* Pickup Validation Feedback */}
+                        {pickupValidation.message && (
+                          <div
+                            className={`mt-2 text-xs flex items-center gap-1 ${
+                              pickupValidation.isValid === null
+                                ? "text-warning"
+                                : pickupValidation.isValid
+                                  ? "text-success"
+                                  : "text-error"
+                            }`}
+                          >
+                            {pickupValidation.isValid === null && (
+                              <div className="loading loading-spinner loading-xs"></div>
+                            )}
+                            <span>{pickupValidation.message}</span>
+                          </div>
+                        )}
                       </div>
 
                       <div>
@@ -606,21 +776,34 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
                         </label>
                         <AddressAutocomplete
                           value={deliveryAddress || ""}
-                          onChange={(address) => {
-                            setDeliveryAddress(address || "");
-                            delivery.setValue(address || ""); // KEEP: only on select
-                          }}
+                          onChange={handleDeliverySelection}
                           disabled={booked}
                           ready={delivery.ready}
-                          inputValue={delivery.value || ""}
-                          onInputChange={(value) =>
-                            delivery.setValue(value || "")
-                          }
+                          inputValue={deliveryInputValue}
+                          onInputChange={handleDeliveryInputChange}
                           suggestions={delivery.suggestions}
                           status={delivery.status}
                           clearSuggestions={delivery.clearSuggestions}
                           label="Delivery Address"
                         />
+
+                        {/* Delivery Validation Feedback */}
+                        {deliveryValidation.message && (
+                          <div
+                            className={`mt-2 text-xs flex items-center gap-1 ${
+                              deliveryValidation.isValid === null
+                                ? "text-warning"
+                                : deliveryValidation.isValid
+                                  ? "text-success"
+                                  : "text-error"
+                            }`}
+                          >
+                            {deliveryValidation.isValid === null && (
+                              <div className="loading loading-spinner loading-xs"></div>
+                            )}
+                            <span>{deliveryValidation.message}</span>
+                          </div>
+                        )}
                       </div>
 
                       <div>
