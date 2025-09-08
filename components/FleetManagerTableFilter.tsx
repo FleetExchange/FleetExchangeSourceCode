@@ -106,7 +106,7 @@ const FleetManagerTableFilter = ({
             </div>
             <div className="form-control">
               <label className="label">
-                <span className="label-text">Type Selection</span>
+                <span className="label-text pr-2">Type Selection</span>
               </label>
               <select
                 id="truckTypeSelect"

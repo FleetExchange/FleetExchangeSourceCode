@@ -450,14 +450,14 @@ const EditTruckCard: React.FC<EditTruckCardProps> = ({ truckId }) => {
 
               {/* Warning for active trips */}
               {linkedTrips && linkedTrips.length > 0 && (
-                <div className="alert alert-warning">
+                <div className="p-3 bg-warning/10 border border-warning/20 rounded-lg">
                   <div className="flex items-start gap-2">
-                    <AlertTriangle className="w-4 h-4 text-warning" />
+                    <AlertTriangle className="w-4 h-4 text-warning flex-shrink-0 mt-0.5" />
                     <div>
-                      <p className="text-sm font-medium">
+                      <p className="text-sm font-medium text-warning">
                         Active trips detected
                       </p>
-                      <p className="text-xs text-warning/80">
+                      <p className="text-xs text-warning/80 mt-1">
                         This vehicle has {linkedTrips.length} active trip(s).
                         Complete all trips before deleting this vehicle.
                       </p>
@@ -492,17 +492,15 @@ const EditTruckCard: React.FC<EditTruckCardProps> = ({ truckId }) => {
             </div>
           </div>
 
-          {/* Help Section */}
-          <div className="bg-warning/5 border border-warning/20 rounded-xl p-4 mt-6">
+          {/* Help Section - Make it more subtle */}
+          <div className="bg-info/10 border border-info/20 rounded-lg p-4 mt-6">
             <div className="flex items-start gap-3">
-              <div className="p-1 bg-warning/10 rounded border border-warning/20">
-                <AlertTriangle className="w-4 h-4 text-warning" />
+              <div className="p-1.5 bg-info/10 rounded border border-info/20">
+                <AlertTriangle className="w-4 h-4 text-info" />
               </div>
               <div>
-                <h4 className="font-medium text-base-content mb-1">
-                  Important Notes
-                </h4>
-                <ul className="text-sm text-base-content/60 space-y-1">
+                <h4 className="font-medium text-info mb-1">Important Notes</h4>
+                <ul className="text-sm text-info/80 space-y-1">
                   <li>
                     • Changes to vehicle specifications may affect trip
                     compatibility

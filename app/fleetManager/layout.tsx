@@ -50,7 +50,7 @@ export default function FleetManagerLayout({
         <TransporterSidebar />
 
         {/* Main content area - THIS should take remaining space */}
-        <main className="flex-1 overflow-auto">{children}</main>
+        <main className="flex-1 overflow-auto ml-10">{children}</main>
       </div>
     </>
   );

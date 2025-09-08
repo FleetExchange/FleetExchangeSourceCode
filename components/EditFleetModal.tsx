@@ -181,22 +181,22 @@ const EditFleetModal = ({ UserFleets }: { UserFleets: Fleet[] }) => {
 
         {/* Return Message */}
         {returnMessage && (
-          <div
-            className={`alert mb-4 ${
-              returnMessage.includes("Fleet Edited") ||
-              returnMessage.includes("Fleet Deleted")
-                ? "alert-success"
-                : returnMessage.includes("IMPORTANT") ||
-                    returnMessage.includes("already have")
-                  ? "alert-warning"
-                  : returnMessage.includes("went wrong")
-                    ? "alert-error"
-                    : "alert-info"
-            }`}
-          >
-            <div className="flex items-start gap-2">
+          <div className="mb-4">
+            <div
+              className={`flex items-center gap-2 p-3 rounded-lg border ${
+                returnMessage.includes("Fleet Edited") ||
+                returnMessage.includes("Fleet Deleted")
+                  ? "bg-success/10 border-success/20 text-success"
+                  : returnMessage.includes("IMPORTANT") ||
+                      returnMessage.includes("already have")
+                    ? "bg-warning/10 border-warning/20 text-warning"
+                    : returnMessage.includes("went wrong")
+                      ? "bg-error/10 border-error/20 text-error"
+                      : "bg-info/10 border-info/20 text-info"
+              }`}
+            >
               {getMessageIcon()}
-              <span className="text-sm">{returnMessage}</span>
+              <span className="text-sm font-medium">{returnMessage}</span>
             </div>
           </div>
         )}
@@ -224,12 +224,14 @@ const EditFleetModal = ({ UserFleets }: { UserFleets: Fleet[] }) => {
 
         {/* Warning for Delete */}
         {trucksInFleet && trucksInFleet.length > 0 && (
-          <div className="alert alert-warning mt-4">
+          <div className="mt-4 p-3 bg-warning/10 border border-warning/20 rounded-lg">
             <div className="flex items-start gap-2">
-              <AlertTriangle className="w-4 h-4 text-warning" />
+              <AlertTriangle className="w-4 h-4 text-warning flex-shrink-0 mt-0.5" />
               <div>
-                <p className="text-sm font-medium">Cannot delete fleet</p>
-                <p className="text-xs text-warning/80">
+                <p className="text-sm font-medium text-warning">
+                  Cannot delete fleet
+                </p>
+                <p className="text-xs text-warning/80 mt-1">
                   This fleet contains {trucksInFleet.length} truck(s). Please
                   reassign or remove all trucks before deleting.
                 </p>

@@ -22,7 +22,7 @@ import PaginationControls from "./PaginationControls";
 
 const FleetManagerTable = () => {
   // Pagination constant
-  const ITEMS_PER_PAGE = 20;
+  const ITEMS_PER_PAGE = 2;
   const [currentPage, setCurrentPage] = useState(1);
 
   // Get the logged in user identity
@@ -168,16 +168,16 @@ const FleetManagerTable = () => {
           <div className="flex flex-col sm:flex-row gap-3 flex-wrap items-start sm:items-center w-full lg:w-auto">
             {/* Search Bar */}
             <div className="form-control">
-              <div className="input input-bordered flex items-center gap-2 focus-within:border-primary min-w-[200px]">
+              <label className="input input-bordered flex items-center gap-2 min-w-[200px] focus-within:outline-none focus-within:ring-0 focus-within:ring-primary focus-within:border-primary">
                 <Search className="w-4 h-4 text-base-content/60" />
                 <input
                   type="text"
-                  className="grow bg-transparent focus:outline-none"
+                  className="grow focus:outline-none border-none"
                   placeholder="Search registration..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
-              </div>
+              </label>
             </div>
 
             {/* Fleet Selector */}
@@ -185,7 +185,7 @@ const FleetManagerTable = () => {
               <select
                 value={userFleet || ""}
                 onChange={handleFleetChange}
-                className="select select-bordered focus:border-primary min-w-[150px]"
+                className="select select-bordered focus:outline-none focus:border-primary min-w-[150px]"
               >
                 {userFleets?.map(
                   (fleet: { _id: string; fleetName: string }) => (
@@ -200,7 +200,7 @@ const FleetManagerTable = () => {
             {/* Sort Selector */}
             <div className="form-control">
               <select
-                className="select select-bordered focus:border-primary min-w-[180px]"
+                className="select select-bordered focus:outline-none focus:border-primary min-w-[180px]"
                 value={sortBy}
                 onChange={(e) =>
                   setSortBy(
@@ -233,7 +233,7 @@ const FleetManagerTable = () => {
           <div className="flex gap-3 items-center">
             {/* Pagination */}
             <PaginationControls
-              currentPage={currentPage}
+              currentPage={totalPages === 0 ? 0 : currentPage}
               totalPages={totalPages}
               onPageChange={(page) => {
                 setCurrentPage(page);
@@ -249,7 +249,7 @@ const FleetManagerTable = () => {
               </div>
               <ul
                 tabIndex={0}
-                className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow-lg border border-base-300"
+                className="dropdown-content bg-base-100 rounded-box z-[1] w-65 p-2 shadow-lg border border-base-300"
               >
                 <li>
                   <Link
@@ -257,17 +257,28 @@ const FleetManagerTable = () => {
                       pathname: "/truckManager",
                       query: { action: "create", truckId: "" },
                     }}
-                    className="flex items-center gap-2"
+                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-primary hover:text-primary-content transition-colors duration-200 group"
                   >
-                    <Truck className="w-4 h-4" />
-                    Create Truck
+                    <div className="p-1.5 rounded-md bg-primary/10 group-hover:bg-primary-content/20">
+                      <Truck className="w-4 h-4 text-primary group-hover:text-primary-content" />
+                    </div>
+                    <div>
+                      <div className="font-medium">Create Truck</div>
+                      <div className="text-xs text-base-content/60 group-hover:text-primary-content/80">
+                        Add a new vehicle to your fleet
+                      </div>
+                    </div>
                   </Link>
                 </li>
                 <li>
-                  <NewFleetCard />
+                  <div className="p-3 rounded-lg hover:bg-success hover:text-success-content transition-colors duration-200 group cursor-pointer">
+                    <NewFleetCard />
+                  </div>
                 </li>
                 <li>
-                  <EditFleetCard />
+                  <div className="p-3 rounded-lg hover:bg-info hover:text-info-content transition-colors duration-200 group cursor-pointer">
+                    <EditFleetCard />
+                  </div>
                 </li>
               </ul>
             </div>

@@ -116,20 +116,20 @@ const NewFleetModal = ({ fleets }: { fleets: Fleet[] }) => {
 
         {/* Return Message */}
         {returnMessage && (
-          <div
-            className={`alert mb-4 ${
-              returnMessage.includes("Fleet Created")
-                ? "alert-success"
-                : returnMessage.includes("already have")
-                  ? "alert-warning"
-                  : returnMessage.includes("went wrong")
-                    ? "alert-error"
-                    : "alert-info"
-            }`}
-          >
-            <div className="flex items-start gap-2">
+          <div className="mb-4">
+            <div
+              className={`flex items-center gap-2 p-3 rounded-lg border ${
+                returnMessage.includes("Fleet Created")
+                  ? "bg-success/10 border-success/20 text-success"
+                  : returnMessage.includes("already have")
+                    ? "bg-warning/10 border-warning/20 text-warning"
+                    : returnMessage.includes("went wrong")
+                      ? "bg-error/10 border-error/20 text-error"
+                      : "bg-info/10 border-info/20 text-info"
+              }`}
+            >
               {getMessageIcon()}
-              <span className="text-sm">{returnMessage}</span>
+              <span className="text-sm font-medium">{returnMessage}</span>
             </div>
           </div>
         )}

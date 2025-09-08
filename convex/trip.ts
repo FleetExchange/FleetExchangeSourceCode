@@ -365,13 +365,16 @@ export const getTripsByTruckId = query({
     const trips = await ctx.db
       .query("trip")
       .filter((q) =>
-        q.or(
-          // Check for upcoming trips
-          q.gt(q.field("departureDate"), currentDate),
-          // Check for trips in progress (between departure and arrival)
-          q.and(
-            q.lte(q.field("departureDate"), currentDate),
-            q.gte(q.field("arrivalDate"), currentDate)
+        q.and(
+          q.eq(q.field("isExpired"), false),
+          q.or(
+            // Check for upcoming trips
+            q.gt(q.field("departureDate"), currentDate),
+            // Check for trips in progress (between departure and arrival)
+            q.and(
+              q.lte(q.field("departureDate"), currentDate),
+              q.gte(q.field("arrivalDate"), currentDate)
+            )
           )
         )
       )
