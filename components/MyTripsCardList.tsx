@@ -47,6 +47,7 @@ const MyTripsCardList = () => {
 
   // From all the trips, get the booked trips and their purchase trip objects
   const bookedTrips = allUserTrips?.filter((trip) => trip.isBooked === true);
+
   const purchaseTripIds = bookedTrips?.map((trip) => trip._id) || [];
 
   //Only call the query if there are actually trip IDs
@@ -233,6 +234,9 @@ const MyTripsCardList = () => {
               (pt) => pt.tripId === trip._id
             );
             const truck = userTrucks?.find((t) => t._id === trip.truckId);
+
+            // If a trip is expired and not booked skip rendering it
+            if (trip.isExpired && !trip.isBooked) return null;
 
             return (
               <div

@@ -407,13 +407,21 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
     if (trip.isBooked && purchaseTripDetails) {
       setPickupAddress(trip.originAddress || "");
       setDeliveryAddress(trip.destinationAddress || "");
+      // IMPORTANT: Also update the input display values
+      setPickupInputValue(trip.originAddress || "");
+      setDeliveryInputValue(trip.destinationAddress || "");
+
       setPickupInstructions(purchaseTripDetails.pickupInstructions || "");
       setDeliveryInstructions(purchaseTripDetails.deliveryInstructions || "");
       setCargoDescription(purchaseTripDetails.freightNotes || "");
       setCargoWeight(purchaseTripDetails.cargoWeight || 0);
       setDistance(purchaseTripDetails.distance || 0);
-      if (trip.originAddress) pickup.setValue(trip.originAddress);
-      if (trip.destinationAddress) delivery.setValue(trip.destinationAddress);
+
+      // Clear any existing validation states
+      setPickupValidation({ isValid: null, message: "" });
+      setDeliveryValidation({ isValid: null, message: "" });
+
+      // Don't call setValue here since we're not searching, just displaying
     }
   }, [trip, purchaseTripDetails]);
 
@@ -538,7 +546,7 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
         // Mark as fetched and update key
         const origin = pickupAddress || `${trip?.originCity}, South Africa`;
         const destination =
-          deliveryAddress || `${trip?.destinationCity}, South Africa`;
+          deliveryAddress || `${trip?.destinationCity}, South Africa}`;
         setDirectionsKey(`${origin}-${destination}`);
 
         console.log(
@@ -555,6 +563,14 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
     setHasDirectionsBeenFetched(false);
     setDirectionsKey("");
   }, [tripId]);
+
+  // Initialize input values when trip data loads (for non-booked trips)
+  useEffect(() => {
+    if (trip && !trip.isBooked) {
+      setPickupInputValue(trip.originCity || "");
+      setDeliveryInputValue(trip.destinationCity || "");
+    }
+  }, [trip?.originCity, trip?.destinationCity, trip?.isBooked]);
 
   return (
     <div className="min-h-screen bg-base-200">

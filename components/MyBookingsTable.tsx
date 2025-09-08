@@ -14,6 +14,7 @@ import {
   Eye,
   Package,
   DollarSign,
+  Banknote,
 } from "lucide-react";
 import {
   formatDateTimeInSAST,
@@ -285,7 +286,7 @@ const MyBookingsTable = () => {
                 </th>
                 <th className="font-semibold text-base-content">
                   <div className="flex items-center gap-2">
-                    <DollarSign className="w-4 h-4" />
+                    <Banknote className="w-4 h-4" />
                     Amount
                   </div>
                 </th>
