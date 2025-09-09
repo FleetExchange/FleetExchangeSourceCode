@@ -447,7 +447,7 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
                     {truck && (
                       <div className="label">
                         <span className="label-text-alt text-base-content/60">
-                          Max capacity: {truck.maxLoadCapacity} kg
+                          Max capacity: {truck.maxLoadCapacity || "N/A"} kg
                         </span>
                       </div>
                     )}
@@ -484,8 +484,12 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
 
                 <div className="bg-base-200/50 border border-base-300 rounded-xl p-4">
                   <h4 className="font-semibold text-base-content mb-4 text-center">
-                    {truck?.year} {truck?.make} {truck?.model} -{" "}
-                    {truck?.truckType}
+                    {truck?.year &&
+                    truck?.make &&
+                    truck?.model &&
+                    truck?.truckType
+                      ? `${truck.year} ${truck.make} ${truck.model} - ${truck.truckType}`
+                      : "N/A"}
                   </h4>
 
                   <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -495,7 +499,7 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
                       </div>
                       <p className="text-xs text-base-content/60">Length</p>
                       <p className="text-sm font-semibold text-base-content">
-                        {truck?.length}m
+                        {truck?.length || "N/A"}m
                       </p>
                     </div>
                     <div className="bg-base-100 rounded-lg p-3 text-center border border-base-300">
@@ -504,7 +508,7 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
                       </div>
                       <p className="text-xs text-base-content/60">Width</p>
                       <p className="text-sm font-semibold text-base-content">
-                        {truck?.width}m
+                        {truck?.width || "N/A"}m
                       </p>
                     </div>
                     <div className="bg-base-100 rounded-lg p-3 text-center border border-base-300">
@@ -513,14 +517,14 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
                       </div>
                       <p className="text-xs text-base-content/60">Height</p>
                       <p className="text-sm font-semibold text-base-content">
-                        {truck?.height}m
+                        {truck?.height || "N/A"}m
                       </p>
                     </div>
                     <div className="bg-base-100 rounded-lg p-3 text-center border border-base-300">
                       <Package className="w-4 h-4 text-primary mx-auto mb-1" />
                       <p className="text-xs text-base-content/60">Max Load</p>
                       <p className="text-sm font-semibold text-base-content">
-                        {truck?.maxLoadCapacity}kg
+                        {truck?.maxLoadCapacity || "N/A"}kg
                       </p>
                     </div>
                   </div>
