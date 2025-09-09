@@ -222,7 +222,7 @@ const ClientProfileFiles: React.FC<ClientProfileFilesProps> = ({
                     <div className="flex items-center gap-1 text-xs text-success">
                       <Calendar className="w-3 h-3" />
                       <span>
-                        Verified: {formatDateInSAST(fileInfo.verifiedAt)}
+                        Assesed: {formatDateInSAST(fileInfo.verifiedAt)}
                       </span>
                     </div>
                   )}
@@ -274,10 +274,10 @@ const ClientProfileFiles: React.FC<ClientProfileFilesProps> = ({
           <div className="bg-base-200/50 border border-base-300 rounded-lg p-4">
             <p className="text-base-content/60 text-sm">
               <strong>Important:</strong> It is your responsibility as a client
-              to upload your most recent and valid documents. FreightConnect
-              will not be held liable for any outdated documentation. These
-              files help transporters trust your business and help our platform
-              uphold high user standards.
+              to upload your most recent and valid documents. FleetExchange will
+              not be held liable for any outdated documentation. These files
+              help transporters trust your business and help our platform uphold
+              high user standards.
             </p>
           </div>
         </div>

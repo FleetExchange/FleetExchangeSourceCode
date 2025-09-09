@@ -132,51 +132,63 @@ export const deleteTruck = mutation({
 export const isTruckAvailable = query({
   args: {
     truckId: v.id("truck"),
-    departureDate: v.string(),
-    arrivalDate: v.string(),
-    excludeTripId: v.optional(v.id("trip")), // For editing existing trips
+    departureDate: v.number(), // Accept timestamps directly
+    arrivalDate: v.number(), // Accept timestamps directly
+    excludeTripId: v.optional(v.id("trip")),
   },
   handler: async (ctx, args) => {
-    const departureTime = new Date(args.departureDate).getTime();
-    const arrivalTime = new Date(args.arrivalDate).getTime();
+    const departureTime = args.departureDate; // Already a timestamp
+    const arrivalTime = args.arrivalDate; // Already a timestamp
 
-    // Find all active trips for this truck that overlap with the requested dates
+    console.log("🔍 Checking truck availability:", {
+      truckId: args.truckId,
+      requestedPeriod: {
+        departure: new Date(args.departureDate).toISOString(),
+        arrival: new Date(args.arrivalDate).toISOString(),
+        departureTime,
+        arrivalTime,
+      },
+      excludeTripId: args.excludeTripId,
+    });
+
+    // Get ALL trips for this truck first for debugging
+    const allTrucksTrips = await ctx.db
+      .query("trip")
+      .filter((q) => q.eq(q.field("truckId"), args.truckId))
+      .collect();
+
+    console.log(
+      "🔍 All trips for this truck:",
+      allTrucksTrips.map((trip) => ({
+        _id: trip._id,
+        departureDate: trip.departureDate,
+        arrivalDate: trip.arrivalDate,
+        isExpired: trip.isExpired,
+        isBooked: trip.isBooked,
+      }))
+    );
+
+    // Find conflicting trips
     const conflictingTrips = await ctx.db
       .query("trip")
       .filter((q) =>
         q.and(
           q.eq(q.field("truckId"), args.truckId),
-          q.eq(q.field("isExpired"), false),
+          q.neq(q.field("isExpired"), true), // Not expired
           // Exclude the current trip if editing
           args.excludeTripId
             ? q.neq(q.field("_id"), args.excludeTripId)
-            : q.eq(1, 1),
-          // Check for date overlap using four conditions:
-          // 1. New trip starts during existing trip
-          // 2. New trip ends during existing trip
-          // 3. New trip encompasses existing trip
-          // 4. Existing trip encompasses new trip
-          q.or(
-            q.and(
-              q.lte(q.field("departureDate"), departureTime),
-              q.gte(q.field("arrivalDate"), departureTime)
-            ),
-            q.and(
-              q.lte(q.field("departureDate"), arrivalTime),
-              q.gte(q.field("arrivalDate"), arrivalTime)
-            ),
-            q.and(
-              q.gte(q.field("departureDate"), departureTime),
-              q.lte(q.field("arrivalDate"), arrivalTime)
-            ),
-            q.and(
-              q.lte(q.field("departureDate"), departureTime),
-              q.gte(q.field("arrivalDate"), arrivalTime)
-            )
+            : q.eq(q.field("_id"), q.field("_id")), // Always true
+          // Simplified overlap check: two ranges overlap if start1 < end2 AND start2 < end1
+          q.and(
+            q.lt(q.field("departureDate"), arrivalTime),
+            q.gt(q.field("arrivalDate"), departureTime)
           )
         )
       )
       .collect();
+
+    console.log("🔍 Conflicting trips found:", conflictingTrips.length);
 
     return {
       isAvailable: conflictingTrips.length === 0,
@@ -187,6 +199,7 @@ export const isTruckAvailable = query({
         departureDate: trip.departureDate,
         arrivalDate: trip.arrivalDate,
         isBooked: trip.isBooked,
+        isExpired: trip.isExpired,
       })),
     };
   },

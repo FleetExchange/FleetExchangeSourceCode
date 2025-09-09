@@ -257,7 +257,7 @@ const TransporterProfileFiles: React.FC<TransporterProfileFilesProps> = ({
                     <div className="flex items-center gap-1 text-xs text-success">
                       <Calendar className="w-3 h-3" />
                       <span>
-                        Verified: {formatDateInSAST(fileInfo.verifiedAt)}
+                        Assesed: {formatDateInSAST(fileInfo.verifiedAt)}
                       </span>
                     </div>
                   )}
@@ -310,7 +310,7 @@ const TransporterProfileFiles: React.FC<TransporterProfileFilesProps> = ({
             <p className="text-base-content/60 text-sm">
               <strong>Important:</strong> It is your responsibility as a
               transporter to upload your most recent and valid documents.
-              FreightConnect will not be held liable for any outdated
+              FleetExchange will not be held liable for any outdated
               documentation. These files help clients trust your business and
               help our platform uphold high user standards.
             </p>

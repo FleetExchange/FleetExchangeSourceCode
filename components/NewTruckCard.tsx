@@ -363,7 +363,7 @@ const NewTruckCard = () => {
                 <Link href="/fleetManager">
                   <button className="btn btn-outline gap-2">
                     <X className="w-4 h-4" />
-                    Cancel
+                    Close
                   </button>
                 </Link>
               </div>

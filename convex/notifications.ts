@@ -142,6 +142,17 @@ export const checkTransporterAccountSetup = mutation({
         roadworthy?.length > 0
       )
     ) {
+      //debug
+      console.log(
+        terms?.length,
+        insurance?.length,
+        companyReg?.length,
+        directorId?.length,
+        professionalLicense?.length,
+        operatingLicense?.length,
+        roadworthy?.length
+      );
+
       // Check if document notification already exists and is unread
       const existingDocNotif = await ctx.db
         .query("notifications")

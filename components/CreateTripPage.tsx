@@ -185,8 +185,8 @@ const CreateTripPage = () => {
     selectedTruckId && departureDate > 0 && arrivalDate > 0
       ? {
           truckId: selectedTruckId,
-          departureDate: departureDate.toString(),
-          arrivalDate: arrivalDate.toString(),
+          departureDate: departureDate,
+          arrivalDate: arrivalDate,
         }
       : "skip"
   );
