@@ -19,9 +19,9 @@ export default function DiscoverPage() {
 
   const [filterTerm, setFilterTerm] = useState<{
     depDate: string;
-    depTime: string;
+
     arrDate: string;
-    arrTime: string;
+
     truckType: string;
     width: string;
     length: string;
@@ -29,9 +29,9 @@ export default function DiscoverPage() {
     payload: string;
   }>({
     depDate: "",
-    depTime: "",
+
     arrDate: "",
-    arrTime: "",
+
     truckType: "",
     width: "",
     length: "",

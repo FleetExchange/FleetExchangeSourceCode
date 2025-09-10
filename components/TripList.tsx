@@ -19,9 +19,9 @@ type SearchTerm = {
 
 type FilterTerm = {
   depDate: string;
-  depTime: string;
+
   arrDate: string;
-  arrTime: string;
+
   truckType: string;
   width: string;
   length: string;

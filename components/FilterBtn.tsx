@@ -14,9 +14,7 @@ const FilterBtn = ({
 }: {
   onFilter: (filters: {
     depDate: string;
-    depTime: string;
     arrDate: string;
-    arrTime: string;
     truckType: string;
     width: string;
     length: string;
@@ -24,11 +22,9 @@ const FilterBtn = ({
     payload: string;
   }) => void;
 }) => {
-  // Local state for form inputs (user sees SAST times)
+  // Local state for form inputs (user sees SAST dates)
   const [depDate, setDepDate] = useState("");
-  const [depTime, setDepTime] = useState("");
   const [arrDate, setArrDate] = useState("");
-  const [arrTime, setArrTime] = useState("");
   const [truckType, setType] = useState("");
   const [width, setWidth] = useState("");
   const [length, setlength] = useState("");
@@ -38,9 +34,7 @@ const FilterBtn = ({
   // Applied filters state - tracks what's actually been applied
   const [appliedFilters, setAppliedFilters] = useState({
     depDate: "",
-    depTime: "",
     arrDate: "",
-    arrTime: "",
     truckType: "",
     width: "",
     length: "",
@@ -56,29 +50,19 @@ const FilterBtn = ({
   const applyFilters = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Convert SAST date/time inputs to UTC timestamps for filtering
+    // Convert SAST date inputs to UTC timestamps for filtering
     let depDateUTC = "";
     let arrDateUTC = "";
 
-    if (depDate && depTime) {
-      // Combine date and time, then convert SAST to UTC
-      const depDateTime = `${depDate}T${depTime}`;
-      const depTimestamp = convertSASTInputToUTC(depDateTime);
-      depDateUTC = depTimestamp.toString();
-    } else if (depDate) {
-      // Just date, assume start of day (00:00) in SAST
+    if (depDate) {
+      // Use start of day (00:00) in SAST for departure date
       const depDateTime = `${depDate}T00:00`;
       const depTimestamp = convertSASTInputToUTC(depDateTime);
       depDateUTC = depTimestamp.toString();
     }
 
-    if (arrDate && arrTime) {
-      // Combine date and time, then convert SAST to UTC
-      const arrDateTime = `${arrDate}T${arrTime}`;
-      const arrTimestamp = convertSASTInputToUTC(arrDateTime);
-      arrDateUTC = arrTimestamp.toString();
-    } else if (arrDate) {
-      // Just date, use end of day utility for precise end-of-day calculation
+    if (arrDate) {
+      // Use end of day for arrival date to include the entire day
       const startOfDay = convertSASTInputToUTC(`${arrDate}T00:00`);
       const arrTimestamp = getEndOfSASTDay(startOfDay);
       arrDateUTC = arrTimestamp.toString();
@@ -86,9 +70,7 @@ const FilterBtn = ({
 
     const filters = {
       depDate: depDateUTC, // Send UTC timestamp for filtering
-      depTime: depTime, // Keep time for additional filtering logic if needed
       arrDate: arrDateUTC, // Send UTC timestamp for filtering
-      arrTime: arrTime, // Keep time for additional filtering logic if needed
       truckType,
       width,
       length,
@@ -99,9 +81,7 @@ const FilterBtn = ({
     // Update applied filters state (keep original user input for display)
     setAppliedFilters({
       depDate,
-      depTime,
       arrDate,
-      arrTime,
       truckType,
       width,
       length,
@@ -126,9 +106,7 @@ const FilterBtn = ({
 
     // Reset local state
     setDepDate("");
-    setDepTime("");
     setArrDate("");
-    setArrTime("");
     setWidth("");
     setlength("");
     setHeight("");
@@ -138,9 +116,7 @@ const FilterBtn = ({
     // Reset applied filters
     const emptyFilters = {
       depDate: "",
-      depTime: "",
       arrDate: "",
-      arrTime: "",
       truckType: "",
       width: "",
       length: "",
@@ -204,7 +180,7 @@ const FilterBtn = ({
                   Advanced Filters
                 </h2>
                 <p className="text-sm text-base-content/60">
-                  All times in South African Standard Time (SAST)
+                  Filter trips by date and vehicle specifications
                 </p>
               </div>
             </div>
@@ -216,73 +192,49 @@ const FilterBtn = ({
           </div>
 
           <div className="space-y-6">
-            {/* Departure Section */}
+            {/* Simplified Departure Section */}
             <div className="bg-base-200/50 border border-base-300 rounded-xl p-4">
               <div className="flex items-center gap-2 mb-4">
                 <Calendar className="w-4 h-4 text-primary" />
                 <h3 className="font-semibold text-base-content">
-                  Departure Time (SAST)
+                  Departure Date
                 </h3>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="label">
-                    <span className="label-text font-medium">Date</span>
-                  </label>
-                  <input
-                    type="date"
-                    className="input input-bordered w-full focus:outline-none focus:border-primary"
-                    value={depDate}
-                    onChange={(e) => setDepDate(e.target.value)}
-                    min={getTodayInSAST()}
-                  />
-                </div>
-                <div>
-                  <label className="label">
-                    <span className="label-text font-medium">Time</span>
-                  </label>
-                  <input
-                    type="time"
-                    className="input input-bordered w-full focus:outline-none focus:border-primary"
-                    value={depTime}
-                    onChange={(e) => setDepTime(e.target.value)}
-                  />
-                </div>
+              <div>
+                <label className="label">
+                  <span className="label-text font-medium">From Date</span>
+                </label>
+                <input
+                  type="date"
+                  className="input input-bordered w-full"
+                  value={depDate}
+                  onChange={(e) => setDepDate(e.target.value)}
+                  min={getTodayInSAST()}
+                  placeholder="Select departure date"
+                />
               </div>
             </div>
 
-            {/* Arrival Section */}
+            {/* Simplified Arrival Section */}
             <div className="bg-base-200/50 border border-base-300 rounded-xl p-4">
               <div className="flex items-center gap-2 mb-4">
                 <Calendar className="w-4 h-4 text-success" />
                 <h3 className="font-semibold text-base-content">
-                  Arrival Time (SAST)
+                  Arrival Date
                 </h3>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="label">
-                    <span className="label-text font-medium">Date</span>
-                  </label>
-                  <input
-                    type="date"
-                    className="input input-bordered w-full focus:outline-none focus:border-primary"
-                    value={arrDate}
-                    onChange={(e) => setArrDate(e.target.value)}
-                    min={depDate || getTodayInSAST()}
-                  />
-                </div>
-                <div>
-                  <label className="label">
-                    <span className="label-text font-medium">Time</span>
-                  </label>
-                  <input
-                    type="time"
-                    className="input input-bordered w-full focus:outline-none focus:border-primary"
-                    value={arrTime}
-                    onChange={(e) => setArrTime(e.target.value)}
-                  />
-                </div>
+              <div>
+                <label className="label">
+                  <span className="label-text font-medium">To Date</span>
+                </label>
+                <input
+                  type="date"
+                  className="input input-bordered w-full"
+                  value={arrDate}
+                  onChange={(e) => setArrDate(e.target.value)}
+                  min={depDate || getTodayInSAST()}
+                  placeholder="Select arrival date"
+                />
               </div>
             </div>
 
@@ -387,12 +339,12 @@ const FilterBtn = ({
                 <div className="flex flex-wrap gap-2">
                   {appliedFilters.depDate && (
                     <div className="badge badge-primary gap-1">
-                      Depart: {appliedFilters.depDate} {appliedFilters.depTime}
+                      From: {appliedFilters.depDate}
                     </div>
                   )}
                   {appliedFilters.arrDate && (
                     <div className="badge badge-success gap-1">
-                      Arrive: {appliedFilters.arrDate} {appliedFilters.arrTime}
+                      To: {appliedFilters.arrDate}
                     </div>
                   )}
                   {appliedFilters.truckType && (

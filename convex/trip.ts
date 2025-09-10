@@ -18,9 +18,7 @@ export const getTrip = query({
     }),
     filterTerm: v.object({
       depDate: v.string(),
-      depTime: v.string(),
       arrDate: v.string(),
-      arrTime: v.string(),
       truckType: v.string(),
       width: v.string(),
       length: v.string(),
@@ -48,7 +46,7 @@ export const getTrip = query({
       );
     }
 
-    // Apply latest arrival, overrride if specific date exists
+    // Apply latest arrival, override if specific date exists
     if (searchTerm.arrival) {
       const latestArrival = new Date(searchTerm.arrival);
       latestArrival.setHours(23, 59, 59, 999); // Set to end of day
@@ -59,66 +57,28 @@ export const getTrip = query({
       );
     }
 
-    // Create a arrival Date object set to a default and update time part based on the filters
-    // If specific time is give, 1 hour window is applied both sides
+    // Filter by arrival date - entire day range
     if (filterTerm.arrDate) {
-      if (filterTerm.arrTime) {
-        const [hours, minutes] = filterTerm.arrTime.split(":").map(Number);
-        const arrivalDate = new Date(filterTerm.arrDate);
-        arrivalDate.setHours(hours, minutes, 0, 0);
+      // Convert string timestamp to number for comparison
+      const arrDateTimestamp = parseInt(filterTerm.arrDate, 10);
 
-        const windowStart = new Date(arrivalDate);
-        windowStart.setHours(hours - 3, minutes, 0, 0);
-
-        const windowEnd = new Date(arrivalDate);
-        windowEnd.setHours(hours - 1, minutes, 59, 999);
-
+      if (!isNaN(arrDateTimestamp)) {
+        // arrDate from frontend is already end of day timestamp
         trips = trips.filter((trip) => {
-          const arr = new Date(trip.arrivalDate);
-          return arr >= windowStart && arr <= windowEnd;
-        });
-      } else {
-        const startOfDay = new Date(filterTerm.arrDate);
-        startOfDay.setHours(0, 0, 0, 0);
-
-        const endOfDay = new Date(filterTerm.arrDate);
-        endOfDay.setHours(23, 59, 59, 999);
-
-        trips = trips.filter((trip) => {
-          const arr = new Date(trip.arrivalDate);
-          return arr >= startOfDay && arr <= endOfDay;
+          return trip.arrivalDate && trip.arrivalDate <= arrDateTimestamp;
         });
       }
     }
 
-    // Create a departure Date object set to a default and update time part based on the filters
-    // If specific time is give, 1 hour window is applied both sides
+    // Filter by departure date - entire day range
     if (filterTerm.depDate) {
-      if (filterTerm.depTime) {
-        const [hours, minutes] = filterTerm.depTime.split(":").map(Number);
-        const depDate = new Date(filterTerm.depDate);
-        depDate.setHours(hours, minutes, 0, 0);
+      // Convert string timestamp to number for comparison
+      const depDateTimestamp = parseInt(filterTerm.depDate, 10);
 
-        const windowStart = new Date(depDate);
-        windowStart.setHours(hours - 3, minutes, 0, 0);
-
-        const windowEnd = new Date(depDate);
-        windowEnd.setHours(hours - 1, minutes, 59, 999);
-
+      if (!isNaN(depDateTimestamp)) {
+        // depDate from frontend is start of day timestamp
         trips = trips.filter((trip) => {
-          const arr = new Date(trip.departureDate);
-          return arr >= windowStart && arr <= windowEnd;
-        });
-      } else {
-        const startOfDay = new Date(filterTerm.depDate);
-        startOfDay.setHours(0, 0, 0, 0);
-
-        const endOfDay = new Date(filterTerm.depDate);
-        endOfDay.setHours(23, 59, 59, 999);
-
-        trips = trips.filter((trip) => {
-          const arr = new Date(trip.departureDate);
-          return arr >= startOfDay && arr <= endOfDay;
+          return trip.departureDate && trip.departureDate >= depDateTimestamp;
         });
       }
     }
@@ -144,6 +104,7 @@ export const getTrip = query({
         return truck && truck.width === Number(filterTerm.width);
       });
     }
+
     // Filter for Length
     if (filterTerm.length) {
       const trucks = await ctx.db.query("truck").collect();
@@ -154,6 +115,7 @@ export const getTrip = query({
         return truck && truck.length === Number(filterTerm.length);
       });
     }
+
     // Filter for height
     if (filterTerm.height) {
       const trucks = await ctx.db.query("truck").collect();
@@ -176,7 +138,7 @@ export const getTrip = query({
       });
     }
 
-    // make sure trip isExpire != true
+    // Make sure trip isExpired != true
     trips = trips.filter((trip) => {
       return trip.isExpired != true;
     });
