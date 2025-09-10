@@ -22,7 +22,7 @@ import PaginationControls from "./PaginationControls";
 
 const FleetManagerTable = () => {
   // Pagination constant
-  const ITEMS_PER_PAGE = 2;
+  const ITEMS_PER_PAGE = 20;
   const [currentPage, setCurrentPage] = useState(1);
 
   // Get the logged in user identity

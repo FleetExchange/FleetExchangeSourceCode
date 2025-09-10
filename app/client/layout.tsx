@@ -19,7 +19,7 @@ export default function ClientLayout({
       <MobileMenuClient />
 
       {/* Main Content */}
-      <main className="lg:ml-5">{children}</main>
+      <main className="lg:ml-10">{children}</main>
     </div>
   );
 }

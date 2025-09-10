@@ -322,11 +322,11 @@ export const createTrip = mutation({
       throw new Error("Arrival date must be after departure date");
     }
 
-    // Double-check truck availability on the backend
+    // Double-check truck availability on the backend (pass numeric timestamps)
     const availability = await ctx.runQuery(api.truck.isTruckAvailable, {
       truckId: args.truckId,
-      departureDate: args.departureDate, // Keep as string for the availability query
-      arrivalDate: args.arrivalDate,
+      departureDate: departureTimestamp, // Pass numeric timestamp
+      arrivalDate: arrivalTimestamp,
     });
 
     if (!availability.isAvailable) {
