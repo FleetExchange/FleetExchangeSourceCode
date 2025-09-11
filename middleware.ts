@@ -3,41 +3,47 @@ import { NextResponse } from "next/server";
 
 export const config = {
   matcher: [
-    // Skip Next.js internals and all static files, unless found in search params
     "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
-    // Always run for API routes
     "/(api|trpc)(.*)",
   ],
 };
 
-const isProtectedRoute = createRouteMatcher([
-  "/transporter(.*)",
-  "/client(.*)",
-  "/admin(.*)",
-]);
-
+// Public routes
 const isPublicRoute = createRouteMatcher([
   "/",
-  "/signUp(.*)",
-  "/signIn(.*)",
+  "/sign-up(.*)",
+  "/sign-in(.*)",
   "/pending-approval",
   "/unauthorized",
   "/api/webhooks(.*)",
 ]);
 
+// Protected routes (auth required)
+const isProtectedRoute = createRouteMatcher([
+  "/transporter(.*)",
+  "/client(.*)",
+  "/admin(.*)",
+  "/myTrips(.*)",
+  "/myBookings(.*)",
+  "/payment(.*)",
+  "/profiles(.*)",
+  "/tripClient(.*)",
+  "/tripOwner(.*)",
+  "/fleetManager(.*)",
+]);
+
 export default clerkMiddleware(async (auth, req) => {
-  const { userId } = await auth();
+  const a = await auth();
+  const { userId } = a;
 
-  // Allow access to public routes
-  if (isPublicRoute(req)) {
-    return;
-  }
+  // Allow public
+  if (isPublicRoute(req)) return NextResponse.next();
 
-  // Redirect to sign-in if accessing protected route without authentication
+  // Block unauthenticated on protected
   if (isProtectedRoute(req) && !userId) {
-    return (await auth()).redirectToSignIn();
+    return a.redirectToSignIn();
   }
 
-  // For authenticated users on protected routes, let the components handle role checking
-  return;
+  // Everything else proceeds
+  return NextResponse.next();
 });
