@@ -299,8 +299,8 @@ const Page = () => {
             {/* Mission Statement */}
             <div className="mt-10 p-6 bg-primary-content/10 rounded-xl border border-primary-content/20">
               <p className="text-primary-content/90 italic text-center">
-                "Our mission is to provide Instantaneous & Reliable logistic
-                solutions ensuring you have Peace of Mind"
+                "Our mission is to provide instantaneous & reliable logistic
+                solutions ensuring you have peace of mind"
               </p>
             </div>
           </div>
