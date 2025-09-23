@@ -2,12 +2,11 @@
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
-  _req: NextRequest,
-  { params }: { params: { reference: string } }
+  req: NextRequest,
+  context: { params: { reference: string } }
 ) {
+  const { reference } = context.params;
   try {
-    // Await params before using its properties (Next.js App Router requirement)
-    const { reference } = await params;
     if (!reference) {
       return NextResponse.json({ error: "missing reference" }, { status: 400 });
     }
