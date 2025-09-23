@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
 import { api } from "@/convex/_generated/api";
-import { ConvexHttpClient } from "convex/browser";
-
-const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
+import { fetchMutation } from "convex/nextjs";
 
 export async function POST(req: Request) {
   try {
@@ -14,7 +12,7 @@ export async function POST(req: Request) {
 
       if (metadata.profile_completed && metadata.contact_number) {
         try {
-          const result = await convex.mutation(api.users.createUserFromClerk, {
+          const result = await fetchMutation(api.users.createUserFromClerk, {
             userId: data.id,
             name:
               metadata.business_name ||
@@ -50,7 +48,7 @@ export async function POST(req: Request) {
       const metadata = data.unsafe_metadata || {};
 
       try {
-        await convex.mutation(api.users.updateUserFromClerk, {
+        await fetchMutation(api.users.updateUserFromClerk, {
           userId: data.id,
           email: data.email_addresses[0]?.email_address ?? "",
           profileImageUrl: data.image_url ?? "",
