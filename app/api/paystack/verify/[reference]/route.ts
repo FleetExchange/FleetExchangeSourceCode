@@ -1,12 +1,11 @@
 // app/api/paystack/verify/[reference]/route.ts
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 
 export async function GET(
-  req: Request,
-  context: { params: Record<string, string | string[]> }
+  req: NextRequest,
+  { params }: { params: Promise<{ reference: string }> }
 ) {
-  const rawRef = context.params.reference;
-  const reference = Array.isArray(rawRef) ? rawRef[0] : rawRef;
+  const { reference } = await params;
 
   try {
     if (!reference) {
