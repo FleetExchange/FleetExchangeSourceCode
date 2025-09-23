@@ -1,11 +1,13 @@
 // app/api/paystack/verify/[reference]/route.ts
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
 export async function GET(
-  req: NextRequest,
-  context: { params: { reference: string } }
+  req: Request,
+  context: { params: Record<string, string | string[]> }
 ) {
-  const { reference } = context.params;
+  const rawRef = context.params.reference;
+  const reference = Array.isArray(rawRef) ? rawRef[0] : rawRef;
+
   try {
     if (!reference) {
       return NextResponse.json({ error: "missing reference" }, { status: 400 });

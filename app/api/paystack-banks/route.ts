@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
   try {
-    const response = await fetch("https://api.paystack.co/bank?currency=NGN", {
+    const response = await fetch("https://api.paystack.co/bank?currency=ZAR", {
       method: "GET",
       headers: {
         Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
