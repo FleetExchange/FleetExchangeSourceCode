@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        type: "bank_account",
+        type: "basa",
         name: name,
         account_number: accountNumber,
         bank_code: bankCode,
