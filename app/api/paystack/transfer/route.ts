@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
       },
       body: JSON.stringify({
         source: "balance", // Transfer from your Paystack balance
-        amount: amount * 100, // Convert to kobo (for NGN) or cents
+        amount: amount * 100, // Convert to ZAR to cents
         recipient: recipientCode,
         reason: reason,
         reference: reference,

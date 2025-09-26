@@ -70,7 +70,7 @@ async function handleChargeSuccess(data: any) {
     // Convert fee to ZAR
     let feesInRand: number | undefined = undefined;
     if (fees) {
-      const feesInRand = fees / 100;
+      feesInRand = fees / 100;
     }
     if (paymentId) {
       // Update known payment by id

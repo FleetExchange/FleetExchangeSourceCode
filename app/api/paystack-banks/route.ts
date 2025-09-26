@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
     const data = await response.json();
 
     if (data.status) {
-      return NextResponse.json(data.data); // Return Nigerian banks
+      return NextResponse.json(data.data); // Return South African banks
     } else {
       return NextResponse.json([]);
     }

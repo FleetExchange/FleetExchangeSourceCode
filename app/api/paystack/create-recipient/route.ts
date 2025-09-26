@@ -13,11 +13,11 @@ export async function POST(req: NextRequest) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        type: "nuban",
+        type: "bank_account",
         name: name,
         account_number: accountNumber,
         bank_code: bankCode,
-        currency: "NGN",
+        currency: "ZAR",
         email: email,
       }),
     });

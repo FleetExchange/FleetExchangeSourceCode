@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
     const url = new URL("https://api.paystack.co/bank/resolve");
     url.searchParams.append("account_number", accountNumber);
     url.searchParams.append("bank_code", bankCode);
-    url.searchParams.append("currency", "NGN");
+    url.searchParams.append("currency", "ZAR");
 
     const response = await fetch(url.toString(), {
       method: "GET",
