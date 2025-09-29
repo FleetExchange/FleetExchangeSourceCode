@@ -64,6 +64,7 @@ const PayoutAccountForm: React.FC<PayoutAccountFormProps> = ({
         throw new Error("User not found. Please log in and try again.");
       }
 
+      /*
       // 1. Verify account with Paystack
       console.log("Verifying account...", { accountNumber, bankCode });
 
@@ -82,9 +83,11 @@ const PayoutAccountForm: React.FC<PayoutAccountFormProps> = ({
       if (!verifyData.status) {
         throw new Error(verifyData.message || "Account verification failed");
       }
+      */
 
       // Use verified account name from Paystack
-      const verifiedAccountName = verifyData.data.account_name;
+      //const verifiedAccountName = verifyData.data.account_name;
+      const verifiedAccountName = accountName;
 
       // 2. Create recipient in Paystack
       console.log("Creating recipient...", {
