@@ -6,17 +6,16 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { accountNumber, bankCode } = body;
 
-    // Build URL with query parameters
-    const url = new URL("https://api.paystack.co/bank/resolve");
-    url.searchParams.append("account_number", accountNumber);
-    url.searchParams.append("bank_code", bankCode);
-
-    const response = await fetch(url.toString(), {
+    const response = await fetch("https://api.paystack.co/bank/resolve", {
       method: "GET",
       headers: {
         Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
         "Content-Type": "application/json",
       },
+      body: JSON.stringify({
+        account_number: accountNumber,
+        bank_code: bankCode,
+      }),
     });
 
     const data = await response.json();
