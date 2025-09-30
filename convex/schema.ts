@@ -151,7 +151,7 @@ export default defineSchema({
     userId: v.id("users"), // Client who made payment
     transporterId: v.id("users"), // Transporter receiving payment
     tripId: v.id("trip"),
-    purchaseTripId: v.id("purchaseTrip"),
+    purchaseTripId: v.optional(v.id("purchaseTrip")), // make optional so that forfeit booking can exist without purchase trip that gets deleted
 
     // Paystack fields
     // paystackInitReference = reference returned by transaction.initialize (optional until customer pays)
