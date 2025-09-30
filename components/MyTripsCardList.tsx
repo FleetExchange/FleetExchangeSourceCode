@@ -106,6 +106,9 @@ const MyTripsCardList = () => {
   const getTripStatus = (trip: any) => {
     if (!trip.isBooked) return "Not Booked";
     const purchaseTrip = purchaseTrips?.find((pt) => pt.tripId === trip._id);
+
+    // If the trip is refuned return refunded status
+
     return purchaseTrip?.status || "Unknown";
   };
 

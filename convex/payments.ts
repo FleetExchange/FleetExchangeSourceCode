@@ -264,7 +264,7 @@ export const processRefund = mutation({
     // Cancel related purchaseTrip
     try {
       if (payment.purchaseTripId) {
-        await ctx.db.patch(payment.purchaseTripId, { status: "Cancelled" });
+        await ctx.db.patch(payment.purchaseTripId, { status: "Refunded" });
       }
     } catch (e) {
       console.warn(

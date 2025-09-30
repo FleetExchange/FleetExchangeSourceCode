@@ -88,6 +88,7 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
   const purchaseTrip = useQuery(api.purchasetrip.getPurchaseTripByTripId, {
     tripId: tripId as Id<"trip">,
   });
+
   // Get the truck object from trip
   const truck = useQuery(
     api.truck.getTruckById,
@@ -923,7 +924,7 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
                         </div>
                       </div>
                     </div>
-                  ) : purchaseTrip.status === "Refunded" ? (
+                  ) : purchaseTrip?.status === "Refunded" ? (
                     // Refunded - show refunded status with support info
                     <div className="space-y-4">
                       <div className="bg-info/10 border border-info/20 rounded-lg p-4 text-center">
