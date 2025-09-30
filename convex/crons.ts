@@ -103,6 +103,17 @@ export const markExpiredTrips = internalMutation({
         });
         updatedCount++;
 
+        // Send notifications for each expired trip
+        await ctx.runMutation(api.notifications.createNotification, {
+          userId: trip.userId,
+          type: "trip",
+          message: `Your trip to ${trip.destinationCity} has been marked as expired as it was not booked before the departure date.`,
+          meta: {
+            tripId: trip._id,
+            action: "trip_expired",
+          },
+        });
+
         const tripDeparture = formatDateTimeInSAST(trip.departureDate);
         console.log(
           `✅ Marked trip ${trip._id} as expired (was scheduled for ${tripDeparture.fullDateTime} SAST)`

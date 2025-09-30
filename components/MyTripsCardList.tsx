@@ -99,7 +99,7 @@ const MyTripsCardList = () => {
   const sortedTrips = statusFilteredTrips?.sort((a, b) => {
     const aDate = a.departureDate ? new Date(a.departureDate).getTime() : 0;
     const bDate = b.departureDate ? new Date(b.departureDate).getTime() : 0;
-    return aDate - bDate; // Sort descending
+    return bDate - aDate; // Sort descending
   });
 
   // Get status for a trip
