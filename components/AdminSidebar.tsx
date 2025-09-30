@@ -14,7 +14,7 @@ const AdminSidebar = () => {
             F
           </div>
           <span className="hidden group-hover:block transition-opacity duration-300 whitespace-nowrap text-white">
-            FreightConnect
+            FleetExchange
           </span>
         </div>
 

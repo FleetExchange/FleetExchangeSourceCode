@@ -13,6 +13,11 @@ import {
   Phone,
   HelpCircle,
 } from "lucide-react";
+import {
+  SUPPORT_EMAIL,
+  SUPPORT_PHONE_DISPLAY,
+  SUPPORT_PHONE_TEL,
+} from "@/shared/support";
 
 interface HelpPageProps {
   onClose?: () => void;
@@ -157,7 +162,7 @@ const HelpPage: React.FC<HelpPageProps> = ({ onClose }) => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <a
-            href="mailto:support@freightconnect.com"
+            href={`mailto:${SUPPORT_EMAIL}`}
             className="flex items-center gap-3 p-3 bg-base-100 rounded-lg border border-base-300 hover:border-primary transition-colors group"
           >
             <div className="p-2 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
@@ -168,13 +173,13 @@ const HelpPage: React.FC<HelpPageProps> = ({ onClose }) => {
                 Email Support
               </div>
               <div className="text-xs text-base-content/60">
-                support@freightconnect.com
+                {SUPPORT_EMAIL}
               </div>
             </div>
           </a>
 
           <a
-            href="tel:+27000000000"
+            href={`tel:${SUPPORT_PHONE_TEL}`}
             className="flex items-center gap-3 p-3 bg-base-100 rounded-lg border border-base-300 hover:border-primary transition-colors group"
           >
             <div className="p-2 bg-success/10 rounded-lg group-hover:bg-success/20 transition-colors">
@@ -184,7 +189,9 @@ const HelpPage: React.FC<HelpPageProps> = ({ onClose }) => {
               <div className="font-medium text-sm text-base-content">
                 Phone Support
               </div>
-              <div className="text-xs text-base-content/60">0800 123 456</div>
+              <div className="text-xs text-base-content/60">
+                {SUPPORT_PHONE_DISPLAY}
+              </div>
             </div>
           </a>
         </div>

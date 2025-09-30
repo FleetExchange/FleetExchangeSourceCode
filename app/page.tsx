@@ -18,6 +18,7 @@ import {
   Heart,
   TrendingUp,
 } from "lucide-react";
+import { SUPPORT_EMAIL, SUPPORT_PHONE_DISPLAY } from "@/shared/support";
 
 export default function Home() {
   return (
@@ -401,7 +402,7 @@ export default function Home() {
               },
               {
                 q: "How do I contact support?",
-                a: "You can reach our support team 24/7 via email at support@fleetexchange.co.za or call us at +27 (0) 83 784 0895.",
+                a: `You can reach our support team 24/7 via email at ${SUPPORT_EMAIL} or call us at ${SUPPORT_PHONE_DISPLAY}.`,
               },
             ].map((item, i) => (
               <div

@@ -13,6 +13,11 @@ import {
   Linkedin,
 } from "lucide-react";
 import Logo from "./Logo";
+import {
+  SUPPORT_EMAIL,
+  SUPPORT_PHONE_DISPLAY,
+  SUPPORT_PHONE_TEL,
+} from "@/shared/support";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -137,19 +142,19 @@ const Footer = () => {
                 <div className="flex items-center gap-2">
                   <Mail className="w-4 h-4 text-primary" />
                   <a
-                    href="mailto:support@fleetexchange.com"
+                    href={`mailto:${SUPPORT_EMAIL}`}
                     className="text-sm text-base-content/60 hover:text-primary transition-colors"
                   >
-                    support@fleetexchange.com
+                    {SUPPORT_EMAIL}
                   </a>
                 </div>
                 <div className="flex items-center gap-2">
                   <Phone className="w-4 h-4 text-primary" />
                   <a
-                    href="tel:++27837840895"
+                    href={`tel:${SUPPORT_PHONE_TEL}`}
                     className="text-sm text-base-content/60 hover:text-primary transition-colors"
                   >
-                    +27 83 784 0895
+                    {SUPPORT_PHONE_DISPLAY}
                   </a>
                 </div>
                 <div className="flex items-start gap-2">
@@ -167,7 +172,7 @@ const Footer = () => {
         <div className="py-6 border-t border-base-300">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="text-sm text-base-content/60">
-              © {currentYear} FreightConnect. All rights reserved.
+              © {currentYear} FleetExchange. All rights reserved.
             </div>
             <div className="flex gap-6">
               <Link

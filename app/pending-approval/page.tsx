@@ -18,6 +18,11 @@ import TransporterProfileInfo from "@/components/TransporterProfileInfo";
 import TransporterProfileFiles from "@/components/TransporterProfileFiles";
 import ClientProfileInfo from "@/components/ClientProfileInfo";
 import ClientProfileFiles from "@/components/ClientProfileFiles";
+import {
+  SUPPORT_EMAIL,
+  SUPPORT_PHONE_DISPLAY,
+  SUPPORT_PHONE_TEL,
+} from "@/shared/support";
 
 const Page = () => {
   const { user, isLoaded } = useUser();
@@ -259,11 +264,11 @@ const Page = () => {
                     <div className="space-y-2 text-sm">
                       <div className="flex items-center gap-2">
                         <Mail className="w-4 h-4 text-info" />
-                        <span>support@fleetexchange.co.za</span>
+                        <span>{SUPPORT_EMAIL}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Phone className="w-4 h-4 text-info" />
-                        <span>+27 (0) 83 784 0895</span>
+                        <span>{SUPPORT_PHONE_DISPLAY}</span>
                       </div>
                     </div>
                   </div>

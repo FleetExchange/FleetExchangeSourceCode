@@ -47,6 +47,11 @@ import {
 } from "@/utils/dateUtils";
 import { useUser } from "@clerk/nextjs";
 import { getCachedCityCoordinates } from "../utils/cityCoordinatesCache";
+import {
+  SUPPORT_EMAIL,
+  SUPPORT_PHONE_DISPLAY,
+  SUPPORT_PHONE_TEL,
+} from "@/shared/support";
 
 interface TripPageClientProps {
   tripId: string;
@@ -831,18 +836,18 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
                         </p>
                         <div className="flex flex-col gap-2 mt-2">
                           <a
-                            href="tel:+27000000000"
+                            href={`tel:${SUPPORT_PHONE_TEL}`}
                             className="btn btn-outline btn-sm gap-2"
                           >
                             <Phone className="w-4 h-4" />
-                            0800 123 456
+                            {SUPPORT_PHONE_DISPLAY}
                           </a>
                           <a
-                            href="mailto:support@freightconnect.com"
+                            href={`mailto:${SUPPORT_EMAIL}`}
                             className="btn btn-outline btn-sm gap-2"
                           >
                             <Mail className="w-4 h-4" />
-                            Support Email
+                            {SUPPORT_EMAIL}
                           </a>
                         </div>
                       </div>
@@ -902,18 +907,18 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
                         </p>
                         <div className="flex flex-col gap-2 mt-2">
                           <a
-                            href="tel:+27000000000"
+                            href={`tel:${SUPPORT_PHONE_TEL}`}
                             className="btn btn-outline btn-sm gap-2"
                           >
                             <Phone className="w-4 h-4" />
-                            0800 123 456
+                            {SUPPORT_PHONE_DISPLAY}
                           </a>
                           <a
-                            href="mailto:support@freightconnect.com"
+                            href={`mailto:${SUPPORT_EMAIL}`}
                             className="btn btn-outline btn-sm gap-2"
                           >
                             <Mail className="w-4 h-4" />
-                            Support Email
+                            {SUPPORT_EMAIL}
                           </a>
                         </div>
                       </div>
@@ -934,18 +939,18 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
                         </p>
                         <div className="flex flex-col gap-2 mt-2">
                           <a
-                            href="tel:+27000000000"
+                            href={`tel:${SUPPORT_PHONE_TEL}`}
                             className="btn btn-outline btn-sm gap-2"
                           >
                             <Phone className="w-4 h-4" />
-                            0800 123 456
+                            {SUPPORT_PHONE_DISPLAY}
                           </a>
                           <a
-                            href="mailto:support@freightconnect.com"
+                            href={`mailto:${SUPPORT_EMAIL}`}
                             className="btn btn-outline btn-sm gap-2"
                           >
                             <Mail className="w-4 h-4" />
-                            Support Email
+                            {SUPPORT_EMAIL}
                           </a>
                         </div>
                       </div>
