@@ -58,6 +58,28 @@ export const deleteNotification = mutation({
   },
 });
 
+// Delete payment notification for a specific trip and user
+export const deletePaymentNotificationForTrip = mutation({
+  args: {
+    userId: v.id("users"),
+    paymentId: v.id("payments"),
+    purchTripId: v.id("purchaseTrip"),
+  },
+  handler: async (ctx, { userId, paymentId, purchTripId }) => {
+    const paymentNotifications = await ctx.db
+      .query("notifications")
+      .filter((q) => q.eq(q.field("userId"), userId))
+      .filter((q) => q.eq(q.field("type"), "paymentRequest"))
+      .filter((q) => q.eq(q.field("meta.paymentId"), paymentId))
+      .filter((q) => q.eq(q.field("meta.purchaseTripId"), purchTripId))
+      .collect();
+
+    for (const notif of paymentNotifications) {
+      await ctx.db.delete(notif._id);
+    }
+  },
+});
+
 // Check Transporter Account for account setup
 export const checkTransporterAccountSetup = mutation({
   args: { userId: v.id("users") },

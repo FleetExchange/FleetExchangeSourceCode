@@ -366,7 +366,7 @@ const StatusAdvanceButton = ({
       await createNotification({
         userId: trip?.userId as Id<"users">,
         type: "payment",
-        message: `Payment release failed: ${error instanceof Error ? error.message : "Unknown error"}. Your request will be processed manually. Please contact support for further questions.`,
+        message: `Payment release failed. Your request will be processed manually. Please contact support for further questions.`,
         meta: {
           tripId: trip?._id as Id<"trip">,
           action: "payment_release_failed",

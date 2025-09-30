@@ -35,6 +35,9 @@ const TripCancelButton = ({
   const setTripCancelled = useMutation(api.trip.setTripCancelled);
   const createNotification = useMutation(api.notifications.createNotification);
   const deletePayment = useMutation(api.payments.deletePayment);
+  const deletePaymentNotificationForTrip = useMutation(
+    api.notifications.deletePaymentNotificationForTrip
+  );
 
   // Queries
   const trip = useQuery(api.trip.getById, { tripId });
@@ -111,6 +114,12 @@ const TripCancelButton = ({
       ) {
         // Delete payment object if it exists
         if (paymentId) await deletePayment({ paymentId });
+        // Delete payment notification if it exists
+        await deletePaymentNotificationForTrip({
+          userId: purchaserUserId as Id<"users">,
+          paymentId: paymentId as Id<"payments">,
+          purchTripId: purchaseId as Id<"purchaseTrip">,
+        });
         // Delete purchTrip object if it exists
         if (purchaseId) await deletePurchTrip({ purchaseTripId: purchaseId });
         // Set the trip to available again

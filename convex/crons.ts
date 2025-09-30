@@ -7,7 +7,7 @@ const crons = cronJobs();
 
 crons.interval(
   "markExpiredTrips",
-  { minutes: 5 }, // Runs every 5 minutes
+  { minutes: 1 }, // Runs every minute
   internal.crons.markExpiredTrips
 );
 
