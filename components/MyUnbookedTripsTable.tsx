@@ -33,9 +33,6 @@ const MyUnbookedTripsTable = () => {
 
   // define all states for filtering and sorting
   const [searchTerm, setSearchTerm] = useState("");
-  const [pastOrUpcoming, setPastOrFuture] = useState<
-    "All Trips" | "Upcomming Trips" | "Past Trips"
-  >("All Trips");
   const [sortBy, setSortBy] = useState<SortOption>("Date Asc");
 
   // Get the logged in user identity
@@ -75,18 +72,6 @@ const MyUnbookedTripsTable = () => {
 
   // Add this filtering function before the return statement
   const filteredTrips = unbookedTrips?.filter((trip) => {
-    // Filter by past or upcoming trips - using current SAST time
-    const currentDate = new Date();
-    if (pastOrUpcoming === "Upcomming Trips") {
-      if (trip.departureDate && new Date(trip.departureDate) < currentDate) {
-        return false; // Exclude past trips
-      }
-    } else if (pastOrUpcoming === "Past Trips") {
-      if (trip.departureDate && new Date(trip.departureDate) >= currentDate) {
-        return false; // Exclude upcoming trips
-      }
-    }
-
     const searchString = searchTerm.toLowerCase();
     return (
       trip.originCity?.toLowerCase().includes(searchString) ||
@@ -155,21 +140,6 @@ const MyUnbookedTripsTable = () => {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-
-          {/* Past/Upcoming */}
-          <select
-            className="select select-bordered focus:outline-none focus:border-primary"
-            value={pastOrUpcoming}
-            onChange={(e) =>
-              setPastOrFuture(
-                e.target.value as "Upcomming Trips" | "Past Trips" | "All Trips"
-              )
-            }
-          >
-            <option value="All Trips">All Trips</option>
-            <option value="Upcomming Trips">Upcoming Trips</option>
-            <option value="Past Trips">Past Trips</option>
-          </select>
 
           {/* Sort By */}
           <select
@@ -336,7 +306,7 @@ const MyUnbookedTripsTable = () => {
                           No trips found
                         </h3>
                         <p className="text-base-content/60 text-sm">
-                          {searchTerm || pastOrUpcoming !== "All Trips"
+                          {searchTerm
                             ? "Try adjusting your filters to see more trips."
                             : "No available trips found."}
                         </p>
