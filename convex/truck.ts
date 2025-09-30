@@ -182,7 +182,7 @@ export const isTruckAvailable = query({
       return pt[0];
     }
 
-    const NON_BLOCKING = new Set(["Cancelled", "Refunded"]);
+    const NON_BLOCKING = new Set(["cancelled", "refunded"]);
     const blocking: typeof overlappingTrips = [];
     const nonBlocking: typeof overlappingTrips = [];
 
