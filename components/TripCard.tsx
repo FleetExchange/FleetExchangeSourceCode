@@ -70,7 +70,7 @@ export default function TripCard({ tripId }: { tripId: Id<"trip"> }) {
               </h3>
               <div className="flex items-center gap-1 text-xs text-base-content/60">
                 <Star className="w-3 h-3 fill-warning text-warning" />
-                <span>{tripOwner?.averageRating}</span>
+                <span>{tripOwner?.averageRating || "No Reviews"}</span>
               </div>
             </div>
           </div>
