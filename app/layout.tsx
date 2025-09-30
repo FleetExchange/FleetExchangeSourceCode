@@ -20,8 +20,7 @@ export const metadata: Metadata = {
   title: "FleetExchange",
   description: "Smart Logistics Solutions",
   icons: {
-    icon: "/images/logos/logo-icon.png",
-    apple: "/images/logos/logo-icon.png",
+    icon: "/public/images/logos/FleetExchangeIcon.png",
   },
 };
 
