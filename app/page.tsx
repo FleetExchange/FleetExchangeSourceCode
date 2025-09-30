@@ -53,9 +53,9 @@ export default function Home() {
                 Free to Join
               </div>
               <h1 className="text-4xl sm:text-5xl lg:text-5xl xl:text-6xl font-extrabold text-base-content leading-tight">
-                <span className="block">Eliminating Empty Trucks.</span>
+                <span className="block">Every Truck Full</span>
                 <span className="text-primary block">
-                  Affordable Logistics for All.
+                  Every Trip Affordable
                 </span>
               </h1>
               <p className="text-lg lg:text-xl text-base-content/70 leading-relaxed">
