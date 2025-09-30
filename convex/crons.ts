@@ -531,24 +531,15 @@ export const forfeitUnpaidBookings = internalMutation({
         }
 
         // Remove the URL from the notification Meta
-        const notification = await ctx.db
-          .query("notifications")
-          .filter((q) =>
-            q.and(
-              q.eq(q.field("userId"), purchaseTrip.userId),
-              q.eq(q.field("type"), "payment_requested"),
-              q.eq(q.field("meta"), {
-                paymentId: payment._id,
-                purchaseTripId: purchaseTrip._id,
-              })
-            )
-          )
-          .first();
-        if (notification) {
-          await ctx.db.patch(notification?._id, {
-            meta: { ...notification?.meta, paymentRequestUrl: undefined },
-          });
-        }
+        // Delete payment notification if it exists
+        await ctx.runMutation(
+          api.notifications.deletePaymentNotificationForTrip,
+          {
+            userId: trip.userId as Id<"users">,
+            paymentId: payment._id as Id<"payments">,
+            purchTripId: purchaseTrip._id as Id<"purchaseTrip">,
+          }
+        );
 
         // Mark payment forfeited & related updates
         await ctx.db.patch(payment._id, {
