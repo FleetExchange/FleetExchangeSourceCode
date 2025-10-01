@@ -17,6 +17,7 @@ import {
   CheckCircle,
   AlertTriangle,
 } from "lucide-react";
+import { TruckSelector } from "./TruckSelector";
 
 interface EditTruckCardProps {
   truckId: string;
@@ -309,20 +310,12 @@ const EditTruckCard: React.FC<EditTruckCardProps> = ({ truckId }) => {
                     <label className="text-sm font-medium text-base-content">
                       Truck Type
                     </label>
-                    <select
-                      className="select select-bordered w-full focus:outline-none focus:border-primary"
+                    <TruckSelector
                       value={truckType}
-                      onChange={(e) =>
-                        setTruckType(e.target.value as TruckType)
+                      onChange={(value: string) =>
+                        setTruckType(value as TruckType)
                       }
-                    >
-                      <option value="">Select truck type</option>
-                      {TRUCK_TYPES.map((type) => (
-                        <option key={type} value={type}>
-                          {type}
-                        </option>
-                      ))}
-                    </select>
+                    />
                   </div>
                 </div>
               </div>

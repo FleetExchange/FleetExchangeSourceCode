@@ -1,8 +1,9 @@
 "use client";
 
-import { TRUCK_TYPES } from "@/shared/truckTypes";
+import { TRUCK_TYPES, TruckType } from "@/shared/truckTypes";
 import React, { useState } from "react";
 import { Filter, Truck, Calendar, Ruler, Weight } from "lucide-react";
+import { TruckSelector } from "./TruckSelector";
 
 const FleetManagerTableFilter = ({
   onFilter,
@@ -108,19 +109,10 @@ const FleetManagerTableFilter = ({
               <label className="label">
                 <span className="label-text pr-2">Type Selection</span>
               </label>
-              <select
-                id="truckTypeSelect"
-                className="select select-bordered focus:outline-none focus:border-primary"
+              <TruckSelector
                 value={truckType}
-                onChange={(e) => setType(e.target.value)}
-              >
-                <option value="Any">Any Type</option>
-                {TRUCK_TYPES.map((type) => (
-                  <option key={type} value={type}>
-                    {type}
-                  </option>
-                ))}
-              </select>
+                onChange={(value: string) => setType(value as TruckType)}
+              />
             </div>
           </div>
 

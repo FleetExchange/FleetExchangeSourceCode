@@ -1,6 +1,6 @@
 "use client";
 
-import { TRUCK_TYPES } from "@/shared/truckTypes";
+import { TRUCK_TYPES, TruckType } from "@/shared/truckTypes";
 import React, { useState } from "react";
 import { Filter, Calendar, Truck, Package, X } from "lucide-react";
 import {
@@ -8,6 +8,7 @@ import {
   getCurrentSASTInputMin,
   getEndOfSASTDay,
 } from "@/utils/dateUtils";
+import { TruckSelector } from "./TruckSelector";
 
 const FilterBtn = ({
   onFilter,
@@ -246,18 +247,10 @@ const FilterBtn = ({
                   Vehicle Type
                 </h3>
               </div>
-              <select
-                className="select select-bordered w-full focus:outline-none focus:border-primary"
+              <TruckSelector
                 value={truckType}
-                onChange={(e) => setType(e.target.value)}
-              >
-                <option value="">Any vehicle type</option>
-                {TRUCK_TYPES.map((type) => (
-                  <option key={type} value={type}>
-                    {type}
-                  </option>
-                ))}
-              </select>
+                onChange={(value: any) => setType(value as TruckType)}
+              />
             </div>
 
             {/* Dimensions & Capacity Section */}
