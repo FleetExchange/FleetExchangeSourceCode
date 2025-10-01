@@ -126,7 +126,7 @@ const Footer = () => {
                 </li>
                 <li>
                   <Link
-                    href="/"
+                    href="/TermsOfService"
                     className="text-sm text-base-content/60 hover:text-primary transition-colors"
                   >
                     Terms of Service
@@ -176,13 +176,13 @@ const Footer = () => {
             </div>
             <div className="flex gap-6">
               <Link
-                href="/"
+                href="/PrivacyPolicy"
                 className="text-sm text-base-content/60 hover:text-primary transition-colors"
               >
                 Privacy Policy
               </Link>
               <Link
-                href="/"
+                href="/CookiePolicy"
                 className="text-sm text-base-content/60 hover:text-primary transition-colors"
               >
                 Cookie Policy

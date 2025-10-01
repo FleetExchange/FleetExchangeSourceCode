@@ -175,11 +175,11 @@ const Page = () => {
                   />
                   <label className="text-sm text-base-content/80 leading-relaxed">
                     I agree to the{" "}
-                    <a href="#" className="link link-primary">
+                    <a href="/TermsOfService" className="link link-primary">
                       Terms of Service
                     </a>{" "}
                     and{" "}
-                    <a href="#" className="link link-primary">
+                    <a href="/PrivacyPolicy" className="link link-primary">
                       Privacy Policy
                     </a>
                   </label>
