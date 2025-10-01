@@ -19,6 +19,7 @@ import {
   CheckCircle,
   AlertTriangle,
 } from "lucide-react";
+import { TruckSelector } from "./TruckSelector";
 
 const NewTruckCard = () => {
   // Get the logged in user identity
@@ -213,20 +214,10 @@ const NewTruckCard = () => {
                     <label className="text-sm font-medium text-base-content">
                       Truck Type
                     </label>
-                    <select
-                      className="select select-bordered w-full focus:outline-none focus:border-primary"
+                    <TruckSelector
                       value={truckType}
-                      onChange={(e) =>
-                        setTruckType(e.target.value as TruckType)
-                      }
-                    >
-                      <option value="">Select truck type</option>
-                      {TRUCK_TYPES.map((type) => (
-                        <option key={type} value={type}>
-                          {type}
-                        </option>
-                      ))}
-                    </select>
+                      onChange={(value) => setTruckType(value as TruckType)}
+                    />
                   </div>
                 </div>
               </div>
