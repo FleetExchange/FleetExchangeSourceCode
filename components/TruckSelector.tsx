@@ -78,12 +78,14 @@ export function TruckSelector({
   placeholder = "Select truck type",
   disabled = false,
   className = "",
+  searchable = true,
 }: {
   value?: string;
   onChange: (v: string) => void;
   placeholder?: string;
   disabled?: boolean;
   className?: string;
+  searchable?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
@@ -91,6 +93,7 @@ export function TruckSelector({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const listRef = useRef<HTMLUListElement | null>(null);
 
+  // default expand first group
   useEffect(() => {
     if (Object.keys(expanded).length === 0) {
       setExpanded({ [groups[0].label]: true });
@@ -109,6 +112,7 @@ export function TruckSelector({
     }))
     .filter((g) => g.options.length > 0);
 
+  // close on outside click
   useEffect(() => {
     function handle(e: MouseEvent) {
       if (!containerRef.current) return;
@@ -146,6 +150,7 @@ export function TruckSelector({
 
   return (
     <div ref={containerRef} className={`relative w-50 ${className}`}>
+      {/* Trigger styled to match other inputs/selects (height, font, spacing) */}
       <button
         type="button"
         disabled={disabled}
@@ -153,36 +158,51 @@ export function TruckSelector({
         onKeyDown={handleKey}
         aria-haspopup="listbox"
         aria-expanded={open}
-        className={`w-full inline-flex items-center justify-between rounded-md border border-base-300 bg-base-100 px-2 py-1.5 text-xs text-base-content shadow-sm transition-colors
-          hover:border-primary focus:outline-none focus:ring-2 focus:ring-primary/40 disabled:opacity-50 disabled:cursor-not-allowed`}
+        className={`h-10 w-full inline-flex items-center justify-between rounded-md border border-base-300 bg-base-100 px-3 text-sm text-base-content shadow-sm
+          transition-colors hover:border-primary focus:outline-none focus:ring-2 focus:ring-primary/40 disabled:opacity-50 disabled:cursor-not-allowed`}
       >
         <span className={currentLabel ? "" : "text-base-content/50"}>
           {currentLabel || placeholder}
         </span>
-        <span className="ml-2 text-[10px] text-base-content/60">
-          {open ? "▲" : "▼"}
+        <span
+          className={`ml-2 transition-transform duration-150 text-base-content/60`}
+        >
+          <svg
+            className={`w-4 h-4 ${open ? "rotate-180" : ""}`}
+            viewBox="0 0 20 20"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path
+              fillRule="evenodd"
+              d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z"
+              clipRule="evenodd"
+            />
+          </svg>
         </span>
       </button>
 
       {open && (
-        <div className="absolute z-50 mt-2 w-full rounded-lg border border-base-300 bg-base-100 shadow-xl ring-1 ring-black/5 overflow-hidden">
-          <div className="p-1.5 border-b border-base-200 bg-base-100">
-            <input
-              autoFocus
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search..."
-              className="w-full text-xs rounded-md bg-base-200/60 px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary/40"
-            />
-          </div>
+        <div className="absolute z-50 mt-1 w-full rounded-md border border-base-300 bg-base-100 shadow-lg ring-1 ring-black/5 overflow-hidden">
+          {searchable && (
+            <div className="p-2 border-b border-base-200">
+              <input
+                autoFocus
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search..."
+                className="w-full h-8 text-sm rounded-md bg-base-200/60 px-2 focus:outline-none focus:ring-2 focus:ring-primary/40"
+              />
+            </div>
+          )}
 
           <ul
             ref={listRef}
             role="listbox"
-            className="max-h-56 overflow-auto py-1 scrollbar-thin scrollbar-thumb-base-300 scrollbar-track-transparent"
+            className="max-h-64 overflow-auto py-1 focus:outline-none scrollbar-thin scrollbar-thumb-base-300 scrollbar-track-transparent"
           >
             {filteredGroups.length === 0 && (
-              <li className="px-3 py-3 text-xs text-base-content/50">
+              <li className="px-3 py-3 text-sm text-base-content/50">
                 No matches
               </li>
             )}
@@ -194,12 +214,22 @@ export function TruckSelector({
                     type="button"
                     onClick={() => toggleGroup(group.label)}
                     aria-expanded={isOpen}
-                    className="w-full flex items-center justify-between px-3 py-1.5 text-[10px] font-semibold tracking-wide uppercase text-base-content/70 hover:bg-base-200/70"
+                    className="w-full flex items-center justify-between px-3 py-2 text-[11px] font-semibold tracking-wide uppercase text-base-content/70 hover:bg-base-200/70"
                   >
                     {group.label}
-                    <span className="ml-2 text-[9px]">
-                      {isOpen ? "▲" : "▼"}
-                    </span>
+                    <svg
+                      className={`w-3 h-3 transition-transform ${
+                        isOpen ? "rotate-180" : ""
+                      }`}
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
                   </button>
                   {isOpen && (
                     <ul className="pb-1">
@@ -212,7 +242,7 @@ export function TruckSelector({
                               role="option"
                               aria-selected={selected}
                               onClick={() => handleSelect(opt.value)}
-                              className={`w-full text-left px-5 py-1.5 text-xs transition-colors
+                              className={`w-full text-left px-6 py-2 text-sm transition-colors
                                 hover:bg-primary/10 hover:text-primary
                                 ${
                                   selected
@@ -232,19 +262,6 @@ export function TruckSelector({
               );
             })}
           </ul>
-
-          <div className="flex items-center justify-between px-3 py-1.5 border-t border-base-200 bg-base-100">
-            <span className="text-[9px] uppercase tracking-wide text-base-content/50">
-              {flatOptions.length} types
-            </span>
-            <button
-              type="button"
-              onClick={() => setOpen(false)}
-              className="text-[10px] px-2 py-0.5 rounded-md border border-base-300 hover:border-primary hover:text-primary"
-            >
-              Close
-            </button>
-          </div>
         </div>
       )}
     </div>
