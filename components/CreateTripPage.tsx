@@ -153,13 +153,13 @@ const CreateTripPage = () => {
   const pickup = usePlacesWithRestrictions({
     cityName: originCity,
     citiesOnly: true, // Enable city-only mode
-    debounceMs: 500, // Add debouncing at hook level too
+    debounceMs: 0, // Add debouncing at hook level too
   });
 
   const delivery = usePlacesWithRestrictions({
     cityName: destinationCity,
     citiesOnly: true, // Enable city-only mode
-    debounceMs: 500, // Add debouncing at hook level too
+    debounceMs: 0, // Add debouncing at hook level too
   });
 
   const userFleets = useQuery(api.fleet.getFleetForCurrentUser, {
