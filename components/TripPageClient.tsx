@@ -564,14 +564,6 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
     setDirectionsKey("");
   }, [tripId]);
 
-  // Initialize input values when trip data loads (for non-booked trips)
-  useEffect(() => {
-    if (trip && !trip.isBooked) {
-      setPickupInputValue(trip.originCity || "");
-      setDeliveryInputValue(trip.destinationCity || "");
-    }
-  }, [trip?.originCity, trip?.destinationCity, trip?.isBooked]);
-
   return (
     <div className="min-h-screen bg-base-200">
       <div className="p-4 lg:p-6">
