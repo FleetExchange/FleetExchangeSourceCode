@@ -8,29 +8,23 @@ import TransporterProfileFiles from "@/components/TransporterProfileFiles";
 import { ArrowLeft } from "lucide-react";
 
 interface ProfilePageProps {
-  params: Promise<{
-    id: string;
-  }>;
+  params: { id: string };
 }
 
-const Page = ({ params }: ProfilePageProps) => {
-  const { id } = React.use(params);
+const TransporterProfilePage = ({ params }: ProfilePageProps) => {
+  const { id } = params;
   const router = useRouter();
 
   const handleBack = () => {
-    // Check where user came from via referrer
-    const referrer = document.referrer;
+    const canGoBack =
+      typeof window !== "undefined" &&
+      window.history.state &&
+      typeof window.history.state.idx === "number" &&
+      window.history.state.idx > 0;
 
-    if (referrer && referrer.includes(window.location.origin)) {
-      // If they came from within our app, check if it's safe to go back
-      if (!referrer.includes("/profiles/")) {
-        router.back();
-      } else {
-        // Fallback to dashboard if coming from profiles
-        router.push("/discover");
-      }
+    if (canGoBack) {
+      router.back();
     } else {
-      // External referrer or direct access - go to dashboard
       router.push("/discover");
     }
   };
@@ -39,7 +33,7 @@ const Page = ({ params }: ProfilePageProps) => {
     <div className="min-h-screen bg-base-200">
       <div className="p-4 lg:p-6">
         <div className="w-full max-w-4xl mx-auto">
-          {/* Header Section */}
+          {/* Header */}
           <div className="mb-8">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
               <div className="flex items-center gap-4">
@@ -62,14 +56,11 @@ const Page = ({ params }: ProfilePageProps) => {
             </div>
           </div>
 
-          {/* Content Section - Stacked Layout */}
+          {/* Content */}
           <div className="space-y-6">
-            {/* Profile Info Section */}
             <div>
               <TransporterProfileInfo transporterId={id} />
             </div>
-
-            {/* Files Section */}
             <div>
               <TransporterProfileFiles transporterId={id} />
             </div>
@@ -80,4 +71,4 @@ const Page = ({ params }: ProfilePageProps) => {
   );
 };
 
-export default Page;
+export default TransporterProfilePage;

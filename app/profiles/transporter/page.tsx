@@ -15,7 +15,7 @@ const Page = () => {
 
   useEffect(() => {
     if (currentUser?._id) {
-      router.push(`/profiles/transporter/${currentUser._id}`);
+      router.replace(`/profiles/transporter/${currentUser._id}`);
     }
   }, [currentUser, router]);
 
