@@ -3,18 +3,14 @@ import { auth } from "@clerk/nextjs/server";
 import { fetchQuery } from "convex/nextjs";
 import { api } from "@/convex/_generated/api";
 
-export default async function ProfilesIndex() {
+export default async function MyProfile() {
   const { userId } = await auth();
   if (!userId) redirect("/sign-in");
 
-  // Get Convex user by Clerk ID
   const convexUser = await fetchQuery(api.users.getUserByClerkId, {
     clerkId: userId,
   });
-  if (!convexUser) {
-    // Could redirect to onboarding or pending approval
-    redirect("/pending-approval");
-  }
+  if (!convexUser) redirect("/pending-approval");
 
   redirect(`/profiles/${convexUser._id}`);
 }

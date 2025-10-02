@@ -5,7 +5,7 @@ export async function GET(
   req: NextRequest,
   { params }: { params: { reference: string } }
 ) {
-  const { reference } = params;
+  const { reference } = await params;
 
   try {
     if (!reference) {
