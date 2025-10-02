@@ -3,17 +3,39 @@
 import { useRouter } from "next/navigation";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import React from "react";
 import { Id } from "@/convex/_generated/dataModel";
-import { ArrowLeft } from "lucide-react";
 
-import ClientProfileInfo from "@/components/ClientProfileInfo";
-import ClientProfileFiles from "@/components/ClientProfileFiles";
-import TransporterProfileInfo from "@/components/TransporterProfileInfo";
-import TransporterProfileFiles from "@/components/TransporterProfileFiles";
-import ProfileViewClient from "./ProfileViewClient";
-
-export const dynamic = "force-dynamic"; // ensure fresh data if needed
-
-export default function ProfilePage({ params }: { params: { id: string } }) {
-  return <ProfileViewClient id={params.id} />;
+interface ProfilePageProps {
+  params: Promise<{ id: string }>;
 }
+
+const Page = ({ params }: ProfilePageProps) => {
+  const router = useRouter();
+  const { id } = React.use(params);
+
+  // Fetch user by id
+  const user = useQuery(api.users.getUserById, { userId: id as Id<"users"> });
+
+  React.useEffect(() => {
+    if (!user) return;
+    if (user.role === "transporter") {
+      router.replace(`/profiles/transporter/${id}`);
+    } else if (user.role === "client") {
+      router.replace(`/profiles/client/${id}`);
+    } else {
+      router.replace("/404");
+    }
+  }, [user, id, router]);
+
+  return (
+    <div className="min-h-screen bg-base-200 flex items-center justify-center">
+      <div className="flex flex-col items-center gap-4">
+        <div className="loading loading-spinner loading-lg text-primary"></div>
+        <p className="text-base-content/60">Loading profile...</p>
+      </div>
+    </div>
+  );
+};
+
+export default Page;
