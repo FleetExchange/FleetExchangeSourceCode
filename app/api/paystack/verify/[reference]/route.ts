@@ -3,9 +3,9 @@ import { NextResponse, type NextRequest } from "next/server";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: Promise<{ reference: string }> }
+  { params }: { params: { reference: string } }
 ) {
-  const { reference } = await params;
+  const { reference } = params;
 
   try {
     if (!reference) {
