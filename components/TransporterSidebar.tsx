@@ -58,7 +58,7 @@ const TransporterSidebar = () => {
       label: "Settings",
     },
     {
-      href: "/profiles/transporter",
+      href: "/profiles",
       icon: CiUser,
       label: "Account",
     },

@@ -73,7 +73,7 @@ const MobileMenuClient = () => {
       label: "Calendar",
     },
     {
-      href: "/profiles/client",
+      href: "/profiles",
       icon: CiUser,
       label: "Profile",
     },
