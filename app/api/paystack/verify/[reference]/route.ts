@@ -1,29 +1,31 @@
 // app/api/paystack/verify/[reference]/route.ts
-import { NextResponse, type NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { reference: string } }
-) {
-  const { reference } = await params;
+interface RouteContext {
+  params: { reference: string };
+}
+
+export async function GET(_req: Request, context: RouteContext) {
+  const { reference } = context.params; // no await
+
+  if (!reference) {
+    return NextResponse.json({ error: "missing reference" }, { status: 400 });
+  }
 
   try {
-    if (!reference) {
-      return NextResponse.json({ error: "missing reference" }, { status: 400 });
-    }
-
     const PAYSTACK =
       process.env.PAYSTACK_SECRET || process.env.PAYSTACK_SECRET_KEY;
     if (!PAYSTACK) {
-      console.error("PAYSTACK secret not configured");
       return NextResponse.json(
-        { error: "server config error" },
+        { error: "server config error: PAYSTACK secret missing" },
         { status: 500 }
       );
     }
 
     const resp = await fetch(
-      `https://api.paystack.co/transaction/verify/${encodeURIComponent(reference)}`,
+      `https://api.paystack.co/transaction/verify/${encodeURIComponent(
+        reference
+      )}`,
       {
         method: "GET",
         headers: {
@@ -35,7 +37,7 @@ export async function GET(
 
     const data = await resp.json();
 
-    if (!resp.ok || !data) {
+    if (!resp.ok) {
       return NextResponse.json(
         { error: "verification failed", details: data },
         { status: 502 }
@@ -54,8 +56,8 @@ export async function GET(
       customerEmail: data?.data?.customer?.email,
       raw: data,
     });
-  } catch (error) {
-    console.error("Verification error:", error);
+  } catch (err) {
+    console.error("Verification error:", err);
     return NextResponse.json({ error: "Verification failed" }, { status: 500 });
   }
 }
