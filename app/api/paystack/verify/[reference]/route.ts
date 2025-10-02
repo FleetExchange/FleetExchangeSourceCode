@@ -1,12 +1,10 @@
-// app/api/paystack/verify/[reference]/route.ts
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 
-interface RouteContext {
-  params: { reference: string };
-}
-
-export async function GET(_req: Request, context: RouteContext) {
-  const { reference } = context.params; // no await
+export async function GET(
+  _req: NextRequest,
+  { params }: { params: { reference: string } }
+) {
+  const { reference } = params;
 
   if (!reference) {
     return NextResponse.json({ error: "missing reference" }, { status: 400 });
@@ -23,9 +21,7 @@ export async function GET(_req: Request, context: RouteContext) {
     }
 
     const resp = await fetch(
-      `https://api.paystack.co/transaction/verify/${encodeURIComponent(
-        reference
-      )}`,
+      `https://api.paystack.co/transaction/verify/${encodeURIComponent(reference)}`,
       {
         method: "GET",
         headers: {
