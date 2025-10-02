@@ -876,7 +876,7 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
                       min="0"
                       className="input input-bordered w-full focus:outline-none focus:border-primary"
                       placeholder="Enter cargo weight"
-                      value={cargoWeight}
+                      value={cargoWeight || ""}
                       onChange={(e) => setCargoWeight(Number(e.target.value))}
                       disabled={booked}
                     />
