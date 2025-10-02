@@ -799,7 +799,7 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
                 </div>
 
                 {/* Action Buttons */}
-                <div className="space-y-4">
+                <div className="space-y-4 flex flex-col items-center">
                   {!trip?.isBooked ? (
                     // Trip not booked - show delete button
                     <button
@@ -818,7 +818,7 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
                     </div>
                   ) : purchaseTrip.status === "Delivered" ? (
                     // Delivered - show rating and support info
-                    <div className="space-y-4">
+                    <div className="space-y-4 flex flex-col items-center">
                       <div className="bg-success/10 border border-success/20 rounded-lg p-4 text-center">
                         <div className="flex items-center justify-center gap-2 text-success font-semibold">
                           <Star className="w-5 h-5 fill-success" />
@@ -855,7 +855,7 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
                     </div>
                   ) : purchaseTrip.status === "Awaiting Confirmation" ? (
                     // Awaiting Confirmation - show accept/reject buttons
-                    <div className="space-y-3">
+                    <div className="space-y-3 flex flex-col items-center">
                       <StatusAdvanceButton
                         currentStatus={purchaseTrip.status as TripStatus}
                         purchaseTripId={purchaseTrip._id}
@@ -868,7 +868,7 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
                     </div>
                   ) : purchaseTrip.status === "Booked" ? (
                     // Booked - show cancel and status advance
-                    <div className="space-y-3">
+                    <div className="space-y-3 flex flex-col items-center">
                       <StatusAdvanceButton
                         currentStatus={purchaseTrip.status as TripStatus}
                         purchaseTripId={purchaseTrip._id}
@@ -881,7 +881,7 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
                     </div>
                   ) : purchaseTrip.status === "Dispatched" ? (
                     // Dispatched - only status advance (no cancel)
-                    <div className="space-y-3">
+                    <div className="space-y-3 flex flex-col items-center">
                       <StatusAdvanceButton
                         currentStatus={purchaseTrip.status as TripStatus}
                         purchaseTripId={purchaseTrip._id}
@@ -894,7 +894,7 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
                     </div>
                   ) : purchaseTrip.status === "Cancelled" ? (
                     // Cancelled - show cancelled status with support info
-                    <div className="space-y-4">
+                    <div className="space-y-4 flex flex-col items-center">
                       <div className="bg-error/10 border border-error/20 rounded-lg p-4 text-center">
                         <div className="flex items-center justify-center gap-2 text-error font-semibold">
                           <X className="w-5 h-5" />
@@ -926,7 +926,7 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
                     </div>
                   ) : purchaseTrip?.status === "Refunded" ? (
                     // Refunded - show refunded status with support info
-                    <div className="space-y-4">
+                    <div className="space-y-4 flex flex-col items-center">
                       <div className="bg-info/10 border border-info/20 rounded-lg p-4 text-center">
                         <div className="flex items-center justify-center gap-2 text-info font-semibold">
                           <CheckCircle className="w-5 h-5" />
