@@ -7,11 +7,11 @@ import TransporterProfileInfo from "@/components/TransporterProfileInfo";
 import TransporterProfileFiles from "@/components/TransporterProfileFiles";
 import { ArrowLeft } from "lucide-react";
 
-interface ProfilePageProps {
+export default function TransporterProfilePage({
+  params,
+}: {
   params: { id: string };
-}
-
-const TransporterProfilePage = ({ params }: ProfilePageProps) => {
+}) {
   const { id } = params;
   const router = useRouter();
 
@@ -21,19 +21,13 @@ const TransporterProfilePage = ({ params }: ProfilePageProps) => {
       window.history.state &&
       typeof window.history.state.idx === "number" &&
       window.history.state.idx > 0;
-
-    if (canGoBack) {
-      router.back();
-    } else {
-      router.push("/discover");
-    }
+    canGoBack ? router.back() : router.push("/discover");
   };
 
   return (
     <div className="min-h-screen bg-base-200">
       <div className="p-4 lg:p-6">
         <div className="w-full max-w-4xl mx-auto">
-          {/* Header */}
           <div className="mb-8">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
               <div className="flex items-center gap-4">
@@ -56,19 +50,12 @@ const TransporterProfilePage = ({ params }: ProfilePageProps) => {
             </div>
           </div>
 
-          {/* Content */}
           <div className="space-y-6">
-            <div>
-              <TransporterProfileInfo transporterId={id} />
-            </div>
-            <div>
-              <TransporterProfileFiles transporterId={id} />
-            </div>
+            <TransporterProfileInfo transporterId={id} />
+            <TransporterProfileFiles transporterId={id} />
           </div>
         </div>
       </div>
     </div>
   );
-};
-
-export default TransporterProfilePage;
+}
