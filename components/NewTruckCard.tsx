@@ -8,6 +8,7 @@ import { useUser } from "@clerk/nextjs";
 import { useMutation, useQuery } from "convex/react";
 import Link from "next/link";
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Truck,
   Calendar,
@@ -22,6 +23,7 @@ import {
 import { TruckSelector } from "./TruckSelector";
 
 const NewTruckCard = () => {
+  const router = useRouter();
   // Get the logged in user identity
   const { user } = useUser();
   // This is the Clerk user ID
@@ -101,7 +103,9 @@ const NewTruckCard = () => {
         truckId: newTruckId,
       });
 
-      alert("Truck Created.");
+      // Navigate back to Fleet Manager after success
+      alert("Truck created and added to fleet successfully!");
+      router.push("/fleetManager");
     } catch (err) {
       console.error("Failed to create truck:", err);
       alert("Something went wrong. Please try again.");
