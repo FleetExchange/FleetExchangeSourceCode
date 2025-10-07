@@ -496,18 +496,11 @@ const CreateTripPage = () => {
                       Route Information
                     </h2>
                     <p className="text-sm text-base-content/60">
-                      Define your trip's origin and destination
+                      Enter only the Origin CITY and Destination CITY. The
+                      client will provide the exact pickup and delivery
+                      addresses when booking.
                     </p>
                   </div>
-                </div>
-
-                {/* Callout */}
-                <div className="rounded-xl border border-base-300 bg-base-200/60 p-3 mb-6">
-                  <p className="text-sm text-base-content/70 leading-relaxed">
-                    Enter only the Origin CITY and Destination CITY. The client
-                    will provide the exact pickup and delivery addresses when
-                    booking.
-                  </p>
                 </div>
 
                 {/* Fields */}
