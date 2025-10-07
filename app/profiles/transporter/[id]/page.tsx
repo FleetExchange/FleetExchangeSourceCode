@@ -18,21 +18,7 @@ const Page = ({ params }: ProfilePageProps) => {
   const router = useRouter();
 
   const handleBack = () => {
-    // Check where user came from via referrer
-    const referrer = document.referrer;
-
-    if (referrer && referrer.includes(window.location.origin)) {
-      // If they came from within our app, check if it's safe to go back
-      if (!referrer.includes("/profiles/")) {
-        router.back();
-      } else {
-        // Fallback to dashboard if coming from profiles
-        router.push("/discover");
-      }
-    } else {
-      // External referrer or direct access - go to dashboard
-      router.push("/discover");
-    }
+    router.push("/transporter/dashboard");
   };
 
   return (

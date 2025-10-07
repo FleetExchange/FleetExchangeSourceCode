@@ -44,6 +44,7 @@ import {
   formatTimeInSAST,
 } from "@/utils/dateUtils";
 import { getCachedCityCoordinates } from "../utils/cityCoordinatesCache";
+import TransporterProfileButton from "./TransporterProfileButton";
 
 type DirectionsResult = google.maps.DirectionsResult;
 
@@ -1001,15 +1002,9 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
                         </p>
                       </div>
                     </div>
-                    <button
-                      className="btn btn-outline btn-sm gap-2"
-                      onClick={() =>
-                        (window.location.href = `/profiles/${tripIssuer?._id}`)
-                      }
-                    >
-                      <User className="w-4 h-4" />
-                      View Profile
-                    </button>
+                    <TransporterProfileButton
+                      id={tripIssuer?._id as Id<"users">}
+                    />
                   </div>
                 </div>
               </div>

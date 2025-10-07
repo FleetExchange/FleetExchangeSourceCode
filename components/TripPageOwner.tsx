@@ -52,6 +52,7 @@ import {
   SUPPORT_PHONE_DISPLAY,
   SUPPORT_PHONE_TEL,
 } from "@/shared/support";
+import ClientProfileButton from "./ClientProfileButton";
 
 interface TripPageClientProps {
   tripId: string;
@@ -580,15 +581,7 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
                           </p>
                         </div>
                       </div>
-                      <button
-                        className="btn btn-outline btn-sm gap-2"
-                        onClick={() =>
-                          (window.location.href = `/profiles/${tripClient?._id}`)
-                        }
-                      >
-                        <User className="w-4 h-4" />
-                        View Profile
-                      </button>
+                      <ClientProfileButton id={tripClient._id} />
                     </div>
                   </div>
                 </div>
