@@ -357,7 +357,8 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
                           </span>
                         </label>
                         <div className="p-3 bg-base-100 border border-base-300 rounded-lg text-sm">
-                          {trip?.originAddress || "N/A"}
+                          {trip?.originAddress ||
+                            "Client will provide address when booking."}
                         </div>
                       </div>
 
@@ -368,7 +369,8 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
                           </span>
                         </label>
                         <div className="p-3 bg-base-100 border border-base-300 rounded-lg text-sm min-h-[3rem]">
-                          {purchaseTrip?.pickupInstructions || "N/A"}
+                          {purchaseTrip?.pickupInstructions ||
+                            "Client will provide address when booking."}
                         </div>
                       </div>
                     </div>
@@ -393,7 +395,8 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
                           </span>
                         </label>
                         <div className="p-3 bg-base-100 border border-base-300 rounded-lg text-sm">
-                          {trip?.destinationAddress || "N/A"}
+                          {trip?.destinationAddress ||
+                            "Client will provide instructions when booking."}
                         </div>
                       </div>
 
@@ -404,7 +407,8 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
                           </span>
                         </label>
                         <div className="p-3 bg-base-100 border border-base-300 rounded-lg text-sm min-h-[3rem]">
-                          {purchaseTrip?.deliveryInstructions || "N/A"}
+                          {purchaseTrip?.deliveryInstructions ||
+                            "Client will provide instructions when booking."}
                         </div>
                       </div>
                     </div>
@@ -448,7 +452,9 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
                       </span>
                     </label>
                     <div className="p-3 bg-base-200/50 border border-base-300 rounded-lg text-sm font-medium">
-                      {purchaseTrip?.cargoWeight ?? "N/A"} kg
+                      {purchaseTrip?.cargoWeight ??
+                        "Client will provide payload weight when booking."}{" "}
+                      kg
                     </div>
                     {truck && (
                       <div className="label">
@@ -466,7 +472,8 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
                       </span>
                     </label>
                     <div className="p-3 bg-base-200/50 border border-base-300 rounded-lg text-sm min-h-[3rem]">
-                      {purchaseTrip?.freightNotes ?? "N/A"}
+                      {purchaseTrip?.freightNotes ??
+                        "Client will provide cargo information when booking."}
                     </div>
                   </div>
                 </div>
