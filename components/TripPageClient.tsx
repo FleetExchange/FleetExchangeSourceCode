@@ -708,8 +708,9 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
                     <div className="space-y-4">
                       <div>
                         <label className="label">
-                          <span className="label-text font-medium">
-                            Address
+                          <span className="label-text text-sm font-medium">
+                            Enter the exact address where the cargo has to be
+                            picked up.
                           </span>
                         </label>
                         <AddressAutocomplete
@@ -746,7 +747,7 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
 
                       <div>
                         <label className="label">
-                          <span className="label-text font-medium">
+                          <span className="label-text text-sm font-medium">
                             Instructions
                           </span>
                         </label>
@@ -778,8 +779,9 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
                     <div className="space-y-4">
                       <div>
                         <label className="label">
-                          <span className="label-text font-medium">
-                            Address
+                          <span className="label-text text-sm font-medium">
+                            Enter the exact address where the cargo has to be
+                            dropped up.
                           </span>
                         </label>
                         <AddressAutocomplete
@@ -816,7 +818,7 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
 
                       <div>
                         <label className="label">
-                          <span className="label-text font-medium">
+                          <span className="label-text text-sm font-medium">
                             Instructions
                           </span>
                         </label>
