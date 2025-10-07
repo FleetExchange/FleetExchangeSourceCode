@@ -486,28 +486,32 @@ const CreateTripPage = () => {
             <div className="xl:col-span-2 space-y-6">
               {/* Route Information */}
               <div className="bg-base-100 rounded-2xl shadow-xl border border-base-300 p-6">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="p-2 bg-primary/10 rounded-lg border border-primary/20">
+                {/* Header */}
+                <div className="grid grid-cols-[44px,1fr] items-start gap-4 mb-4">
+                  <div className="h-11 w-11 rounded-xl border border-primary/20 bg-primary/10 flex items-center justify-center">
                     <Route className="w-5 h-5 text-primary" />
                   </div>
                   <div>
-                    <h2 className="text-lg font-bold text-base-content">
+                    <h2 className="text-lg font-bold text-base-content leading-tight">
                       Route Information
                     </h2>
                     <p className="text-sm text-base-content/60">
                       Define your trip's origin and destination
                     </p>
-                    <div className="mt-3 rounded-xl border border-base-300 bg-base-200/50 p-3">
-                      <p className="text-sm text-base-content/70">
-                        Enter only the Origin CITY and Destination CITY. The
-                        client will provide the exact pickup and delivery
-                        addresses when booking.
-                      </p>
-                    </div>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Callout */}
+                <div className="rounded-xl border border-base-300 bg-base-200/60 p-3 mb-6">
+                  <p className="text-sm text-base-content/70 leading-relaxed">
+                    Enter only the Origin CITY and Destination CITY. The client
+                    will provide the exact pickup and delivery addresses when
+                    booking.
+                  </p>
+                </div>
+
+                {/* Fields */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   <div className="space-y-2">
                     <label className="label">
                       <span className="label-text font-medium flex items-center gap-2">
