@@ -293,6 +293,11 @@ const StatusAdvanceButton = ({
           action: "status_update",
         },
       });
+
+      alert(
+        `Trip status advanced to ${nextStatus}. Remember to update the trip status as it progresses.`
+      );
+      window.location.href = "/myTrips";
     } catch (error) {
       console.error("Failed to advance status:", error);
     }
