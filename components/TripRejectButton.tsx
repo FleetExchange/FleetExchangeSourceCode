@@ -94,12 +94,20 @@ const TripRejectButton = ({ tripId, currentStatus }: TripRejectButtonProps) => {
 
   return (
     <button
+      type="button"
       onClick={handleRejectBooking}
       disabled={isProcessing}
-      className="btn btn-error btn-sm flex flex-col items-center gap-1 py-2 h-auto min-h-[3rem] disabled:opacity-60"
+      className="btn btn-outline btn-error w-full sm:w-auto gap-3 px-4 py-3 border border-error/40 disabled:opacity-60 disabled:cursor-not-allowed"
+      aria-busy={isProcessing}
+      aria-label="Reject booking"
     >
-      <span className="text-xs opacity-80">Awaiting Confirmation</span>
-      <span className="font-medium">Reject Booking</span>
+      <div className="flex flex-col leading-tight text-left">
+        <span className="text-[10px] uppercase tracking-wide opacity-70">
+          {currentStatus}
+        </span>
+        <span className="text-sm font-semibold">Reject Booking</span>
+      </div>
+      {isProcessing && <span className="loading loading-spinner loading-xs" />}
     </button>
   );
 };
