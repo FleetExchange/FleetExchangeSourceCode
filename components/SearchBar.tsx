@@ -161,7 +161,7 @@ export default function SearchBar({
               <div className="flex items-center gap-2 mb-2">
                 <MapPin className="w-4 h-4 text-primary" />
                 <label className="text-sm font-medium text-base-content">
-                  Origin
+                  Origin City
                 </label>
               </div>
               <AddressAutocomplete {...getPickupProps()} label="Enter City" />
@@ -172,7 +172,7 @@ export default function SearchBar({
               <div className="flex items-center gap-2 mb-2">
                 <MapPin className="w-4 h-4 text-success" />
                 <label className="text-sm font-medium text-base-content">
-                  Destination
+                  Destination City
                 </label>
               </div>
               <AddressAutocomplete {...getDeliveryProps()} label="Enter City" />
