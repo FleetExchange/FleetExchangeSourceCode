@@ -33,7 +33,7 @@ const TransporterProfileButton = ({ id }: Props) => {
         role="dialog"
         aria-modal="true"
       >
-        <div className="modal-box max-w-md">
+        <div className="modal-box max-w-[1000px]">
           <div className="flex items-start justify-between gap-4">
             <button
               className="btn btn-ghost btn-sm"
