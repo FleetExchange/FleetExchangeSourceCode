@@ -150,6 +150,29 @@ const FleetManagerTable = () => {
     );
   }
 
+  // Require at least one fleet before using the table
+  if (Array.isArray(userFleets) && userFleets.length === 0) {
+    return (
+      <div className="p-6">
+        <div className="max-w-2xl mx-auto text-center bg-base-100 border border-base-300 rounded-xl p-8">
+          <Truck className="w-12 h-12 mx-auto text-base-content/30 mb-3" />
+          <h2 className="text-xl font-semibold text-base-content">
+            Create your first fleet
+          </h2>
+          <p className="text-base-content/60 mb-6">
+            You need a fleet before you can add or manage trucks.
+          </p>
+          <div className="inline-block">
+            <NewFleetCard />
+          </div>
+        </div>
+
+        {/* Mount the modal so NewFleetCard can open it */}
+        <NewFleetModal fleets={userFleets} />
+      </div>
+    );
+  }
+
   // Calculate pagination values
   const totalItems = filteredTrucks.length;
   const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
