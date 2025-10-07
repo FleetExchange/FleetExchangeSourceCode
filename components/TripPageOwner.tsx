@@ -451,10 +451,9 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
                         Weight (kg)
                       </span>
                     </label>
-                    <div className="p-3 bg-base-200/50 border border-base-300 rounded-lg text-sm font-medium">
+                    <div className="p-3 bg-base-200/50 border border-base-300 rounded-lg text-sm ">
                       {purchaseTrip?.cargoWeight ??
-                        "Client will provide payload weight when booking."}{" "}
-                      kg
+                        "Client will provide payload weight when booking."}
                     </div>
                     {truck && (
                       <div className="label">
