@@ -162,7 +162,7 @@ const FleetManagerTable = () => {
           <p className="text-base-content/60 mb-6">
             You need a fleet before you can add or manage trucks.
           </p>
-          <div className="inline-block">
+          <div className="inline-block border border-base-300 rounded-xl p-8">
             <NewFleetCard />
           </div>
         </div>

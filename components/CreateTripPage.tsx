@@ -497,6 +497,13 @@ const CreateTripPage = () => {
                     <p className="text-sm text-base-content/60">
                       Define your trip's origin and destination
                     </p>
+                    <div className="mt-3 rounded-xl border border-base-300 bg-base-200/50 p-3">
+                      <p className="text-sm text-base-content/70">
+                        Enter only the Origin CITY and Destination CITY. The
+                        client will provide the exact pickup and delivery
+                        addresses when booking.
+                      </p>
+                    </div>
                   </div>
                 </div>
 
