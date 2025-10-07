@@ -635,9 +635,33 @@ const CreateTripPage = () => {
                         Flexible Pricing Options:
                       </p>
                       <p>
-                        Combine a minimum trip price with variable rates per KM
-                        or KG to create your ideal pricing schema.
+                        Combine a fixed trip price with variable rates per KM or
+                        KG to create your ideal pricing schema.
                       </p>
+                      {/* Example block */}
+                      <div className="mt-3 rounded-lg border border-base-300 bg-base-100/70 p-3">
+                        <p className="font-medium text-base-content/80 mb-2">
+                          Example
+                        </p>
+                        <ul className="list-disc ml-5 space-y-1">
+                          <li>Fixed price: R500.00</li>
+                          <li>Rate per KM: R2.50</li>
+                          <li>Rate per KG: R0.80</li>
+                          <li>Trip: 350 km, 800 kg</li>
+                        </ul>
+                        <div className="mt-2 text-sm">
+                          <p>
+                            Calculation: R500.00 + (350 × 2.50) + (800 × 0.80)
+                          </p>
+                          <p className="font-semibold text-base-content">
+                            Total: R2,015.00
+                          </p>
+                        </div>
+                        <p className="text-xs text-base-content/60 mt-2">
+                          Leave input boxes empty if it doesn’t apply (e.g.,
+                          only base price or only distance-based).
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -665,7 +689,7 @@ const CreateTripPage = () => {
                     </div>
                     <div className="label">
                       <span className="label-text-alt text-base-content/60">
-                        Minimum trip cost
+                        Fixed trip cost
                       </span>
                     </div>
                   </div>
