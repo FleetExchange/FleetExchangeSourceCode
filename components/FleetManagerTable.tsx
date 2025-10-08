@@ -374,7 +374,7 @@ const FleetManagerTable = () => {
                 <th className="font-semibold text-base-content">Length (m)</th>
                 <th className="font-semibold text-base-content">Width (m)</th>
                 <th className="font-semibold text-base-content">Height (m)</th>
-                <th className="font-semibold text-base-content">Actions</th>
+                <th className="font-semibold text-base-content">Edit</th>
               </tr>
             </thead>
             <tbody>

@@ -14,6 +14,7 @@ interface Fleet {
 const NewFleetModal = ({ fleets }: { fleets: Fleet[] }) => {
   const [name, setName] = useState("");
   const [returnMessage, setReturnMessage] = useState("");
+  const [isCreating, setIsCreating] = useState(false);
 
   // Get the logged in user identity
   const { user } = useUser();
@@ -26,6 +27,7 @@ const NewFleetModal = ({ fleets }: { fleets: Fleet[] }) => {
 
   const createFleet = useMutation(api.fleet.newFleet);
   const handleCreate = async () => {
+    if (isCreating) return; // prevent double click
     const nameExists = fleets.some(
       (fleet) => fleet.fleetName.toLowerCase() === name.trim().toLowerCase()
     );
@@ -38,6 +40,7 @@ const NewFleetModal = ({ fleets }: { fleets: Fleet[] }) => {
     setReturnMessage("");
 
     try {
+      setIsCreating(true);
       if (userId) {
         await createFleet({ fleetName: name.trim(), userId });
         setReturnMessage("Fleet Created.");
@@ -46,6 +49,8 @@ const NewFleetModal = ({ fleets }: { fleets: Fleet[] }) => {
     } catch (err) {
       console.error("Failed to create fleet:", err);
       setReturnMessage("Something went wrong. Please try again.");
+    } finally {
+      setIsCreating(false);
     }
   };
 
@@ -107,6 +112,7 @@ const NewFleetModal = ({ fleets }: { fleets: Fleet[] }) => {
               placeholder="Enter the name of your new fleet"
               value={name}
               onChange={(e) => setName(e.target.value)}
+              disabled={isCreating}
             />
             <p className="text-xs text-base-content/60">
               Choose a unique name to identify this fleet
@@ -139,13 +145,20 @@ const NewFleetModal = ({ fleets }: { fleets: Fleet[] }) => {
           <button
             className="btn btn-primary gap-2"
             onClick={handleCreate}
-            disabled={!name.trim()}
+            disabled={!name.trim() || isCreating}
+            aria-busy={isCreating}
           >
-            <Plus className="w-4 h-4" />
-            Create Fleet
+            {isCreating ? (
+              <span className="loading loading-spinner loading-xs" />
+            ) : (
+              <Plus className="w-4 h-4" />
+            )}
+            <span>Create Fleet</span>
           </button>
           <form method="dialog">
-            <button className="btn btn-outline">Close</button>
+            <button className="btn btn-outline" disabled={isCreating}>
+              Close
+            </button>
           </form>
         </div>
 

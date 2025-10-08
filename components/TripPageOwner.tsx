@@ -371,7 +371,7 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
                         </label>
                         <div className="p-3 bg-base-100 border border-base-300 rounded-lg text-sm min-h-[3rem]">
                           {purchaseTrip?.pickupInstructions ||
-                            "Client will provide address when booking."}
+                            "Client will provide instructions when booking."}
                         </div>
                       </div>
                     </div>
@@ -397,7 +397,7 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
                         </label>
                         <div className="p-3 bg-base-100 border border-base-300 rounded-lg text-sm">
                           {trip?.destinationAddress ||
-                            "Client will provide instructions when booking."}
+                            "Client will provide address when booking."}
                         </div>
                       </div>
 
