@@ -37,7 +37,7 @@ export default function ProofOfDeliveryModal({
   const tooBig = (file?.size ?? 0) > 15 * 1024 * 1024; // 15MB
 
   const handleSubmit = async () => {
-    if (!file || !isPdf || tooBig || userId) return;
+    if (!file || !isPdf || tooBig || !userId) return;
     setBusy(true);
     try {
       const uploadUrl = await genUrl();
