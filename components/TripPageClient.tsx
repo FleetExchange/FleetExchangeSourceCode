@@ -55,7 +55,6 @@ interface TripPageClientProps {
 
 const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
   const router = useRouter();
-
   // Get the logged in user identity
   const { user } = useUser();
 
@@ -1011,9 +1010,11 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
                         </p>
                       </div>
                     </div>
-                    <TransporterProfileButton
-                      id={tripIssuer?._id as Id<"users">}
-                    />
+                    {tripIssuer?._id ? (
+                      <TransporterProfileButton
+                        id={tripIssuer._id as Id<"users">}
+                      />
+                    ) : null}
                   </div>
                 </div>
               </div>
