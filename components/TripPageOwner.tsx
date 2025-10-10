@@ -53,6 +53,7 @@ import {
   SUPPORT_PHONE_TEL,
 } from "@/shared/support";
 import ClientProfileButton from "./ClientProfileButton";
+import PODDisplay from "./PODDisplay";
 
 interface TripPageClientProps {
   tripId: string;
@@ -822,6 +823,16 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
                         <div className="flex items-center justify-center gap-2 text-success font-semibold">
                           <Star className="w-5 h-5 fill-success" />
                           <span>Trip Delivered</span>
+                        </div>
+                      </div>
+
+                      {/* POD above rating */}
+                      <div className="w-full">
+                        <div className="pb-2 border-b border-base-300 flex justify-start">
+                          <PODDisplay
+                            purchaseTripId={purchaseTrip._id}
+                            size="sm"
+                          />
                         </div>
                       </div>
 

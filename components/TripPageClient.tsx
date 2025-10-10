@@ -450,16 +450,19 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
 
     // Trip is booked by current user
     if (booked && purchaseTripDetails) {
-      // Delivered - show rating
+      // Delivered - show POD above rating
       if (purchaseTripDetails.status === "Delivered") {
         return (
-          <>
+          <div className="space-y-3">
+            <div className="pb-3 border-b border-base-300 flex justify-start">
+              <PODDisplay
+                purchaseTripId={purchaseTripDetails._id}
+                size="sm"
+                className="border-base-300"
+              />
+            </div>
             <TripRatingComponent purchaseTripId={purchaseTripDetails._id} />
-            <PODDisplay
-              purchaseTripId={purchaseTripDetails._id}
-              className="mt-2"
-            />
-          </>
+          </div>
         );
       }
 
