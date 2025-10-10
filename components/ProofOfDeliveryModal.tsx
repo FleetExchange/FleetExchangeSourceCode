@@ -56,7 +56,7 @@ export default function ProofOfDeliveryModal({
           fileName: file.name,
           mimeType: file.type,
           fileSize: file.size,
-          userId: userId,
+          userId: userId as Id<"users">,
         });
       } catch (e) {
         // If already exists, replace
@@ -66,7 +66,7 @@ export default function ProofOfDeliveryModal({
           fileName: file.name,
           mimeType: file.type,
           fileSize: file.size,
-          userId: userId,
+          userId: userId as Id<"users">,
         });
       }
 

@@ -19,6 +19,7 @@ import type * as fleet from "../fleet.js";
 import type * as notifications from "../notifications.js";
 import type * as payments from "../payments.js";
 import type * as payoutAccount from "../payoutAccount.js";
+import type * as proofOfDelivery from "../proofOfDelivery.js";
 import type * as purchasetrip from "../purchasetrip.js";
 import type * as trip from "../trip.js";
 import type * as truck from "../truck.js";
@@ -40,6 +41,7 @@ declare const fullApi: ApiFromModules<{
   notifications: typeof notifications;
   payments: typeof payments;
   payoutAccount: typeof payoutAccount;
+  proofOfDelivery: typeof proofOfDelivery;
   purchasetrip: typeof purchasetrip;
   trip: typeof trip;
   truck: typeof truck;
