@@ -201,4 +201,14 @@ export default defineSchema({
     .index("by_init_reference", ["paystackInitReference"])
     .index("by_reference", ["paystackReference"])
     .index("by_status_deadline", ["status", "paymentDeadline"]),
+
+  proofOfDelivery: defineTable({
+    purchaseTripId: v.id("purchaseTrip"), // Linked to which purchase trip
+    userId: v.id("users"), // The user that uploads the proof
+    fileId: v.id("_storage"),
+    fileName: v.string(),
+    mimeType: v.string(),
+    fileSize: v.number(),
+    uploadedAt: v.number(),
+  }).index("by_purchase_trip", ["purchaseTripId"]),
 });

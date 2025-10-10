@@ -7,6 +7,7 @@ import { release } from "os";
 import React from "react";
 import { useState } from "react";
 import { formatDateInSAST } from "@/utils/dateUtils";
+import ProofOfDeliveryModal from "./ProofOfDeliveryModal";
 
 export type TripStatus =
   | "Awaiting Confirmation"
@@ -26,6 +27,7 @@ const StatusAdvanceButton = ({
   purchaseTripId,
 }: StatusAdvanceButtonProps) => {
   const [status, setStatus] = useState<TripStatus>(currentStatus);
+  const [podOpen, setPodOpen] = useState(false);
   const updateStatus = useMutation(api.purchasetrip.updatePurchaseTripStatus);
 
   // Add query to keep status in sync
@@ -94,6 +96,12 @@ const StatusAdvanceButton = ({
   const handleAdvanceStatus = async () => {
     try {
       const nextStatus = getNextStatus(status);
+
+      // Gate Delivered behind POD upload
+      if (nextStatus === "Delivered") {
+        setPodOpen(true);
+        return;
+      }
 
       // capture previous status so we can rollback on failure
       const prevStatus = status;
@@ -262,20 +270,6 @@ const StatusAdvanceButton = ({
         }
       }
 
-      // 3. Handle payment release for "Delivered" status
-      if (nextStatus === "Delivered") {
-        await releasePaymentToTransporter();
-        await createNotification({
-          userId: purchaseTrip?.userId as Id<"users">,
-          type: "booking",
-          message: `Please rate your experience for your booking from ${trip?.originCity} to ${trip?.destinationCity}.`,
-          meta: {
-            tripId: trip?._id as Id<"trip">,
-            action: "rating_request",
-          },
-        });
-      }
-
       setStatus(nextStatus); // Update local state immediately
 
       // Updated to use SAST formatting utility
@@ -300,6 +294,54 @@ const StatusAdvanceButton = ({
       window.location.href = "/myTrips";
     } catch (error) {
       console.error("Failed to advance status:", error);
+    }
+  };
+
+  // Called by the POD modal once the PDF is uploaded successfully
+  const advanceToDeliveredAfterPod = async () => {
+    const prevStatus = status;
+    try {
+      const nextStatus: TripStatus = "Delivered";
+
+      await updateStatus({
+        purchaseTripId,
+        newStatus: nextStatus,
+      });
+
+      await releasePaymentToTransporter();
+
+      setStatus(nextStatus);
+      const formattedDate = trip?.departureDate
+        ? formatDateInSAST(trip.departureDate)
+        : "TBD";
+
+      await createNotification({
+        userId: purchaseTrip?.userId as Id<"users">,
+        type: "booking",
+        message: `Please rate your experience for your booking from ${trip?.originCity} to ${trip?.destinationCity}.`,
+        meta: { tripId: trip?._id as Id<"trip">, action: "rating_request" },
+      });
+
+      await createNotification({
+        userId: purchaseTrip?.userId as Id<"users">,
+        type: "booking",
+        message: `Booking Status Update: ${formattedDate} ${trip?.originCity} - ${trip?.destinationCity}: ${nextStatus}.`,
+        meta: { tripId: trip?._id as Id<"trip">, action: "status_update" },
+      });
+
+      alert(
+        `Trip status advanced to ${nextStatus}. Remember to update the trip status as it progresses.`
+      );
+      window.location.href = "/myTrips";
+    } catch (e) {
+      console.error("Failed to mark Delivered after POD:", e);
+      // Optional: rollback if needed using
+      await updateStatus({
+        purchaseTripId,
+        newStatus: prevStatus,
+      });
+    } finally {
+      setPodOpen(false);
     }
   };
 
@@ -405,66 +447,75 @@ const StatusAdvanceButton = ({
   const canAdvance = nextStatus !== status;
 
   return (
-    <button
-      onClick={handleAdvanceStatus}
-      disabled={!canAdvance}
-      aria-label={`Advance booking status from ${status} to ${nextStatus}`}
-      className={`relative w-full sm:w-auto rounded-lg px-4 py-3 text-left shadow-sm border
+    <>
+      <button
+        onClick={handleAdvanceStatus}
+        disabled={!canAdvance}
+        aria-label={`Advance booking status from ${status} to ${nextStatus}`}
+        className={`relative w-full sm:w-auto rounded-lg px-4 py-3 text-left shadow-sm border
         transition-colors group
         ${
           canAdvance
             ? "bg-success hover:bg-success/90 active:bg-success border-success text-success-content"
             : "bg-base-300 border-base-300 text-base-content/50 cursor-not-allowed"
         }`}
-    >
-      <div className="flex items-start gap-4">
-        {/* Current status */}
-        <div className="flex flex-col leading-tight">
-          <span className="text-[10px] uppercase tracking-wide opacity-70">
-            Current
-          </span>
-          <span className="text-xs font-medium">{status}</span>
-        </div>
+      >
+        <div className="flex items-start gap-4">
+          {/* Current status */}
+          <div className="flex flex-col leading-tight">
+            <span className="text-[10px] uppercase tracking-wide opacity-70">
+              Current
+            </span>
+            <span className="text-xs font-medium">{status}</span>
+          </div>
 
-        <div className="h-10 w-px bg-success-content/25 rounded" />
+          <div className="h-10 w-px bg-success-content/25 rounded" />
 
-        {/* Next status */}
-        <div className="flex flex-col leading-tight">
-          <span className="text-[10px] uppercase tracking-wide opacity-70">
-            Next
-          </span>
-          <span className="text-sm font-semibold tracking-tight">
-            {nextStatus}
-          </span>
+          {/* Next status */}
+          <div className="flex flex-col leading-tight">
+            <span className="text-[10px] uppercase tracking-wide opacity-70">
+              Next
+            </span>
+            <span className="text-sm font-semibold tracking-tight">
+              {nextStatus}
+            </span>
+          </div>
+
+          {canAdvance && (
+            <span className="ml-auto pt-4 text-success-content/80 group-hover:translate-x-0.5 transition-transform">
+              <svg
+                className="w-4 h-4"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10.293 3.293a1 1 0 011.414 0l5 5a1 1 0 010 1.414l-5 5a1 1 0 11-1.414-1.414L13.586 10 10.293 6.707a1 1 0 010-1.414z"
+                  clipRule="evenodd"
+                />
+                <path
+                  fillRule="evenodd"
+                  d="M3 10a1 1 0 011-1h11a1 1 0 110 2H4a1 1 0 01-1-1z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </span>
+          )}
         </div>
 
         {canAdvance && (
-          <span className="ml-auto pt-4 text-success-content/80 group-hover:translate-x-0.5 transition-transform">
-            <svg
-              className="w-4 h-4"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-              aria-hidden="true"
-            >
-              <path
-                fillRule="evenodd"
-                d="M10.293 3.293a1 1 0 011.414 0l5 5a1 1 0 010 1.414l-5 5a1 1 0 11-1.414-1.414L13.586 10 10.293 6.707a1 1 0 010-1.414z"
-                clipRule="evenodd"
-              />
-              <path
-                fillRule="evenodd"
-                d="M3 10a1 1 0 011-1h11a1 1 0 110 2H4a1 1 0 01-1-1z"
-                clipRule="evenodd"
-              />
-            </svg>
-          </span>
+          <span className="pointer-events-none absolute left-4 -bottom-1 h-1 w-2/5 rounded-full bg-success-content/30 group-hover:w-3/5 transition-all" />
         )}
-      </div>
+      </button>
 
-      {canAdvance && (
-        <span className="pointer-events-none absolute left-4 -bottom-1 h-1 w-2/5 rounded-full bg-success-content/30 group-hover:w-3/5 transition-all" />
-      )}
-    </button>
+      <ProofOfDeliveryModal
+        purchaseTripId={purchaseTripId}
+        open={podOpen}
+        onClose={() => setPodOpen(false)}
+        onSuccess={advanceToDeliveredAfterPod}
+      />
+    </>
   );
 };
 

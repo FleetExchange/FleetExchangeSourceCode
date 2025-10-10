@@ -45,6 +45,7 @@ import {
 } from "@/utils/dateUtils";
 import { getCachedCityCoordinates } from "../utils/cityCoordinatesCache";
 import TransporterProfileButton from "./TransporterProfileButton";
+import PODDisplay from "./PODDisplay";
 
 type DirectionsResult = google.maps.DirectionsResult;
 
@@ -452,7 +453,15 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
     if (booked && purchaseTripDetails) {
       // Delivered - show rating
       if (purchaseTripDetails.status === "Delivered") {
-        return <TripRatingComponent purchaseTripId={purchaseTripDetails._id} />;
+        return (
+          <>
+            <TripRatingComponent purchaseTripId={purchaseTripDetails._id} />
+            <PODDisplay
+              purchaseTripId={purchaseTripDetails._id}
+              className="mt-2"
+            />
+          </>
+        );
       }
 
       // Dispatched - cannot cancel
