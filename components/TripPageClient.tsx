@@ -454,7 +454,7 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
       if (purchaseTripDetails.status === "Delivered") {
         return (
           <div className="space-y-3">
-            <div className="pb-3 border-b border-base-300 flex justify-start">
+            <div className="pb-3 border-b border-base-300 flex justify-center">
               <PODDisplay
                 purchaseTripId={purchaseTripDetails._id}
                 size="sm"

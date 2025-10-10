@@ -828,7 +828,7 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
 
                       {/* POD above rating */}
                       <div className="w-full">
-                        <div className="pb-2 border-b border-base-300 flex justify-start">
+                        <div className="pb-2 border-b border-base-300 flex justify-center">
                           <PODDisplay
                             purchaseTripId={purchaseTrip._id}
                             size="sm"
