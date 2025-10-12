@@ -7,7 +7,7 @@ import { title } from "process";
 
 async function sendWithResend(to: string, subject: string, html: string) {
   const key = process.env.RESEND_API_KEY;
-  const from = "no-reply@fleetexchange.co.za";
+  const from = "notifications@fleetexchange.co.za";
   if (!key) throw new Error("RESEND_API_KEY missing");
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
