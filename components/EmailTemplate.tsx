@@ -27,7 +27,7 @@ export default function EmailTemplate({
   footerNote,
   brandName = "FleetExchange",
   brandUrl = "https://www.fleetexchange.co.za",
-  logoUrl = "./public/images/FleetExchangeIcon.png",
+  logoUrl = "https://www.fleetexchange.co.za/images/FleetExchangeIcon.png",
   supportEmail = SUPPORT_EMAIL,
   supportPhone = SUPPORT_PHONE_DISPLAY,
   websiteUrl = "https://www.fleetexchange.co.za",
