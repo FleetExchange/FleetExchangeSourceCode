@@ -20,6 +20,7 @@
     "@headlessui/react": "^2.2.4",
     "@paystack/inline-js": "^2.22.7",
     "@radix-ui/react-slot": "^1.2.0",
+    "@react-email/render": "^1.3.2",
     "@react-google-maps/api": "^2.20.6",
     "@tailwindcss/postcss": "^4.1.3",
     "axios": "^1.11.0",

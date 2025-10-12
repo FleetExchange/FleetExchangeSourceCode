@@ -3,7 +3,7 @@ import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { api } from "./_generated/api";
 
-// Create a notification
+// Create a notification and schedule its email
 export const createNotification = mutation({
   args: {
     userId: v.id("users"),
@@ -19,7 +19,7 @@ export const createNotification = mutation({
     meta: v.optional(v.any()),
   },
   handler: async (ctx, args) => {
-    return await ctx.db.insert("notifications", {
+    const id = await ctx.db.insert("notifications", {
       userId: args.userId,
       type: args.type,
       message: args.message,
@@ -27,6 +27,13 @@ export const createNotification = mutation({
       read: false,
       meta: args.meta,
     });
+
+    // Fire-and-forget: render & send email in an action
+    await ctx.scheduler.runAfter(0, api.emails.sendForNotification, {
+      notificationId: id,
+    });
+
+    return id;
   },
 });
 
