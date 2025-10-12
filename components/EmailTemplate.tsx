@@ -1,5 +1,6 @@
 import * as React from "react";
 import Logo from "./Logo";
+import { SUPPORT_EMAIL, SUPPORT_PHONE_DISPLAY } from "@/shared/support";
 
 type Props = {
   title: string;
@@ -11,6 +12,10 @@ type Props = {
   // Optional brand overrides (safe defaults provided)
   brandName?: string;
   brandUrl?: string;
+  // Optional contact details shown in the Contact section
+  supportEmail?: string;
+  supportPhone?: string;
+  websiteUrl?: string;
 };
 
 export default function EmailTemplate({
@@ -21,6 +26,9 @@ export default function EmailTemplate({
   footerNote,
   brandName = "FleetExchange",
   brandUrl = "https://www.fleetexchange.co.za",
+  supportEmail = SUPPORT_EMAIL,
+  supportPhone = SUPPORT_PHONE_DISPLAY,
+  websiteUrl = "https://www.fleetexchange.co.za",
 }: Props) {
   // Palette (aligned to app theme)
   const colors = {
@@ -143,6 +151,52 @@ export default function EmailTemplate({
                   Tip: Keep this email for your records. You can manage your
                   bookings and payments anytime on {brandName}.
                 </p>
+              </div>
+
+              {/* Contact section */}
+              <div
+                style={{
+                  marginTop: 16,
+                  background: colors.surface,
+                  border: `1px solid ${colors.border}`,
+                  borderRadius: 10,
+                  padding: 16,
+                }}
+              >
+                <p style={{ margin: 0, marginBottom: 8, fontWeight: 700 }}>
+                  Need help?
+                </p>
+                <p style={{ margin: 0, fontSize: 13, color: colors.subtext }}>
+                  Visit our website:{" "}
+                  <a
+                    href={websiteUrl}
+                    style={{ color: colors.primary, textDecoration: "none" }}
+                  >
+                    {websiteUrl.replace(/^https?:\/\//, "")}
+                  </a>
+                </p>
+                {supportEmail ? (
+                  <p style={{ margin: 0, fontSize: 13, color: colors.subtext }}>
+                    Email:{" "}
+                    <a
+                      href={`mailto:${supportEmail}`}
+                      style={{ color: colors.primary, textDecoration: "none" }}
+                    >
+                      {supportEmail}
+                    </a>
+                  </p>
+                ) : null}
+                {supportPhone ? (
+                  <p style={{ margin: 0, fontSize: 13, color: colors.subtext }}>
+                    Phone:{" "}
+                    <a
+                      href={`tel:${supportPhone.replace(/\s+/g, "")}`}
+                      style={{ color: colors.primary, textDecoration: "none" }}
+                    >
+                      {supportPhone}
+                    </a>
+                  </p>
+                ) : null}
               </div>
 
               {footerNote ? (
