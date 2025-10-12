@@ -12,6 +12,7 @@ type Props = {
   // Optional brand overrides (safe defaults provided)
   brandName?: string;
   brandUrl?: string;
+  logoUrl?: string;
   // Optional contact details shown in the Contact section
   supportEmail?: string;
   supportPhone?: string;
@@ -26,6 +27,7 @@ export default function EmailTemplate({
   footerNote,
   brandName = "FleetExchange",
   brandUrl = "https://www.fleetexchange.co.za",
+  logoUrl = "./public/images/FleetExchangeIcon.png",
   supportEmail = SUPPORT_EMAIL,
   supportPhone = SUPPORT_PHONE_DISPLAY,
   websiteUrl = "https://www.fleetexchange.co.za",
@@ -74,7 +76,15 @@ export default function EmailTemplate({
                 gap: 12,
               }}
             >
-              <Logo variant="icon" size="lg" href="/" />
+              {logoUrl ? (
+                <img
+                  src={logoUrl}
+                  alt={brandName}
+                  width={24}
+                  height={24}
+                  style={{ display: "block", borderRadius: 6 }}
+                />
+              ) : null}
               <a
                 href={brandUrl}
                 style={{
