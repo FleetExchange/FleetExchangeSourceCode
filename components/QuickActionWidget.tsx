@@ -8,11 +8,14 @@ import {
   Package,
   Truck,
   MessageCircle,
+  Book,
 } from "lucide-react";
+import { useState } from "react";
+import TutorialModal from "./TutorialModal";
 
 const QuickActionsWidget = () => {
   const router = useRouter();
-
+  const [showTutorial, setShowTutorial] = useState(false);
   const quickActions = [
     {
       title: "Book a Trip",
@@ -39,12 +42,12 @@ const QuickActionsWidget = () => {
       onClick: () => router.push("/myBookings"),
     },
     {
-      title: "Browse Transporters",
-      description: "Find trusted transporters",
-      icon: Truck,
+      title: "Tutorial",
+      description: "Learn how to use the app",
+      icon: Book,
       color: "bg-warning/10 border-warning/20 hover:bg-warning/20",
       iconColor: "text-warning",
-      onClick: () => router.push("/discover"),
+      onClick: () => setShowTutorial(true),
     },
     {
       title: "Get Support",
@@ -104,6 +107,10 @@ const QuickActionsWidget = () => {
           );
         })}
       </div>
+      <TutorialModal
+        open={showTutorial}
+        onClose={() => setShowTutorial(false)}
+      />
     </div>
   );
 };
