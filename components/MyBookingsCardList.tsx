@@ -103,9 +103,9 @@ const MyBookingsCardList = () => {
       case "Awaiting Confirmation":
         return "badge badge-warning";
       case "Booked":
-        return "badge badge-info";
-      case "Dispatched":
         return "badge badge-primary";
+      case "Dispatched":
+        return "badge badge-info";
       case "Delivered":
         return "badge badge-success";
       case "Cancelled":

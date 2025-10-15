@@ -87,13 +87,13 @@ const MyBookingsWidget = () => {
         };
       case "booked":
         return {
-          className: "badge-info",
+          className: "badge-primary",
           text: "Confirmed",
           icon: Package,
         };
       case "dispatched":
         return {
-          className: "badge-success",
+          className: "badge-info",
           text: "In Transit",
           icon: MapPin,
         };

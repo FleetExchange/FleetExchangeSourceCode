@@ -147,9 +147,9 @@ const MyBookingsTable = () => {
       case "Cancelled":
         return <span className="badge badge-error">{status}</span>;
       case "Refunded":
-        return <span className="badge badge-warning">{status}</span>;
+        return <span className="badge badge-error">{status}</span>;
       case "Awaiting Confirmation":
-        return <span className="badge badge-neutral">Awaiting</span>;
+        return <span className="badge badge-warning">Awaiting</span>;
       default:
         return <span className="badge badge-ghost">{status}</span>;
     }
