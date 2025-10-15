@@ -48,7 +48,7 @@ const ClientSidebar = () => {
     {
       href: "/profiles/client",
       icon: CiUser,
-      label: "Account",
+      label: "Profile",
     },
   ];
 

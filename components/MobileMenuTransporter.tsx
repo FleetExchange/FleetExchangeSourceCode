@@ -88,7 +88,7 @@ const MobileMenuTransporter = () => {
     {
       href: "/profiles/transporter",
       icon: CiUser,
-      label: "Account",
+      label: "Profile",
     },
   ];
 
