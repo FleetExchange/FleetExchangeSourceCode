@@ -21,6 +21,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { TruckSelector } from "./TruckSelector";
+import DecimalInput from "./DecimalInput";
 
 const NewTruckCard = () => {
   const router = useRouter();
@@ -42,6 +43,10 @@ const NewTruckCard = () => {
   const [width, setWidth] = useState<number>(0);
   const [length, setLength] = useState<number>(0);
   const [height, setHeight] = useState<number>(0);
+  const [lengthInput, setLengthInput] = useState<string>("");
+  const [widthInput, setWidthInput] = useState<string>("");
+  const [heightInput, setHeightInput] = useState<string>("");
+  const [capacityInput, setCapacityInput] = useState<string>("");
   const [fleet, setFleet] = useState("");
 
   // Combine all truck IDs from all fleets
@@ -243,71 +248,49 @@ const NewTruckCard = () => {
                     <label className="text-sm font-medium text-base-content">
                       Width (meters)
                     </label>
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.1"
-                      className="input input-bordered w-full focus:outline-none focus:border-primary"
+
+                    <DecimalInput
+                      value={widthInput}
+                      onValueChange={setWidthInput}
+                      onNumberChange={setWidth}
                       placeholder="e.g., 2.5"
-                      value={width || ""}
-                      onChange={(e) =>
-                        setWidth(
-                          e.target.value === "" ? 0 : parseFloat(e.target.value)
-                        )
-                      }
+                      name="width"
                     />
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-base-content">
                       Length (meters)
                     </label>
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.1"
-                      className="input input-bordered w-full focus:outline-none focus:border-primary"
-                      placeholder="e.g., 12.0"
-                      value={length || ""}
-                      onChange={(e) =>
-                        setLength(
-                          e.target.value === "" ? 0 : parseFloat(e.target.value)
-                        )
-                      }
+                    <DecimalInput
+                      value={lengthInput}
+                      onValueChange={setLengthInput}
+                      onNumberChange={setLength}
+                      placeholder="e.g., 12.3"
+                      name="length"
                     />
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-base-content">
                       Height (meters)
                     </label>
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.1"
-                      className="input input-bordered w-full focus:outline-none focus:border-primary"
-                      placeholder="e.g., 4.0"
-                      value={height || ""}
-                      onChange={(e) =>
-                        setHeight(
-                          e.target.value === "" ? 0 : parseFloat(e.target.value)
-                        )
-                      }
+                    <DecimalInput
+                      value={heightInput}
+                      onValueChange={setHeightInput}
+                      onNumberChange={setHeight}
+                      placeholder="e.g., 2.3"
+                      name="height"
                     />
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-base-content">
                       Payload Capacity (kg)
                     </label>
-                    <input
-                      type="number"
-                      min="0"
-                      className="input input-bordered w-full focus:outline-none focus:border-primary"
-                      placeholder="e.g., 10000"
-                      value={maxLoadCapacity || ""}
-                      onChange={(e) =>
-                        setMaxLoadCapacity(
-                          e.target.value === "" ? 0 : parseFloat(e.target.value)
-                        )
-                      }
+                    <DecimalInput
+                      value={capacityInput}
+                      onValueChange={setCapacityInput}
+                      onNumberChange={setMaxLoadCapacity}
+                      placeholder="e.g., 1000"
+                      name="capacity"
                     />
                   </div>
                 </div>
