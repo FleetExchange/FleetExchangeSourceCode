@@ -30,7 +30,7 @@ const ClientDashPage = () => {
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   return (
-    <div className="min-h-screen pl-24 p-6 bg-base-200">
+    <div className="min-h-screen pl-5 md:pl-24 p-6 bg-base-200">
       {/* Notification Bell - Fixed position */}
       <div className="fixed top-6 right-6 z-50">
         <NotificationBell
