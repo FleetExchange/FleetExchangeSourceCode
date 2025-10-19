@@ -99,11 +99,12 @@ export default function Home() {
                     ))}
                   </div>
                   <span className="text-sm text-base-content/70">
-                    4.9/5 from 200+ reviews
+                    {/*4.9/5 from 200+ reviews*/}5 Star Rating
                   </span>
                 </div>
                 <div className="text-sm text-base-content/70">
-                  500+ Verified Transporters
+                  {/*500+ Verified Transporters*/}
+                  Trusted by Transporters
                 </div>
               </div>
             </div>
@@ -581,10 +582,15 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             {[
-              { number: "500+", label: "Active Transporters" },
+              /*{ number: "500+", label: "Active Transporters" },
               { number: "10k+", label: "Trips Completed" },
               { number: "R50M+", label: "Cargo Value Moved" },
-              { number: "99.8%", label: "On-Time Delivery" },
+              { number: "99.8%", label: "On-Time Delivery" },*/
+
+              { number: "Verfied", label: "Active Transporters" },
+              { number: "Nationwide", label: "Trip Coverage" },
+              { number: "Specialised", label: "Cargo Options" },
+              { number: "Secure", label: "Payment Handling" },
             ].map((stat, i) => (
               <div key={i} className="space-y-2">
                 <div className="text-3xl lg:text-4xl font-bold">

@@ -113,7 +113,7 @@ const StatusAdvanceButton = ({
         const payment = getPaymentByTrip;
         if (payment?.status !== "charged") {
           const proceed = confirm(
-            "The payment for this trip has not been received yet. Dispatching before payment confirmation is at own discretion. Do you want to proceed?"
+            "The payment for this trip has not been received yet. Dispatching before payment confirmation is at your own discretion. Do you want to proceed?"
           );
           if (!proceed) {
             setIsSubmitting(false);
