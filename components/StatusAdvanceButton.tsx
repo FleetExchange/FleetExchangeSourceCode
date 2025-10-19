@@ -28,6 +28,7 @@ const StatusAdvanceButton = ({
 }: StatusAdvanceButtonProps) => {
   const [status, setStatus] = useState<TripStatus>(currentStatus);
   const [podOpen, setPodOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const updateStatus = useMutation(api.purchasetrip.updatePurchaseTripStatus);
 
   // Add query to keep status in sync
@@ -94,13 +95,31 @@ const StatusAdvanceButton = ({
   };
 
   const handleAdvanceStatus = async () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
     try {
       const nextStatus = getNextStatus(status);
 
       // Gate Delivered behind POD upload
       if (nextStatus === "Delivered") {
         setPodOpen(true);
+        setIsSubmitting(false);
         return;
+      }
+
+      // 3. if next status is Dispatched
+      if (nextStatus === "Dispatched") {
+        // If the payment has not been received alert user and then give them option to continue or rather cancel
+        const payment = getPaymentByTrip;
+        if (payment?.status !== "charged") {
+          const proceed = confirm(
+            "The payment for this trip has not been received yet. Dispatching before payment confirmation is at own discretion. Do you want to proceed?"
+          );
+          if (!proceed) {
+            setIsSubmitting(false);
+            return; // Exit if user chooses not to proceed
+          }
+        }
       }
 
       // capture previous status so we can rollback on failure
@@ -129,7 +148,7 @@ const StatusAdvanceButton = ({
                 email: client?.email || undefined,
                 amountZar: payment.totalAmount, // Use ZAR instead of kobo
                 metadata: {
-                  paymenntId: payment?._id,
+                  paymentId: payment?._id,
                   purchaseTripId: payment.purchaseTripId,
                 },
               }),
@@ -221,6 +240,7 @@ const StatusAdvanceButton = ({
               alert(
                 "Failed to create payment request. The booking status has been reverted. Please try again."
               );
+              setIsSubmitting(false);
               return;
             }
           } else if (payment.status === "payment_requested") {
@@ -266,6 +286,7 @@ const StatusAdvanceButton = ({
               e
             );
           }
+          setIsSubmitting(false);
           return;
         }
       }
@@ -288,12 +309,14 @@ const StatusAdvanceButton = ({
         },
       });
 
+      setIsSubmitting(false);
       alert(
         `Trip status advanced to ${nextStatus}. Remember to update the trip status as it progresses.`
       );
       window.location.href = "/myTrips";
     } catch (error) {
       console.error("Failed to advance status:", error);
+      setIsSubmitting(false);
     }
   };
 
@@ -450,7 +473,8 @@ const StatusAdvanceButton = ({
     <>
       <button
         onClick={handleAdvanceStatus}
-        disabled={!canAdvance}
+        disabled={!canAdvance || isSubmitting}
+        aria-busy={isSubmitting}
         aria-label={`Advance booking status from ${status} to ${nextStatus}`}
         className={`relative w-full sm:w-auto rounded-lg px-4 py-3 text-left shadow-sm border
         transition-colors group
@@ -458,7 +482,8 @@ const StatusAdvanceButton = ({
           canAdvance
             ? "bg-success hover:bg-success/90 active:bg-success border-success text-success-content"
             : "bg-base-300 border-base-300 text-base-content/50 cursor-not-allowed"
-        }`}
+        }
+        ${isSubmitting ? "opacity-70 cursor-wait" : ""}`}
       >
         <div className="flex items-start gap-4">
           {/* Current status */}
@@ -498,6 +523,30 @@ const StatusAdvanceButton = ({
                   fillRule="evenodd"
                   d="M3 10a1 1 0 011-1h11a1 1 0 110 2H4a1 1 0 01-1-1z"
                   clipRule="evenodd"
+                />
+              </svg>
+            </span>
+          )}
+          {isSubmitting && (
+            <span className="absolute right-3 top-3">
+              <svg
+                className="w-4 h-4 animate-spin"
+                viewBox="0 0 24 24"
+                fill="none"
+                aria-hidden="true"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
                 />
               </svg>
             </span>
