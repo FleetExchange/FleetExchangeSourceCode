@@ -6,7 +6,7 @@ import { Settings, Bell, HelpCircle } from "lucide-react";
 import React, { useState } from "react";
 
 const ClientSettings = () => {
-  const [activeTab, setActiveTab] = useState("notifications");
+  const [activeTab, setActiveTab] = useState("help");
 
   const tabs = [
     {

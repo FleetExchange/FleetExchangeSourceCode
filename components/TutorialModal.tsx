@@ -263,8 +263,8 @@ export default function TutorialModal({ open, onClose }: TutorialModalProps) {
 
   return (
     <dialog open className="modal modal-open">
-      {/* Wider modal */}
-      <div className="modal-box w-[96vw] max-w-5xl p-6 md:p-8">
+      {/* Responsive modal: capped height with internal scroll */}
+      <div className="modal-box w-[96vw] max-w-5xl p-4 md:p-8 max-h-[90vh] overflow-hidden flex flex-col">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-bold text-xl md:text-2xl">Client Tutorial</h3>
           <button
@@ -278,14 +278,8 @@ export default function TutorialModal({ open, onClose }: TutorialModalProps) {
 
         {/* Bigger stepper */}
         <ul
-          className="steps steps-horizontal justify-center mb-6"
-          style={
-            {
-              // DaisyUI steps sizing
-              ["--size" as any]: "2.25rem",
-              ["--step-spacing" as any]: "1rem",
-            } as React.CSSProperties
-          }
+          className="steps steps-vertical md:steps-horizontal justify-center mb-4 md:mb-6
+                     [--size:1.5rem] [--step-spacing:.5rem] md:[--size:2.25rem] md:[--step-spacing:1rem]"
         >
           {steps.map((s, i) => (
             <li
@@ -297,10 +291,12 @@ export default function TutorialModal({ open, onClose }: TutorialModalProps) {
           ))}
         </ul>
 
-        {/* Scrollable content area with bigger image */}
-        <div className="space-y-4 max-h-[70vh] overflow-auto pr-1">
-          <h4 className="text-lg font-semibold">{steps[idx].title}</h4>
-          <div className="text-sm md:text-base text-base-content/70 space-y-2">
+        {/* Scrollable content area */}
+        <div className="space-y-3 md:space-y-4 flex-1 min-h-0 overflow-auto pr-2 -mr-2 overscroll-contain [--webkit-overflow-scrolling:touch]">
+          <h4 className="text-lg font-semibold break-words">
+            {steps[idx].title}
+          </h4>
+          <div className="text-sm md:text-base text-base-content/70 space-y-2 break-words">
             {steps[idx].body}
           </div>
 
@@ -319,10 +315,10 @@ export default function TutorialModal({ open, onClose }: TutorialModalProps) {
                 <Image
                   src={img.src}
                   alt={img.alt}
-                  width={img.width ?? 1600}
-                  height={img.height ?? 900}
+                  width={img.width ?? 1280}
+                  height={img.height ?? 720}
                   className="w-full h-auto rounded-xl border border-base-300"
-                  sizes="(max-width: 1280px) 90vw, 1100px"
+                  sizes="(max-width: 640px) 92vw, (max-width: 1280px) 90vw, 1100px"
                   priority={stepNumber === 1}
                 />
               </a>
@@ -330,7 +326,7 @@ export default function TutorialModal({ open, onClose }: TutorialModalProps) {
           })()}
         </div>
 
-        <div className="mt-6 flex items-center justify-between">
+        <div className="mt-4 md:mt-6 flex items-center justify-between shrink-0">
           <label className="label cursor-pointer gap-2">
             <input
               type="checkbox"
