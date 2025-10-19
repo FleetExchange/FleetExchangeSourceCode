@@ -211,4 +211,12 @@ export default defineSchema({
     fileSize: v.number(),
     uploadedAt: v.number(),
   }).index("by_purchase_trip", ["purchaseTripId"]),
+
+  adminLogs: defineTable({
+    createdAt: v.number(),
+    userEnvolved: v.id("users"),
+    action: v.string(),
+    details: v.string(),
+    resolved: v.boolean(),
+  }),
 });

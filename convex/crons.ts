@@ -530,6 +530,23 @@ export const forfeitUnpaidBookings = internalMutation({
           continue;
         }
 
+        // If a trip is dispatched, skip the forfeit as money has to be paid, manual follow up
+        if (
+          purchaseTrip.status === "Dispatched" ||
+          purchaseTrip.status === "Delivered"
+        ) {
+          console.warn(
+            `⚠️ Skipping payment ${payment._id} because purchaseTrip ${purchaseTrip._id} is in status ${purchaseTrip.status}`
+          );
+          // Send error to admin error dashboard
+          await ctx.runMutation(api.adminLogs.createAdminLog, {
+            userEnvolved: purchaseTrip.userId,
+            action: "Dispatched without payment",
+            details: `Skipped forfeiting payment ${payment._id} for purchaseTrip ${purchaseTrip._id} in status ${purchaseTrip.status}`,
+          });
+          continue;
+        }
+
         // Remove the URL from the notification Meta
         // Delete payment notification if it exists
         await ctx.runMutation(

@@ -13,6 +13,7 @@ import type {
   FilterApi,
   FunctionReference,
 } from "convex/server";
+import type * as adminLogs from "../adminLogs.js";
 import type * as crons from "../crons.js";
 import type * as emails from "../emails.js";
 import type * as files from "../files.js";
@@ -37,6 +38,7 @@ import type * as users from "../users.js";
  * ```
  */
 declare const fullApi: ApiFromModules<{
+  adminLogs: typeof adminLogs;
   crons: typeof crons;
   emails: typeof emails;
   files: typeof files;
