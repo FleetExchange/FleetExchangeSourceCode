@@ -18,8 +18,8 @@ const page = () => {
                 <h1 className="text-2xl lg:text-3xl font-bold text-base-content">
                   My Trips
                 </h1>
-                <p className="text-base-content/60 mt-2 break-words whitespace-normal max-w-full">
-                  View, manage, and create your transportation services
+                <p className="text-base-content/60 mt-2">
+                  View, manage, and create your trips
                 </p>
               </div>
               <Link href="/createTrip">

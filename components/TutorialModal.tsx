@@ -276,20 +276,28 @@ export default function TutorialModal({ open, onClose }: TutorialModalProps) {
           </button>
         </div>
 
-        {/* Bigger stepper */}
-        <ul
-          className="steps steps-vertical md:steps-horizontal justify-center mb-4 md:mb-6
-                     [--size:1.5rem] [--step-spacing:.5rem] md:[--size:2.25rem] md:[--step-spacing:1rem]"
-        >
-          {steps.map((s, i) => (
-            <li
-              key={s.title}
-              className={`step ${i <= idx ? "step-primary" : ""}`}
-              aria-current={i === idx ? "step" : undefined}
-              data-content={String(i + 1)}
-            />
-          ))}
-        </ul>
+        {/* Stepper - always horizontal, shrinks on mobile, scrolls if needed */}
+        <div className="relative -mx-2 mb-4 md:mb-6">
+          <div className="overflow-x-auto px-2 [-webkit-overflow-scrolling:touch]">
+            <ul
+              role="navigation"
+              aria-label="Tutorial steps"
+              className="steps steps-horizontal min-w-max mx-auto justify-center
+                         [--size:1.125rem] [--step-spacing:.35rem]
+                         sm:[--size:1.25rem] sm:[--step-spacing:.5rem]
+                         md:[--size:2.25rem] md:[--step-spacing:1rem]"
+            >
+              {steps.map((s, i) => (
+                <li
+                  key={s.title}
+                  className={`step ${i <= idx ? "step-primary" : ""}`}
+                  aria-current={i === idx ? "step" : undefined}
+                  data-content={String(i + 1)}
+                />
+              ))}
+            </ul>
+          </div>
+        </div>
 
         {/* Scrollable content area */}
         <div className="space-y-3 md:space-y-4 flex-1 min-h-0 overflow-auto pr-2 -mr-2 overscroll-contain [--webkit-overflow-scrolling:touch]">
