@@ -1008,7 +1008,7 @@ const TripPageClient: React.FC<TripPageClientProps> = ({ tripId }) => {
                             {tripIssuer?.ratingCount || 0} reviews)
                           </span>
                         </div>
-                        <p className="text-sm text-base-content/60">
+                        <p className="text-sm text-base-content/60 break-all overflow-hidden">
                           {tripIssuer?.email}
                         </p>
                       </div>
