@@ -27,36 +27,38 @@ const Page = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-base-100 to-base-200">
+    <div className="min-h-screen bg-gradient-to-br from-base-100 to-base-200 overflow-x-hidden">
       {/* Navigation with Back Button */}
       <nav className="bg-base-100/80 backdrop-blur-sm border-b border-base-300 p-4">
-        <div className="container mx-auto flex items-center justify-between">
-          {/* Back Button */}
-          <button
-            onClick={handleBackClick}
-            className="btn btn-ghost btn-sm gap-2 hover:bg-base-200"
-          >
-            <ArrowLeft size={16} />
-            <span className="hidden sm:inline">Back to Home</span>
-            <span className="sm:hidden">Back</span>
-          </button>
-
-          {/* Centered Logo */}
-          <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center gap-2">
-            <Logo variant="icon" size="md" href="/" />
-            <span className="text-xl font-bold text-secondary hidden sm:inline">
-              FleetExchange
-            </span>
+        <div className="mx-auto max-w-7xl">
+          <div className="grid grid-cols-3 items-center">
+            {/* Back Button (left) */}
+            <div className="justify-self-start">
+              <button
+                onClick={handleBackClick}
+                className="btn btn-ghost btn-sm gap-2 hover:bg-base-200"
+              >
+                <ArrowLeft size={16} />
+                <span className="hidden sm:inline">Back to Home</span>
+                <span className="sm:hidden">Back</span>
+              </button>
+            </div>
+            {/* Center (logo) */}
+            <div className="justify-self-center flex items-center gap-2">
+              <Logo variant="icon" size="md" href="/" />
+              <span className="text-xl font-bold text-secondary hidden sm:inline">
+                FleetExchange
+              </span>
+            </div>
+            {/* Right spacer */}
+            <div className="justify-self-end w-16" />
           </div>
-
-          {/* Empty div for spacing */}
-          <div className="w-16"></div>
         </div>
       </nav>
 
       {/* Main Content */}
-      <div className="flex items-center justify-center px-4 py-8 sm:py-16">
-        <div className="w-full max-w-md">
+      <div className="flex items-center justify-center px-4 py-8 sm:py-16 overflow-x-hidden">
+        <div className="w-full max-w-md overflow-x-hidden">
           {/* Welcome Header */}
           <div className="text-center mb-8 space-y-2">
             <h1 className="text-2xl sm:text-3xl font-bold text-base-content">
@@ -68,7 +70,7 @@ const Page = () => {
           </div>
 
           {/* Sign In Component Container */}
-          <div className="bg-base-100 rounded-2xl shadow-xl border border-base-300 p-6 sm:p-8">
+          <div className="bg-base-100 rounded-2xl shadow-xl border border-base-300 p-6 sm:p-8 overflow-hidden">
             <SignIn
               path="/sign-in"
               routing="path"
@@ -77,21 +79,22 @@ const Page = () => {
               appearance={{
                 elements: {
                   // Customize Clerk's styling to match your design
-                  rootBox: "w-full",
-                  card: "bg-transparent shadow-none border-0 p-0",
+                  rootBox: "w-full max-w-full",
+                  card: "bg-transparent shadow-none border-0 p-0 w-full max-w-full overflow-hidden",
                   headerTitle: "text-xl font-bold text-base-content",
                   headerSubtitle: "text-base-content/70 text-sm",
                   socialButtonsBlockButton:
-                    "btn btn-outline btn-block normal-case",
-                  formButtonPrimary: "btn btn-primary btn-block",
-                  formFieldInput: "input input-bordered w-full",
+                    "btn btn-outline btn-block normal-case w-full",
+                  formButtonPrimary: "btn btn-primary btn-block w-full",
+                  formFieldInput: "input input-bordered w-full max-w-full",
                   formFieldLabel: "label-text font-medium",
                   dividerLine: "border-base-300",
                   dividerText: "text-base-content/60 text-sm",
                   footerActionLink: "link link-primary",
                   identityPreviewEditButton: "btn btn-sm btn-ghost",
                   formResendCodeLink: "link link-primary text-sm",
-                  otpCodeFieldInput: "input input-bordered text-center",
+                  otpCodeFieldInput:
+                    "input input-bordered text-center w-full max-w-full",
                 },
               }}
             />

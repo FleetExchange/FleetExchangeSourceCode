@@ -77,7 +77,7 @@ const TripList = ({
   return (
     <div className="p-6">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mx-2 md:mx-0 mb-6">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-primary/10 rounded-lg border border-primary/20 hidden md:block">
             <TruckIcon className="w-6 h-6 text-primary" />

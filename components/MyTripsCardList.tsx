@@ -258,9 +258,7 @@ const MyTripsCardList = () => {
                       <span className="truncate">{trip.destinationCity}</span>
                     </div>
                   </div>
-                  <div className={`${getStatusBadge(status)} shrink-0`}>
-                    {" "}
-                    {/* don't let badge stretch row */}
+                  <div className={`${getStatusBadge(status)}`}>
                     <span className="text-xs">{status}</span>
                   </div>
                 </div>
@@ -335,13 +333,15 @@ const MyTripsCardList = () => {
                         <span className="text-base-content/60">
                           Registration:
                         </span>
-                        <span className="font-medium">
+                        <span className="font-medium break-words">
                           {truck.registration}
                         </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-base-content/60">Type:</span>
-                        <span className="font-medium">{truck.truckType}</span>
+                        <span className="font-medium break-words">
+                          {truck.truckType}
+                        </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-base-content/60">Capacity:</span>
@@ -375,7 +375,7 @@ const MyTripsCardList = () => {
                           <span className="text-base-content/60">
                             Base Price:
                           </span>
-                          <span className="font-medium">
+                          <span className="font-medium break-words">
                             R{trip.basePrice.toFixed(2)}
                           </span>
                         </div>
@@ -383,7 +383,7 @@ const MyTripsCardList = () => {
                       {trip.KGPrice > 0 && (
                         <div className="flex justify-between">
                           <span className="text-base-content/60">Per KG:</span>
-                          <span className="font-medium">
+                          <span className="font-medium break-words">
                             R{trip.KGPrice.toFixed(2)}
                           </span>
                         </div>
@@ -391,7 +391,7 @@ const MyTripsCardList = () => {
                       {trip.KMPrice > 0 && (
                         <div className="flex justify-between">
                           <span className="text-base-content/60">Per KM:</span>
-                          <span className="font-medium">
+                          <span className="font-medium break-words">
                             R{trip.KMPrice.toFixed(2)}
                           </span>
                         </div>
@@ -421,7 +421,7 @@ const MyTripsCardList = () => {
                             <span className="text-base-content/60">
                               Cargo Type:
                             </span>
-                            <span className="font-medium text-xs truncate max-w-[120px]">
+                            <span className="font-medium text-xs truncate max-w-[160px]">
                               {purchaseTrip.freightNotes}
                             </span>
                           </div>
