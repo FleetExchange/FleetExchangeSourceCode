@@ -9,7 +9,6 @@ import { Plus, Truck, Calendar } from "lucide-react";
 const page = () => {
   return (
     <div className="min-h-screen bg-base-200 overflow-x-hidden">
-      {" "}
       {/* catch stray overflow */}
       <div className="p-4 lg:p-6">
         <div className="w-full max-w-7xl mx-auto">
@@ -17,7 +16,6 @@ const page = () => {
           <div className="mb-8 pl-16 lg:pl-0">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
               <div className="min-w-0">
-                {" "}
                 {/* allow wrapping inside flex */}
                 <h1 className="text-2xl lg:text-3xl font-bold text-base-content">
                   My Trips
@@ -27,7 +25,7 @@ const page = () => {
                 </p>
               </div>
               <Link href="/createTrip">
-                <button className="btn btn-primary gap-2">
+                <button className="btn btn-primary gap-2 w-full lg:w-auto max-w-full">
                   <Plus className="w-4 h-4" />
                   <span className="hidden sm:inline">Create Trip</span>
                   <span className="sm:hidden">Create</span>

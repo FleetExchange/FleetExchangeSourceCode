@@ -577,7 +577,7 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
                             {tripClient?.name}
                           </h4>
 
-                          <p className="text-sm text-base-content/60">
+                          <p className="text-sm text-base-content/60 break-all overflow-hidden">
                             {tripClient?.email}
                           </p>
                         </div>
