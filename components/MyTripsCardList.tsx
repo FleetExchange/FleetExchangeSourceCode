@@ -149,7 +149,9 @@ const MyTripsCardList = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 overflow-x-hidden">
+      {" "}
+      {/* prevent horizontal scroll from any child */}
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-2xl lg:text-3xl font-bold text-base-content mb-2">
@@ -159,7 +161,6 @@ const MyTripsCardList = () => {
           All times shown in South African Standard Time (SAST)
         </p>
       </div>
-
       {/* Filter Header */}
       <div className="bg-base-100 rounded-2xl shadow-xl border border-base-300 p-4">
         <div className="flex items-center gap-3 mb-4">
@@ -227,7 +228,6 @@ const MyTripsCardList = () => {
           )}
         </div>
       </div>
-
       {/* Trip Cards */}
       <div className="space-y-4">
         {sortedTrips && sortedTrips.length > 0 ? (
@@ -258,7 +258,9 @@ const MyTripsCardList = () => {
                       <span className="truncate">{trip.destinationCity}</span>
                     </div>
                   </div>
-                  <div className={getStatusBadge(status)}>
+                  <div className={`${getStatusBadge(status)} shrink-0`}>
+                    {" "}
+                    {/* don't let badge stretch row */}
                     <span className="text-xs">{status}</span>
                   </div>
                 </div>

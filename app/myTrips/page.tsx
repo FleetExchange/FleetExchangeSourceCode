@@ -8,17 +8,21 @@ import { Plus, Truck, Calendar } from "lucide-react";
 
 const page = () => {
   return (
-    <div className="min-h-screen bg-base-200">
+    <div className="min-h-screen bg-base-200 overflow-x-hidden">
+      {" "}
+      {/* catch stray overflow */}
       <div className="p-4 lg:p-6">
         <div className="w-full max-w-7xl mx-auto">
           {/* Header Section */}
           <div className="mb-8 pl-16 lg:pl-0">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
-              <div>
+              <div className="min-w-0">
+                {" "}
+                {/* allow wrapping inside flex */}
                 <h1 className="text-2xl lg:text-3xl font-bold text-base-content">
                   My Trips
                 </h1>
-                <p className="text-base-content/60 mt-2">
+                <p className="text-base-content/60 mt-2 break-words">
                   View, manage, and create your trips
                 </p>
               </div>

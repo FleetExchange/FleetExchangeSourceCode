@@ -4,6 +4,20 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 
+function useIsMobile(breakpoint = 768) {
+  const [is, setIs] = React.useState(false);
+  React.useEffect(() => {
+    const mq = window.matchMedia(`(max-width: ${breakpoint}px)`);
+    const onChange = () => setIs(mq.matches);
+    onChange();
+    mq.addEventListener?.("change", onChange) ?? mq.addListener(onChange);
+    return () =>
+      mq.removeEventListener?.("change", onChange) ??
+      mq.removeListener(onChange);
+  }, [breakpoint]);
+  return is;
+}
+
 interface CalendarEvent {
   id: string;
   title: string;
@@ -33,23 +47,38 @@ const TransporterFullCalendar: React.FC<TransporterFullCalendarProps> = ({
     })),
   ];
 
+  const isMobile = useIsMobile();
+
   return (
     <FullCalendar
       plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-      initialView="dayGridMonth"
+      initialView={isMobile ? "timeGridWeek" : "dayGridMonth"}
       events={events}
-      headerToolbar={{
-        left: "prev,next today",
-        center: "title",
-        right: "dayGridMonth,timeGridWeek",
-      }}
+      headerToolbar={
+        isMobile
+          ? { left: "prev,next", center: "title", right: "today" }
+          : {
+              left: "prev,next today",
+              center: "title",
+              right: "dayGridMonth,timeGridWeek",
+            }
+      }
+      dayHeaderFormat={
+        isMobile
+          ? { weekday: "short", month: "numeric", day: "numeric" }
+          : { weekday: "short" }
+      }
       eventTimeFormat={{
         hour: "numeric",
         minute: "2-digit",
-        meridiem: "short", // This will show 'am'/'pm' instead of 'a'/'p'
+        meridiem: "short",
       }}
-      height="700px" // Increase height for visibility
-      contentHeight="auto"
+      height={isMobile ? "auto" : 700}
+      contentHeight={isMobile ? "auto" : undefined}
+      aspectRatio={isMobile ? 0.9 : 1.6}
+      expandRows
+      dayMaxEventRows
+      moreLinkClick="popover"
     />
   );
 };

@@ -79,7 +79,7 @@ const TripList = ({
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-primary/10 rounded-lg border border-primary/20">
+          <div className="p-2 bg-primary/10 rounded-lg border border-primary/20 hidden md:block">
             <TruckIcon className="w-6 h-6 text-primary" />
           </div>
           <div>
@@ -92,7 +92,7 @@ const TripList = ({
           </div>
         </div>
 
-        <div className="bg-info/10 border border-info/20 rounded-lg px-4 py-2">
+        <div className="bg-info/10 border border-info/20 rounded-lg px-2 py-2">
           <div className="flex items-center gap-2">
             <CalendarDays className="w-4 h-4 text-info" />
             <span className="font-semibold text-sm text-base-content">
