@@ -9,6 +9,7 @@ import {
   getEndOfSASTDay,
 } from "@/utils/dateUtils";
 import { TruckSelector } from "./TruckSelector";
+import DecimalInput from "./DecimalInput";
 
 const FilterBtn = ({
   onFilter,
@@ -317,6 +318,11 @@ const FilterBtn = ({
                     onChange={(e) => setPayload(e.target.value)}
                   />
                 </div>
+              </div>
+              <div className="flex items-center gap-2 mt-4">
+                <p className="text-sm text-base-content/60">
+                  Use points for deciamls values not commas.
+                </p>
               </div>
             </div>
 
