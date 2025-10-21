@@ -538,6 +538,25 @@ export const forfeitUnpaidBookings = internalMutation({
           console.warn(
             `⚠️ Skipping payment ${payment._id} because purchaseTrip ${purchaseTrip._id} is in status ${purchaseTrip.status}`
           );
+          // Check if the error log already exists to avoid duplicates
+          const existingLog = await ctx.db
+            .query("adminLogs")
+            .filter((q) =>
+              q.and(
+                q.eq(q.field("userEnvolved"), purchaseTrip.userId),
+                q.eq(q.field("action"), "Dispatched without payment"),
+                q.eq(
+                  q.field("details"),
+                  `Skipped forfeiting payment ${payment._id} for purchaseTrip ${purchaseTrip._id} in status ${purchaseTrip.status}`
+                )
+              )
+            )
+            .first();
+
+          if (existingLog) {
+            continue; // Log already exists, skip creating a new one
+          }
+
           // Send error to admin error dashboard
           await ctx.runMutation(api.adminLogs.createAdminLog, {
             userEnvolved: purchaseTrip.userId,
