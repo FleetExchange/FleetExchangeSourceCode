@@ -215,7 +215,7 @@ const TripPageOwner: React.FC<TripPageClientProps> = ({ tripId }) => {
       <div className="p-4 lg:p-6">
         <div className="w-full max-w-7xl mx-auto">
           {/* Header with Back Button */}
-          <div className="mb-8 pl-16 lg:pl-0">
+          <div className="mb-8 pl-5 lg:pl-0">
             <div className="flex items-center gap-4 mb-4">
               <button
                 onClick={() => router.back()}

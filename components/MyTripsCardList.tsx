@@ -182,7 +182,7 @@ const MyTripsCardList = () => {
             <input
               type="text"
               placeholder="Search origin city..."
-              className="input input-bordered input-sm w-full max-w-full pl-10 focus:outline-none focus:border-primary"
+              className="input input-bordered input-sm w-full pl-10 focus:outline-none focus:border-primary"
               value={originSearchTerm}
               onChange={(e) => setOriginSearchTerm(e.target.value)}
             />
@@ -193,7 +193,7 @@ const MyTripsCardList = () => {
             <input
               type="text"
               placeholder="Search destination city..."
-              className="input input-bordered input-sm w-full max-w-full pl-10 focus:outline-none focus:border-primary"
+              className="input input-bordered input-sm w-full  pl-10 focus:outline-none focus:border-primary"
               value={destSearchTerm}
               onChange={(e) => setDestSearchTerm(e.target.value)}
             />
