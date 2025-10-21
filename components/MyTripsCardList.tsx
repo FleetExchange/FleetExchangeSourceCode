@@ -253,9 +253,13 @@ const MyTripsCardList = () => {
                       <MapPin className="w-3 h-3 text-primary" />
                     </div>
                     <div className="flex items-center gap-1 min-w-0 text-sm font-medium">
-                      <span className="truncate">{trip.originCity}</span>
+                      <span className="truncate">
+                        {trip.originCity.split(",")[0].trim()}
+                      </span>
                       <ArrowRight className="w-3 h-3 text-base-content/60 shrink-0" />
-                      <span className="truncate">{trip.destinationCity}</span>
+                      <span className="truncate">
+                        {trip.destinationCity.split(",")[0].trim()}
+                      </span>
                     </div>
                   </div>
                   <div className={`${getStatusBadge(status)}`}>

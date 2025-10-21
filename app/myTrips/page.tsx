@@ -13,7 +13,7 @@ const page = () => {
       <div className="p-4 lg:p-6">
         <div className="w-full max-w-7xl mx-auto">
           {/* Header Section */}
-          <div className="mb-8  ">
+          <div className="mb-8 pl-16 lg:pl-0">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
               <div className="min-w-0">
                 {/* allow wrapping inside flex */}
