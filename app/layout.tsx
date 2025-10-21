@@ -16,11 +16,17 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "FleetExchange",
-  description: "Smart Logistics Solutions",
+export const metadata = {
+  metadataBase: new URL("https://fleetexchange.co.za"),
+  title: { default: "FleetExchange", template: "%s | FleetExchange" },
+  description:
+    "South Africa's most innovative logistics solution. The future of connecting transporters with clients through smart technology.",
+  alternates: { canonical: "/" },
+  robots: { index: true, follow: true },
   icons: {
-    icon: "/public/images/logos/FleetExchangeIcon.png",
+    icon: "/images/logos/FleetExchangeIcon.png",
+    shortcut: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
   },
 };
 
