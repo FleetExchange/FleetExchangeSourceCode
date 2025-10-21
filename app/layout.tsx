@@ -24,7 +24,18 @@ export const metadata = {
   alternates: { canonical: "/" },
   robots: { index: true, follow: true },
   icons: {
-    icon: "/images/logos/FleetExchangeIcon.png",
+    icon: [
+      {
+        url: "/images/logos/favicon-16x16.png",
+        sizes: "16x16",
+        type: "image/png",
+      },
+      {
+        url: "/images/logos/favicon-32x32.png",
+        sizes: "32x32",
+        type: "image/png",
+      },
+    ],
     shortcut: "/favicon.ico",
     apple: "/apple-touch-icon.png",
   },
