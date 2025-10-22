@@ -58,6 +58,7 @@ const StatusAdvanceButton = ({
 
   // create mutation
   const createNotification = useMutation(api.notifications.createNotification);
+
   const getPaymentByTrip = useQuery(
     api.payments.getPaymentByTrip,
     trip?._id ? { tripId: trip._id } : "skip"
@@ -72,6 +73,14 @@ const StatusAdvanceButton = ({
   // Mutations for payment handling
   const updatePaymentStatus = useMutation(api.payments.updatePaymentStatus);
   const requestPayment = useMutation(api.payments.requestPayment);
+
+  // Check if error log existst for payment release failure
+  const createErrorLog = useMutation(api.adminLogs.createAdminLog);
+  const errorExists = useQuery(api.adminLogs.checkErrorForPaymentRelease, {
+    paymentId: getPaymentByTrip?._id as Id<"payments">,
+    userId: trip?.userId as Id<"users">,
+    purchaseTripId: purchaseTrip?._id as Id<"purchaseTrip">,
+  });
 
   // Update local state when database changes
   React.useEffect(() => {
@@ -442,6 +451,21 @@ const StatusAdvanceButton = ({
           action: "payment_release_failed",
         },
       });
+
+      // Create an error Log entry
+      const payment = getPaymentByTrip;
+      if (!payment) {
+        throw new Error("Payment not found");
+      }
+
+      if (!errorExists) {
+        // Send error to admin error dashboard
+        await createErrorLog({
+          userEnvolved: trip?.userId as Id<"users">,
+          action: "Payment release failed",
+          details: `Failed to release payment ${payment._id} for purchaseTrip ${purchaseTrip?._id}`,
+        });
+      }
     }
   };
 
