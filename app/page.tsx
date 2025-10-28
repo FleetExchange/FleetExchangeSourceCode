@@ -28,7 +28,7 @@ export default function Home() {
         <div className="container mx-auto flex items-center justify-between">
           <div className="navbar-start flex items-center gap-2">
             <Logo variant="icon" size="lg" href="/" />
-            <span className="text-xl font-bold text-secondary hidden sm:inline">
+            <span className="text-xl font-bold text-neutral hidden sm:inline">
               FleetExchange
             </span>
           </div>

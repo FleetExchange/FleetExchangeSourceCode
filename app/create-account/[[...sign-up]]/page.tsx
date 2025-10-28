@@ -73,7 +73,7 @@ const CreateAccountPage = () => {
             </div>
             <div className="justify-self-center flex items-center gap-2">
               <Logo variant="icon" size="md" href="/" />
-              <span className="text-xl font-bold text-secondary hidden sm:inline">
+              <span className="text-xl font-bold text-neutral hidden sm:inline">
                 FleetExchange
               </span>
             </div>
