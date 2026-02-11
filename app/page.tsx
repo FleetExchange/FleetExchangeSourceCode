@@ -191,7 +191,7 @@ export default function Home() {
                 icon: <Users className="w-8 h-8" />,
                 title: "Trusted Network",
                 description:
-                  "Join 500+ verified transporters and clients across South Africa.",
+                  "Join verified transporters and clients across South Africa.",
                 color: "primary",
               },
             ].map((feature, i) => (
@@ -383,11 +383,11 @@ export default function Home() {
             {[
               {
                 q: "What exactly gets listed, cargo or trucks?",
-                a: "Fleet Exchange is a marketplace for transporters to list their routes. It can be an empty-leg you are trying to fill or a popular route that you are wishing to capitalise on. Clients then book a suitable truck going where they need thier cargo to go.",
+                a: "Fleet Exchange is a marketplace for transporters to list their routes. It can be an empty-leg you are trying to fill or a popular route that you are wishing to capitalise on. Clients then book a suitable truck going where they need their cargo to go.",
               },
               {
                 q: "Who can join Fleet Exchange?",
-                a: "Any verified transporter or business looking to move cargo or fill thier trucks in South Africa can join. We verify all users for safety and trust.",
+                a: "Any verified transporter or business looking to move cargo or fill their trucks in South Africa can join. We verify all users to ensure safety and trust.",
               },
               {
                 q: "How do I get paid as a transporter?",
@@ -587,7 +587,7 @@ export default function Home() {
               { number: "R50M+", label: "Cargo Value Moved" },
               { number: "99.8%", label: "On-Time Delivery" },*/
 
-              { number: "Verfied", label: "Active Transporters" },
+              { number: "Verfeid", label: "Active Transporters" },
               { number: "Nationwide", label: "Trip Coverage" },
               { number: "Specialised", label: "Cargo Options" },
               { number: "Secure", label: "Payment Handling" },
@@ -611,8 +611,8 @@ export default function Home() {
               Ready to Transform Your Logistics?
             </h2>
             <p className="text-xl text-base-content/70">
-              Join thousands of transporters and clients who trust Fleet
-              Exchange
+              Start your free account today and experience the future of freight
+              booking.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
